@@ -11,7 +11,8 @@ Status snapshot of the Phase-1 Gate-1-equivalent acceptance criteria applied to 
 | 3 | STAC-Suche funktionsfähig | BBox-Abfrage liefert korrekte Items | Bestanden | ✅ | `/search?bbox=13.5,50.8,14.0,51.2` → 30+ Items im Dresden-Raum |
 | 4 | SQL-Abfrage auf Curated-/Processed-Zone | Einfache Abfrage in < 10 Sek. | Bestanden | ✅ | `ST_Intersects` über 367 219 Features, 10 490 Treffer, < 2 s |
 | 5 | COG-Serving funktionsfähig | TiTiler liefert PNG für Raster-Item | Bestanden | ✅ | `/cog/tiles/10/519/340.png` → 256×256 RGBA PNG |
-| 6 | Pipeline idempotent | Zwei aufeinanderfolgende Läufe, keine Duplikate | Bestanden | ✅ | dataset_id = `sha256(filename + content + layer)`, wiederholte Läufe liefern denselben STAC-Item-ID → `stac.post_item` 409 → PUT-Upsert |
+| 6 | Pipeline idempotent | Zwei aufeinanderfolgende Läufe, keine Duplikate | Bestanden | ✅ | dataset_id = `sha256(filename + content + layer)`, wiederholte Läufe liefern denselben STAC-Item-ID → `stac.post_item` 409 → PUT-Upsert. Zusätzlich Prefect-`cache_key_fn=task_input_hash`, der identische Tasks direkt aus dem Cache liefert. |
+| 8 | Prefect-Orchestrierung aktiv | Flow registriert + ausgeführt, Run zeigt `COMPLETED` im Prefect-API | Bestanden | ✅ | `poc/smoke/prefect.sh`: Flow `miso-ingest` mit `@task` Retry-Policy (2× mit 30s), `task_input_hash` Cache, Prefect 3 Server in `miso-data` Namespace |
 | 7 | Betriebsdoku vorhanden | Setup + Teardown + Troubleshooting | Vollständig | ✅ | [docs/OPERATIONS.md](OPERATIONS.md), [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md), [poc/docs/k3s-setup.md](poc/docs/k3s-setup.md) |
 
 ## Unterstützende Metriken
@@ -64,8 +65,9 @@ Per [PHASE-0-ROADMAP.md](PHASE-0-ROADMAP.md#bewusst-außerhalb-gate-1-scope):
 
 | Punkt | Status |
 |-------|:------:|
-| Prefect Orchestrierung + produktive Pipeline-Scheduling | ⏳ Strang F |
-| Ingestion-Container-Image (damit Flows nicht lokal laufen müssen) | ⏳ Strang F |
+| Prefect Orchestrierung — Server + Flow live | ✅ Strang F (Smoke grün) |
+| Ingestion-Container-Image (damit Flows nicht lokal laufen müssen) | ⏳ Dockerfile vorhanden, K8s Work-Pool + Worker-Deployment noch offen |
+| Scheduled Triggers (Cron) + Retry-Policies in Produktion | ⏳ Phase 2 |
 | ADR-007 final: DuckDB für alles vs. Spark-Ergänzung | ⏳ offen |
 | ADR-005 final: Iceberg / Delta / kein Tabellenformat | ⏳ offen |
 | Technischer Katalog (Lineage-Backend) | ⏳ offen |

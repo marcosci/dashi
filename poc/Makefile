@@ -64,8 +64,14 @@ serving-deploy:
 	@bash scripts/serving-deploy.sh
 
 prefect-up:
-	@echo "TODO: apply manifests/prefect/"
-	@exit 1
+	kubectl apply -k manifests/prefect
+	@echo ""
+	@echo "→ Waiting for Prefect server"
+	kubectl -n miso-data rollout status deployment/prefect-server --timeout=240s
+	@echo ""
+	@echo "✓ Prefect up. Port-forward with:"
+	@echo "  kubectl -n miso-data port-forward svc/prefect-server 4200:4200"
+	@echo "  then visit http://localhost:4200/  (UI) and set PREFECT_API_URL=http://localhost:4200/api"
 
 ingest-sample:
 	@bash scripts/ingest-sample.sh
@@ -74,6 +80,7 @@ smoke:
 	@bash smoke/catalog.sh
 	@bash smoke/ingest.sh
 	@bash smoke/serving.sh
+	@bash smoke/prefect.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

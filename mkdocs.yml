@@ -129,6 +129,7 @@ nav:
           - pgstac + stac-fastapi: poc/manifests/pgstac/README.md
           - TiTiler Serving: poc/manifests/titiler/README.md
           - DuckDB SQL Endpoint: poc/manifests/duckdb-endpoint/README.md
+          - Prefect Orchestrierung: poc/manifests/prefect/README.md
       - Custom Images:
           - titiler-endpoint (arm64 Rebuild): poc/titiler-endpoint/README.md
           - duckdb-endpoint: poc/duckdb-endpoint/README.md

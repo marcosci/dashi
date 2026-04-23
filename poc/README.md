@@ -57,7 +57,8 @@ make smoke           # Run Gate-1 acceptance checks
 - **Strang E (serving):** ✅ TiTiler + DuckDB SQL endpoint live in `miso-serving`
     - `GET /cog/info` + `/cog/tiles/{z}/{x}/{y}.png` on COGs in RustFS (custom arm64 image — upstream TiTiler is amd64-only)
     - `POST /query` on DuckDB with SELECT-only allowlist, spatial extension, httpfs pointed at RustFS. `ST_Intersects` over the 367k-feature Dresden dataset returns in <2 s (BBox around Frauenkirche matched 10490 features)
-- **Strang F (Prefect + Gate-1):** ⏳
+- **Strang F (Prefect orchestration):** ✅ Prefect 3 server live in `miso-data`; `flows/ingest.py` wraps `miso_ingest.runner.ingest_one` as a `@task` with 2× retries + `task_input_hash` cache. Smoke verified end-to-end: flow registered, run `COMPLETED`, STAC item written.
+- **Gate-1 acceptance:** ✅ All 8 PoC-scope criteria passed — see [../docs/GATE-1-ACCEPTANCE.md](../docs/GATE-1-ACCEPTANCE.md)
 
 ## Ingestion package
 
