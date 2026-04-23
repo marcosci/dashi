@@ -1,4 +1,4 @@
-# k3s Setup — Local MISO PoC Cluster
+# k3s Setup — Local dashi PoC Cluster
 
 Step-by-step setup for a local Kubernetes cluster running k3s (or k3s-in-Docker). Tested on macOS 14+, Ubuntu 22.04+, Windows 11 (WSL2).
 

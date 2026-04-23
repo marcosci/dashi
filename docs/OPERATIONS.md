@@ -1,6 +1,6 @@
 # Operations Runbook
 
-Step-by-step deploy, verify, and teardown for a new operator. Covers the full MISO PoC stack on a fresh machine.
+Step-by-step deploy, verify, and teardown for a new operator. Covers the full dashi PoC stack on a fresh machine.
 
 ## Prerequisites
 

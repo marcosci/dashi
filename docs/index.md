@@ -3,15 +3,17 @@ hide:
   - navigation
 ---
 
-# MISO
-
-## Map Infrastructure & Spatial Orchestration
-
-<div style="text-align: center; margin: 2rem 0;">
-  <img src="assets/miso-logo.png" alt="MISO logo" width="280">
+<div style="text-align: center; margin: 2.5rem 0 1rem 0;">
+  <img src="assets/dashi-logo.svg" alt="dashi logo" width="220" style="display:inline-block">
 </div>
 
-> A cloud-native spatial data lake consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment geodata under a common zone-based architecture.
+# dashi
+
+## The *essential base* for spatial data
+
+> A cloud-native spatial data lake — layered, infused, re-usable. Ingests any OGR/GDAL-readable geodata (vector, raster, point cloud), standardises onto a common zone model (Landing → Processed → Curated → Enrichment → Serving), catalogs it via STAC, and serves it via SQL + COG tiles. Phase 2 extends with Prefect orchestration, Kubernetes work pools, and scheduled triggers.
+>
+> Original spec: _CldGIS Geodatalake_ (German). Codename-become-brand: **dashi** — the Japanese broth that forms the base of every layered dish.
 
 !!! info "Status — Phase 0 (PoC)"
     **Co-Owners:** Marco Sciaini + Johannes Schlund (opendefense) · **Substrate:** local k3s + GitHub Actions + Pages
@@ -89,4 +91,4 @@ hide:
 
 ---
 
-<sub>MISO is under active development. Specification content is in German (matches stakeholder language); navigation and meta docs are in English.</sub>
+<sub>dashi is under active development. Specification content is in German (matches stakeholder language); navigation and meta docs are in English.</sub>

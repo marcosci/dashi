@@ -1,6 +1,6 @@
-site_name: MISO
-site_description: "Map Infrastructure & Spatial Orchestration — CldGIS Geodatalake architecture"
-site_author: Marco Sciaini
+site_name: dashi
+site_description: "dashi — a spatial data lake (née CldGIS Geodatalake)."
+site_author: Marco Sciaini + Johannes Schlund
 site_url: https://marcosci.github.io/dashi/
 
 repo_url: https://github.com/marcosci/dashi
@@ -12,8 +12,8 @@ docs_dir: docs
 theme:
   name: material
   language: de
-  logo: assets/miso-logo.png
-  favicon: assets/miso-logo.png
+  logo: assets/dashi-logo.svg
+  favicon: assets/dashi-favicon.svg
   font:
     text: Inter
     code: JetBrains Mono
@@ -24,15 +24,11 @@ theme:
         name: Switch to light mode
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: amber
-      accent: deep orange
       toggle:
         icon: material/weather-sunny
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: amber
-      accent: deep orange
       toggle:
         icon: material/weather-night
         name: Switch to auto
@@ -141,7 +137,10 @@ extra:
       link: https://github.com/marcosci/dashi
   generator: false
 
+extra_css:
+  - stylesheets/dashi.css
+
 extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
 
-copyright: "MISO — Map Infrastructure & Spatial Orchestration · Marco Sciaini · opendefense"
+copyright: "dashi · spatial data lake · Marco Sciaini + Johannes Schlund · opendefense"

@@ -1,17 +1,21 @@
-# MISO
+# dashi
 
-**Map Infrastructure & Spatial Orchestration** — a cloud-native spatial data lake consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment data under a common zone-based architecture. Implementation workspace for the CldGIS Geodatalake specification.
+> **The essential base for spatial data.**
+> A cloud-native spatial data lake — layered, infused, re-usable — consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment geodata under a common zone-based architecture. Implementation workspace for the _CldGIS Geodatalake_ specification.
 
-> Living document. Source of truth for architectural decisions, phase scope, open questions, and risks.
-
-**Rendered documentation:** [marcosci.github.io/dashi](https://marcosci.github.io/dashi/) _(activates once pushed to GitHub with Pages enabled)_
+**Rendered documentation:** [marcosci.github.io/dashi](https://marcosci.github.io/dashi/)
 
 ## Status
 
-- **Phase:** Phase 0 — PoC implementation on local k3s (see [docs/PHASE-0-ROADMAP.md](docs/PHASE-0-ROADMAP.md))
+- **Phase:** Phase 2 — production hardening in progress (Strang G Prefect-in-cluster ✅, Strang H RBAC / I Observability / J OGC next)
 - **Co-Owners:** Marco Sciaini + Johannes Schlund (opendefense)
-- **Target:** Operational readiness within 18 months (3 phases) — military accreditation track deferred
+- **Phase-0 PoC:** ✅ Gate-1 passed, all strands A–F green
+- **Target:** Operational readiness within 18 months — military accreditation track deferred
 - **Domains:** Aufklärung & ISR · Missionsplanung & C2 · Logistik & Versorgung · **Gelände & Umwelt** (PoC focus)
+
+## About the name
+
+_Dashi_ is the Japanese foundational broth that sits under every layered dish: kombu, bonito, water. Unseen but essential. The platform takes its name from that idea — it's the base that every downstream map, analysis, and mission plan is built on. Visible brand: **dashi**. Original spec document name: _CldGIS Geodatalake_.
 
 ## Local docs preview
 

@@ -1,6 +1,6 @@
 # RustFS Deployment
 
-S3-compatible object storage for the MISO PoC. Primary backend for all zones (`landing`, `processed`, `curated`). See [ADR-001](../../../adr/ADR-001-object-storage.md) for the decision and its rationale.
+S3-compatible object storage for the dashi PoC. Primary backend for all zones (`landing`, `processed`, `curated`). See [ADR-001](../../../adr/ADR-001-object-storage.md) for the decision and its rationale.
 
 ## Components
 

@@ -106,7 +106,7 @@ Abkürzungen und Fachbegriffe, die in dieser Spezifikation verwendet werden.
 | **TiTiler** | FastAPI-basierter COG-Tile-Dienst |
 | **stac-fastapi** | FastAPI-Implementierung des STAC-API-Standards |
 | **RustFS** | Rust-basierter, MinIO-API-kompatibler S3-Objektspeicher (Apache 2.0); primäre Speicherwahl im PoC, siehe [ADR-001](adr/ADR-001-object-storage.md) |
-| **MinIO** | S3-kompatibler on-premise Objektspeicher (Go-basiert, AGPL, 2025 Community-Edition ausgedünnt — in MISO durch RustFS ersetzt) |
+| **MinIO** | S3-kompatibler on-premise Objektspeicher (Go-basiert, AGPL, 2025 Community-Edition ausgedünnt — in dashi durch RustFS ersetzt) |
 
 ## KI / ML
 
