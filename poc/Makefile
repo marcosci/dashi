@@ -69,12 +69,11 @@ prefect-up:
 	@exit 1
 
 ingest-sample:
-	@echo "TODO: python -m miso_ingest.cli ingest poc/sample-data/"
-	@exit 1
+	@bash scripts/ingest-sample.sh
 
 smoke:
-	@echo "TODO: bash smoke/run-all.sh"
-	@exit 1
+	@bash smoke/catalog.sh
+	@bash smoke/ingest.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

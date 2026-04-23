@@ -27,6 +27,12 @@ scratch/
 poc/sample-data/*
 !poc/sample-data/.gitkeep
 
+# Ingest runtime artifacts
+poc/ingest/.venv/
+poc/ingest/*.egg-info/
+poc/ingest/.miso-ingest-result.json
+.miso-ingest-result.json
+
 # Large binary attachments shouldn't sit in the spec repo
 *.pdf
 *.xlsx

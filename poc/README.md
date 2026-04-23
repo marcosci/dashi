@@ -45,7 +45,46 @@ make smoke           # Run Gate-1 acceptance checks
 
 ## Current State
 
-**Not yet bootstrapped.** This directory is a scaffold plan. See [PHASE-0-ROADMAP.md](../PHASE-0-ROADMAP.md) for sequence.
+- **Strang B (cluster + storage):** ✅ RustFS live in `miso-platform`, buckets `landing/processed/curated`
+- **Strang D (catalog):** ✅ pgstac + stac-fastapi live in `miso-catalog`
+- **Strang C (ingestion):** ✅ `miso-ingest` CLI format-agnostic (vector + raster), end-to-end proven with Dresden OSM extract — 28 shapefiles → 366k features → 3709 H3-7 partitions → 28 STAC items
+- **Strang E (serving):** ⏳ next — TiTiler + DuckDB endpoint
+- **Strang F (Prefect + Gate-1):** ⏳
+
+## Ingestion package
+
+```
+poc/ingest/
+└── src/miso_ingest/
+    ├── cli.py          # `miso-ingest scan | ingest`
+    ├── detect.py       # format classification (vector / raster / unknown)
+    ├── validators.py   # CRS present, geometries valid, non-empty
+    ├── partition.py    # H3 cell assignment (centroid-based)
+    ├── storage.py      # S3 client + upload
+    ├── stac.py         # Collection + Item build + POST/PUT
+    ├── transforms/
+    │   ├── vector.py   # reproject → GeoParquet Hive-partitioned on h3_7
+    │   └── raster.py   # reproject → Cloud Optimized GeoTIFF + overviews
+    └── runner.py       # glue: detect → validate → transform → upload → catalog
+```
+
+Input-format agnostic: any OGR/GDAL-readable vector (Shapefile, GeoPackage, KML, GeoJSON, FlatGeobuf, ...) or raster (GeoTIFF, NetCDF, JP2, VRT, ...). No product-specific hard-coding.
+
+Run against your own data:
+
+```bash
+# inside ingest/ once:
+python3 -m venv .venv && .venv/bin/pip install -e .
+
+# every run:
+cd poc
+make ingest-sample              # uses poc/sample-data/ and live cluster
+# or:
+export MISO_S3_ENDPOINT=http://localhost:9000
+export MISO_S3_ACCESS_KEY=...
+export MISO_S3_SECRET_KEY=...
+.venv/bin/miso-ingest ingest /path/to/data --domain my-collection
+```
 
 ## Related Spec
 
