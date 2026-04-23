@@ -108,6 +108,8 @@ def ingest_one(
                 "width": rresult.width,
                 "height": rresult.height,
                 "source_crs": rresult.source_crs,
+                "reprojected": rresult.reprojected,
+                "overviews": rresult.overviews,
             }
 
         # Metadata sidecar

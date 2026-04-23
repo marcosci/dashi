@@ -68,7 +68,13 @@ poc/ingest/
     └── runner.py       # glue: detect → validate → transform → upload → catalog
 ```
 
-Input-format agnostic: any OGR/GDAL-readable vector (Shapefile, GeoPackage, KML, GeoJSON, FlatGeobuf, ...) or raster (GeoTIFF, NetCDF, JP2, VRT, ...). No product-specific hard-coding.
+Input-format agnostic: any OGR/GDAL-readable vector (Shapefile, GeoPackage, KML, GeoJSON, FlatGeobuf, ...) or raster (GeoTIFF incl. already-COG, NetCDF, JP2, VRT, ...). No product-specific hard-coding.
+
+### Known limitations (tracked, not yet fixed)
+
+- **Multi-layer GPKG:** only the first layer is ingested; pyogrio emits a warning listing the others. Add a `--layers` switch or auto-fan-out to one STAC item per layer.
+- **LAZ / point clouds:** detected as `unknown`, skipped. COPC transform path (ADR-004) not yet implemented — needs `laspy` + `copclib` or PDAL.
+- **Vector bbox with empty partitions:** falls back to world extent `[-180,-90,180,90]` if no partitions have features. Fine for empty sources, worth tightening.
 
 Run against your own data:
 
