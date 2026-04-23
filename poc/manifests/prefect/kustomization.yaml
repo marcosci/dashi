@@ -3,8 +3,11 @@ kind: Kustomization
 namespace: miso-data
 resources:
   - namespace.yaml
+  - statefulset-postgres.yaml
   - deployment-server.yaml
   - service.yaml
+  - rbac.yaml
+  - deployment-worker.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: miso

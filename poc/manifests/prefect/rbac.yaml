@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prefect-worker
+  namespace: miso-data
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prefect-worker
+  namespace: miso-data
+rules:
+  # Worker schedules flow runs as Jobs + creates Pods + reads status
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "pods/status"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prefect-worker
+  namespace: miso-data
+subjects:
+  - kind: ServiceAccount
+    name: prefect-worker
+    namespace: miso-data
+roleRef:
+  kind: Role
+  name: prefect-worker
+  apiGroup: rbac.authorization.k8s.io
+---
+# kopf (used by prefect-kubernetes) watches at cluster scope even when the
+# worker only schedules Jobs in its own namespace. Grant read-only cluster
+# access for list + watch on the resources kopf needs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: prefect-worker-cluster-watch
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces", "events"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prefect-worker-cluster-watch
+subjects:
+  - kind: ServiceAccount
+    name: prefect-worker
+    namespace: miso-data
+roleRef:
+  kind: ClusterRole
+  name: prefect-worker-cluster-watch
+  apiGroup: rbac.authorization.k8s.io

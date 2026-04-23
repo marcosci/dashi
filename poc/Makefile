@@ -64,10 +64,14 @@ serving-deploy:
 	@bash scripts/serving-deploy.sh
 
 prefect-up:
-	kubectl apply -k manifests/prefect
+	@bash scripts/apply-with-secret.sh manifests/prefect statefulset-postgres.yaml CHANGE_ME_PREFECT_DB
 	@echo ""
+	@echo "→ Waiting for Prefect DB"
+	kubectl -n miso-data rollout status statefulset/prefect-db --timeout=180s
 	@echo "→ Waiting for Prefect server"
 	kubectl -n miso-data rollout status deployment/prefect-server --timeout=240s
+	@echo "→ Waiting for Prefect worker"
+	kubectl -n miso-data rollout status deployment/prefect-worker --timeout=180s
 	@echo ""
 	@echo "✓ Prefect up. Port-forward with:"
 	@echo "  kubectl -n miso-data port-forward svc/prefect-server 4200:4200"

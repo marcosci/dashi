@@ -1,14 +1,12 @@
-FROM python:3.12-slim
+FROM condaforge/miniforge3:latest
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      gdal-bin \
-      libgdal-dev \
-      pdal \
-      libpdal-plugin-python \
-      libexpat1 \
-      build-essential \
- && rm -rf /var/lib/apt/lists/*
+# Base deps via conda-forge — PDAL is not in Debian main.
+RUN mamba install -y -c conda-forge \
+      python=3.12 \
+      gdal=3.9 \
+      pdal=2.7 \
+      python-pdal \
+ && mamba clean -afy
 
 WORKDIR /app
 
@@ -21,7 +19,15 @@ RUN pip install --no-cache-dir \
       "prefect-kubernetes>=0.5" \
     && pip install --no-cache-dir -e .
 
+# Demo fixture — small GeoJSON so Phase-2 scheduled runs have data even
+# when no landing-zone upload happened. Overridable: set the flow's
+# source_path parameter to any path inside the ingest pod (mount a PVC
+# or ConfigMap in production).
+COPY fixtures /work/sample-data
+
 ENV PYTHONUNBUFFERED=1 \
     PREFECT_LOGGING_LEVEL=INFO
 
-ENTRYPOINT ["miso-ingest"]
+# No ENTRYPOINT — Prefect flow-run Jobs override with
+# `prefect flow-run execute`. For direct CLI use run:
+#   docker run --rm miso/miso-ingest:dev miso-ingest --help

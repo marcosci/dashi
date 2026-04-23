@@ -31,6 +31,23 @@ spec:
               value: "0.0.0.0"
             - name: PREFECT_HOME
               value: "/var/lib/prefect"
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_USER
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_PASSWORD
+            - name: PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_DB
+            - name: PREFECT_API_DATABASE_CONNECTION_URL
+              value: "postgresql+asyncpg://$(PG_USER):$(PG_PASSWORD)@prefect-db:5432/$(PG_DB)"
           readinessProbe:
             httpGet:
               path: /api/ready
