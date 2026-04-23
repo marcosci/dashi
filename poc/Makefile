@@ -61,8 +61,7 @@ catalog-deploy:
 	@echo "  Port-forward: kubectl -n miso-catalog port-forward svc/stac-fastapi 8080:8080"
 
 serving-deploy:
-	@echo "TODO: apply manifests/titiler/ + manifests/duckdb-endpoint/"
-	@exit 1
+	@bash scripts/serving-deploy.sh
 
 prefect-up:
 	@echo "TODO: apply manifests/prefect/"
@@ -74,6 +73,7 @@ ingest-sample:
 smoke:
 	@bash smoke/catalog.sh
 	@bash smoke/ingest.sh
+	@bash smoke/serving.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

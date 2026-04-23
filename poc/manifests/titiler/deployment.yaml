@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: titiler
+  namespace: miso-serving
+  labels:
+    app.kubernetes.io/name: titiler
+    app.kubernetes.io/part-of: miso
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: titiler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: titiler
+    spec:
+      containers:
+        - name: titiler
+          image: miso/titiler-endpoint:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: AWS_S3_ENDPOINT
+              value: "http://rustfs.miso-platform.svc.cluster.local:9000"
+            - name: AWS_VIRTUAL_HOSTING
+              value: "FALSE"
+            - name: AWS_HTTPS
+              value: "NO"
+            - name: GDAL_DISABLE_READDIR_ON_OPEN
+              value: "EMPTY_DIR"
+            - name: CPL_VSIL_CURL_ALLOWED_EXTENSIONS
+              value: ".tif,.TIF,.tiff"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-client
+                  key: access-key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-client
+                  key: secret-key
+            - name: AWS_REGION
+              value: "us-east-1"
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 12
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"

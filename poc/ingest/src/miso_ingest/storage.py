@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import boto3
+from boto3.s3.transfer import TransferConfig
 from botocore.client import Config
 
 
@@ -34,6 +35,14 @@ class S3Config:
         )
 
 
+_TRANSFER_CFG = TransferConfig(
+    multipart_threshold=8 * 1024 * 1024,
+    multipart_chunksize=8 * 1024 * 1024,
+    max_concurrency=2,
+    use_threads=True,
+)
+
+
 def s3_client(cfg: S3Config | None = None):
     cfg = cfg or S3Config.from_env()
     return boto3.client(
@@ -42,7 +51,13 @@ def s3_client(cfg: S3Config | None = None):
         region_name=cfg.region,
         aws_access_key_id=cfg.access_key,
         aws_secret_access_key=cfg.secret_key,
-        config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
+        config=Config(
+            signature_version="s3v4",
+            s3={"addressing_style": "path"},
+            retries={"max_attempts": 10, "mode": "adaptive"},
+            connect_timeout=30,
+            read_timeout=120,
+        ),
     )
 
 
@@ -58,7 +73,7 @@ def upload_tree(local_root: Path, bucket: str, key_prefix: str, cfg: S3Config | 
             continue
         rel = p.relative_to(local_root).as_posix()
         key = f"{key_prefix.rstrip('/')}/{rel}"
-        client.upload_file(str(p), bucket, key)
+        client.upload_file(str(p), bucket, key, Config=_TRANSFER_CFG)
         n += 1
     return n
 

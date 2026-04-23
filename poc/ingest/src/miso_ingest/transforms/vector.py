@@ -24,6 +24,8 @@ class VectorTransformResult:
     target_crs: str
     h3_resolution: int
     partitions: int
+    layer: str | None
+    bbox: tuple[float, float, float, float] | None
 
 
 def transform(
@@ -32,9 +34,11 @@ def transform(
     *,
     h3_resolution: int = 7,
     repair_invalid: bool = True,
+    layer: str | None = None,
 ) -> VectorTransformResult:
-    """Read any OGR-readable vector, reproject to EPSG:4326, write Hive-partitioned GeoParquet."""
-    gdf = gpd.read_file(src)
+    """Read any OGR-readable vector layer, reproject to EPSG:4326, write Hive-partitioned GeoParquet."""
+    kwargs = {"layer": layer} if layer else {}
+    gdf = gpd.read_file(src, **kwargs)
     feature_count = len(gdf)
     source_crs = str(gdf.crs) if gdf.crs else None
 
@@ -51,6 +55,8 @@ def transform(
             target_crs=TARGET_CRS,
             h3_resolution=h3_resolution,
             partitions=0,
+            layer=layer,
+            bbox=None,
         )
 
     # Reproject only if needed (avoids numerical drift for already-4326 inputs)
@@ -83,6 +89,10 @@ def transform(
         group.drop(columns=["h3_7"]).to_parquet(part_path, index=False)
         partitions += 1
 
+    # Post-reprojection bounds — authoritative for STAC bbox
+    b = gdf.total_bounds
+    bbox = (float(b[0]), float(b[1]), float(b[2]), float(b[3])) if partitions else None
+
     return VectorTransformResult(
         input_path=src,
         output_dir=out_dir,
@@ -92,4 +102,6 @@ def transform(
         target_crs=TARGET_CRS,
         h3_resolution=h3_resolution,
         partitions=partitions,
+        layer=layer,
+        bbox=bbox,
     )

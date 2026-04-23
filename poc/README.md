@@ -14,10 +14,12 @@ poc/
 │   └── .gitkeep
 ├── manifests/               # k8s manifests / Helm values
 │   ├── rustfs/              # S3-compatible object storage (see ADR-001)
-│   ├── stac-fastapi/
-│   ├── titiler/
-│   ├── duckdb-endpoint/
+│   ├── pgstac/              # pgstac Postgres + stac-fastapi API
+│   ├── titiler/             # COG tile endpoint (arm64 rebuild via titiler-endpoint/)
+│   ├── duckdb-endpoint/     # SQL endpoint over GeoParquet in RustFS
 │   └── prefect/
+├── titiler-endpoint/        # Dockerfile + FastAPI app (rio-tiler based, arm64-native)
+├── duckdb-endpoint/         # Dockerfile + FastAPI app (DuckDB SELECT-only)
 ├── ingest/                  # Python ingestion + standardization
 │   ├── pyproject.toml
 │   ├── src/
@@ -47,8 +49,14 @@ make smoke           # Run Gate-1 acceptance checks
 
 - **Strang B (cluster + storage):** ✅ RustFS live in `miso-platform`, buckets `landing/processed/curated`
 - **Strang D (catalog):** ✅ pgstac + stac-fastapi live in `miso-catalog`
-- **Strang C (ingestion):** ✅ `miso-ingest` CLI format-agnostic (vector + raster), end-to-end proven with Dresden OSM extract — 28 shapefiles → 366k features → 3709 H3-7 partitions → 28 STAC items
-- **Strang E (serving):** ⏳ next — TiTiler + DuckDB endpoint
+- **Strang C (ingestion):** ✅ `miso-ingest` CLI format-agnostic (vector, raster, point cloud). End-to-end proven:
+    - 29 Dresden OSM shapefiles → 366k features → 3709 H3-7 partitions → 28 STAC items (1 legitimate rejection, empty coastline)
+    - 1 GeoTIFF (EPSG:32631) → reprojected COG with overviews
+    - 1 GeoPackage with 4 usable layers → 4 separate STAC items
+    - 1 LAZ (NZGD2000 NZTM2000, 28.8M points, 118 MB) → 97 MB COPC reprojected to EPSG:4326 via PDAL
+- **Strang E (serving):** ✅ TiTiler + DuckDB SQL endpoint live in `miso-serving`
+    - `GET /cog/info` + `/cog/tiles/{z}/{x}/{y}.png` on COGs in RustFS (custom arm64 image — upstream TiTiler is amd64-only)
+    - `POST /query` on DuckDB with SELECT-only allowlist, spatial extension, httpfs pointed at RustFS. `ST_Intersects` over the 367k-feature Dresden dataset returns in <2 s (BBox around Frauenkirche matched 10490 features)
 - **Strang F (Prefect + Gate-1):** ⏳
 
 ## Ingestion package
@@ -63,18 +71,31 @@ poc/ingest/
     ├── storage.py      # S3 client + upload
     ├── stac.py         # Collection + Item build + POST/PUT
     ├── transforms/
-    │   ├── vector.py   # reproject → GeoParquet Hive-partitioned on h3_7
-    │   └── raster.py   # reproject → Cloud Optimized GeoTIFF + overviews
-    └── runner.py       # glue: detect → validate → transform → upload → catalog
+    │   ├── vector.py      # reproject → GeoParquet Hive-partitioned on h3_7
+    │   ├── raster.py      # reproject → Cloud Optimized GeoTIFF + overviews
+    │   └── pointcloud.py  # reproject → Cloud Optimized Point Cloud (COPC via PDAL)
+    └── runner.py          # glue: detect → validate → transform → upload → catalog
 ```
 
-Input-format agnostic: any OGR/GDAL-readable vector (Shapefile, GeoPackage, KML, GeoJSON, FlatGeobuf, ...) or raster (GeoTIFF incl. already-COG, NetCDF, JP2, VRT, ...). No product-specific hard-coding.
+Input-format agnostic:
 
-### Known limitations (tracked, not yet fixed)
+- **Vector** — any OGR-readable format: Shapefile, GeoPackage (including **multi-layer containers — one STAC item per layer**), KML, KMZ, GeoJSON, FlatGeobuf, MapInfo TAB/MIF, FileGDB, ...
+- **Raster** — any GDAL-readable format including already-COG GeoTIFF: COG, GeoTIFF, NetCDF, JP2, VRT, HGT, ASC, IMG, ...
+- **Point cloud** — LAS / LAZ → converted to **COPC** (Cloud Optimized Point Cloud) via PDAL, reprojected to EPSG:4326.
 
-- **Multi-layer GPKG:** only the first layer is ingested; pyogrio emits a warning listing the others. Add a `--layers` switch or auto-fan-out to one STAC item per layer.
-- **LAZ / point clouds:** detected as `unknown`, skipped. COPC transform path (ADR-004) not yet implemented — needs `laspy` + `copclib` or PDAL.
-- **Vector bbox with empty partitions:** falls back to world extent `[-180,-90,180,90]` if no partitions have features. Fine for empty sources, worth tightening.
+No product-specific hard-coding. Drop any supported file and it classifies, validates, reprojects, and catalogs.
+
+### System prerequisites
+
+- Python 3.13+ (3.14 also supported after fixing the macOS `libexpat` pyexpat linkage — see Troubleshooting)
+- GDAL 3.8+ for rasterio / pyogrio
+- PDAL 2.10+ for LAS/LAZ → COPC conversion (`brew install pdal` on macOS; `apt install pdal` on Debian/Ubuntu). If missing, pointcloud ingestion is skipped with a clear error; other formats unaffected.
+
+### Known limitations (tracked)
+
+- **Vector empty-layer ingestion:** layers with zero features after validation are rejected at the transform boundary with a clear reason (previously returned a world-extent bbox silently).
+- **GPKG catalogue layers** (`layer_styles`, `qgis_projects`): filtered during detection. Primary layers only appear as STAC items.
+- **KMZ (zipped KML):** detection recognises the extension, but fan-out to inner KML requires an unzip step not yet wired in.
 
 Run against your own data:
 

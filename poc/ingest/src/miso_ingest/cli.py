@@ -19,11 +19,11 @@ console = Console()
 
 @app.command("scan")
 def scan(path: Path = typer.Argument(..., exists=True, readable=True, file_okay=True, dir_okay=True)) -> None:
-    """Classify every file under PATH without processing. Useful for dry-run."""
+    """Classify every file (and every layer of multi-layer files) without processing."""
     detections = detect.discover(path)
-    table = Table("path", "kind", "driver", "reason")
+    table = Table("path", "kind", "driver", "layer", "reason")
     for d in detections:
-        table.add_row(str(d.path), d.kind, d.driver or "-", d.reason)
+        table.add_row(str(d.path), d.kind, d.driver or "-", d.layer or "-", d.reason)
     console.print(table)
 
 
@@ -50,7 +50,7 @@ def ingest(
         if d.kind == "unknown":
             continue  # sidecar or unreadable — skip silently
         outcome = ingest_one(
-            d.path,
+            d,
             domain=domain,
             processed_bucket=processed_bucket,
             stac_url=stac_url,
@@ -62,8 +62,9 @@ def ingest(
         status_color = {"ingested": "green", "rejected": "red", "skipped": "yellow"}.get(
             outcome.status, "white"
         )
+        layer_suffix = f"[{outcome.layer}]" if outcome.layer else ""
         console.print(
-            f"[{status_color}]{outcome.status}[/] {outcome.kind:6s}  {d.path}"
+            f"[{status_color}]{outcome.status}[/] {outcome.kind:10s}  {d.path}{layer_suffix}"
             + (f"  → {outcome.output_uri}" if outcome.output_uri else "")
             + (f"  ({outcome.reason})" if outcome.reason else "")
         )

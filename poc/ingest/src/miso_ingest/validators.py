@@ -40,15 +40,21 @@ class ValidationResult:
         return {"ok": self.ok, "errors": self.errors, "warnings": self.warnings}
 
 
-def validate_vector(path: Path, *, sample_geometries: int = 1000) -> ValidationResult:
-    """Validate a vector file using pyogrio (no full read into memory).
+def validate_vector(
+    path: Path,
+    *,
+    layer: str | None = None,
+    sample_geometries: int = 1000,
+) -> ValidationResult:
+    """Validate one vector layer using pyogrio (no full read into memory).
 
-    Sampling of geometries limits cost on very large datasets while still
-    catching common issues. `sample_geometries=0` disables sampling.
+    Sampling limits cost on very large datasets. `sample_geometries=0` disables
+    sampling. `layer` selects the layer in multi-layer containers (GPKG, FileGDB).
     """
     result = ValidationResult(ok=True)
+    kwargs = {"layer": layer} if layer else {}
     try:
-        info = pyogrio.read_info(path)
+        info = pyogrio.read_info(path, **kwargs)
     except Exception as e:  # noqa: BLE001
         result.fail(f"unreadable: {e}")
         return result
@@ -73,9 +79,9 @@ def validate_vector(path: Path, *, sample_geometries: int = 1000) -> ValidationR
         n = info.get("features", 0)
         to_read = min(n, sample_geometries) if sample_geometries else n
         if to_read > 0:
-            geoms, _ = pyogrio.read_dataframe(
-                path, max_features=to_read, read_geometry=True
-            ), None
+            geoms = pyogrio.read_dataframe(
+                path, max_features=to_read, read_geometry=True, **kwargs
+            )
             invalid = 0
             for g in geoms.geometry:
                 if g is None:
@@ -89,6 +95,25 @@ def validate_vector(path: Path, *, sample_geometries: int = 1000) -> ValidationR
     except Exception as e:  # noqa: BLE001
         result.warn(f"geometry sample skipped: {e}")
 
+    return result
+
+
+def validate_pointcloud(path: Path) -> ValidationResult:
+    """Validate LAS/LAZ via laspy — CRS declared, non-empty, header readable."""
+    import laspy  # local import — laspy may be missing in minimal envs
+
+    result = ValidationResult(ok=True)
+    try:
+        with laspy.open(path) as reader:
+            header = reader.header
+            if header.point_count == 0:
+                result.fail("zero points")
+            if not header.parse_crs():
+                result.fail("missing CRS — producer must declare coordinate reference system")
+            if header.mins is None or header.maxs is None:
+                result.fail("missing bounds in LAS header")
+    except Exception as e:  # noqa: BLE001
+        result.fail(f"unreadable: {e}")
     return result
 
 
