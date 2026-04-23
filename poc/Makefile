@@ -34,9 +34,7 @@ k3s-down:
 	@bash scripts/k3s-down.sh $(CLUSTER_NAME)
 
 storage-deploy:
-	@if ! grep -q 'secret-key: CHANGE_ME_ROOT_PASSWORD' manifests/rustfs/secret.yaml 2>/dev/null; then :; \
-	  else echo "ERROR: manifests/rustfs/secret.yaml contains placeholder CHANGE_ME_ROOT_PASSWORD. Rotate before deploy."; exit 1; fi
-	kubectl apply -k manifests/rustfs
+	@bash scripts/apply-with-secret.sh manifests/rustfs secret.yaml CHANGE_ME_ROOT_PASSWORD
 	@echo ""
 	@echo "→ Waiting for RustFS to be Ready"
 	kubectl -n miso-platform rollout status statefulset/rustfs --timeout=180s
@@ -48,8 +46,19 @@ storage-deploy:
 	@echo "  Port-forward with: kubectl -n miso-platform port-forward svc/rustfs 9000:9000 9001:9001"
 
 catalog-deploy:
-	@echo "TODO: apply manifests/stac-fastapi/"
-	@exit 1
+	@bash scripts/apply-with-secret.sh manifests/pgstac secret.yaml CHANGE_ME_PG_PASSWORD
+	@echo ""
+	@echo "→ Waiting for Postgres (pgstac) StatefulSet"
+	kubectl -n miso-catalog rollout status statefulset/pgstac --timeout=180s
+	@echo ""
+	@echo "→ Waiting for pgstac migration Job"
+	kubectl -n miso-catalog wait --for=condition=complete job/pgstac-migrate --timeout=180s
+	@echo ""
+	@echo "→ Waiting for stac-fastapi Deployment"
+	kubectl -n miso-catalog rollout status deployment/stac-fastapi --timeout=180s
+	@echo ""
+	@echo "✓ Catalog ready. stac-fastapi on svc/stac-fastapi:8080 in miso-catalog"
+	@echo "  Port-forward: kubectl -n miso-catalog port-forward svc/stac-fastapi 8080:8080"
 
 serving-deploy:
 	@echo "TODO: apply manifests/titiler/ + manifests/duckdb-endpoint/"
