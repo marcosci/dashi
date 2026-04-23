@@ -17,6 +17,8 @@ cldgis-geodatalake/
 ├── README.md                      # This file
 ├── CLAUDE.md                      # Agent working instructions
 ├── docs/                          # Chapter-by-chapter architecture doc
+│   ├── INDEX.md                   # Every F-NN / NF-NN / W-NN / ADR / R-NN lookup
+│   ├── GLOSSARY.md                # Acronyms + domain terms
 │   ├── 01-summary.md
 │   ├── 02-context.md
 │   ├── 03-goals.md
@@ -27,6 +29,7 @@ cldgis-geodatalake/
 │   ├── 08-technology-decisions.md
 │   ├── 09-phases.md
 │   └── 10-risks-open-questions.md
+├── source/                        # Archived original PDF for traceability
 ├── adr/                           # Architecture Decision Records (per-decision)
 │   ├── ADR-001-object-storage.md
 │   ├── ADR-002-vector-format-geoparquet.md
@@ -56,6 +59,8 @@ cldgis-geodatalake/
 | [08](docs/08-technology-decisions.md) | ADR-Übersicht |
 | [09](docs/09-phases.md) | PoC → MVP → Vollbetrieb (18 Monate) |
 | [10](docs/10-risks-open-questions.md) | Offene Fragen & Risikoregister |
+| [INDEX](docs/INDEX.md) | Lookup aller IDs (F/NF/W/ADR/R) |
+| [GLOSSARY](docs/GLOSSARY.md) | Abkürzungen + Fachbegriffe |
 
 ## Working Language
 

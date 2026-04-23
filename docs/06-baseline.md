@@ -24,10 +24,10 @@ Die Abwesenheit einer bestehenden Plattform hat direkte Auswirkungen auf die Ini
 
 ### Risiken
 
-- **Unbekannte Datenlage.** Da keine zentrale Übersicht existiert, ist unklar, welche Geodaten in welcher Qualität, welchem Format und an welchem Ort vorhanden sind. Die Bestandsaufnahme in Phase 1 ist daher ein kritischer Meilenstein.
-- **Unbekannte Quellsysteme.** Welche Systeme Geodaten erzeugen oder konsumieren, ist nicht vollständig bekannt. Fehlende oder schlecht dokumentierte Schnittstellen können die Ingestion-Architektur erheblich beeinflussen.
-- **Keine Vergleichsbasis.** Ohne Ausgangszustand ist es schwerer, den Nutzen der Plattform quantitativ nachzuweisen. Erfolgskennzahlen müssen daher bereits in Phase 1 als Baseline erhoben werden — zum Beispiel: gemessener manueller Aufwand für Datenbeschaffung und -konvertierung heute.
-- **Kultureller Wandel.** Dort wo heute keine Plattform existiert, existieren oft informelle Prozesse, persönliche Datensilos und gewachsene Abhängigkeiten. Die Einführung einer gemeinsamen Plattform erfordert aktives Change Management — nicht nur Technologie.
+- **Unbekannte Datenlage.** Da keine zentrale Übersicht existiert, ist unklar, welche Geodaten in welcher Qualität, welchem Format und an welchem Ort vorhanden sind. Die Bestandsaufnahme in Phase 1 ist daher ein kritischer Meilenstein. — Register: [R-07](10-risks-open-questions.md#technische-risiken) (Datenvolumina), offene Frage [F-06](10-risks-open-questions.md#101-offene-fragen) (undokumentierte Quellsysteme)
+- **Unbekannte Quellsysteme.** Welche Systeme Geodaten erzeugen oder konsumieren, ist nicht vollständig bekannt. Fehlende oder schlecht dokumentierte Schnittstellen können die Ingestion-Architektur erheblich beeinflussen. — Register: [R-06](10-risks-open-questions.md#technische-risiken) (undokumentierte Formate), [R-11](10-risks-open-questions.md#technische-risiken) (Schema-Drift)
+- **Keine Vergleichsbasis.** Ohne Ausgangszustand ist es schwerer, den Nutzen der Plattform quantitativ nachzuweisen. Erfolgskennzahlen müssen daher bereits in Phase 1 als Baseline erhoben werden — zum Beispiel: gemessener manueller Aufwand für Datenbeschaffung und -konvertierung heute. — Bezug zum Reduktionsziel in [§3 Operative Ziele](03-goals.md#operative-ziele) (`[X %]`-Placeholder).
+- **Kultureller Wandel.** Dort wo heute keine Plattform existiert, existieren oft informelle Prozesse, persönliche Datensilos und gewachsene Abhängigkeiten. Die Einführung einer gemeinsamen Plattform erfordert aktives Change Management — nicht nur Technologie. — Register: [R-01](10-risks-open-questions.md#organisatorische-risiken) (Verweigerung Datenzugang), [R-04](10-risks-open-questions.md#organisatorische-risiken) (Silo-Widerstand)
 
 ## 6.3 Aufgaben der Bestandsaufnahme in Phase 1
 

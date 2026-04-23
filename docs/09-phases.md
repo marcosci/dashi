@@ -8,6 +8,24 @@ Die Initiative wird in drei aufeinander aufbauenden Phasen umgesetzt. Jede Phase
 
 ## Phasenübersicht
 
+```mermaid
+gantt
+    title CldGIS Geodatalake — 18-Monats-Plan
+    dateFormat X
+    axisFormat Monat %s
+    section Phase 1
+    Proof of Concept (Gelände & Umwelt) :p1, 1, 4
+    Gate 1                              :milestone, after p1, 0
+    section Phase 2
+    Minimum Viable Platform (ISR + C2)  :p2, 5, 11
+    Gate 2                              :milestone, after p2, 0
+    section Phase 3
+    Vollbetrieb (Logistik + Hardening)  :p3, 12, 18
+    Gate 3                              :milestone, after p3, 0
+```
+
+ASCII-Fallback:
+
 ```
 Monat:  1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18
         ├───────────────┼───────────────────────────────────┼──────────────────┤

@@ -10,6 +10,26 @@ Die logische Architektur ist der **stabilste Teil dieses Dokuments**. Technologi
 
 Die Plattform gliedert sich in fünf horizontale Schichten. Daten fließen grundsätzlich von unten nach oben — von der Rohquelle bis zum analysebereit aufbereiteten Produkt.
 
+```mermaid
+flowchart TB
+    K["<b>KONSUMSCHICHT</b><br/>Analysten · Missionsplanung · ML-Pipelines · APIs"]
+    S["<b>SERVING-SCHICHT</b><br/>SQL-Engine · OGC-Dienste · Kachelserver · Feature Store"]
+    C["<b>CURATED ZONE</b><br/>Domänenprodukte"]
+    E["<b>ENRICHMENT ZONE</b><br/>Domänenübergreifende Produkte"]
+    P["<b>PROCESSED ZONE</b><br/>Standardisiertes KRS · Validiert · Katalogisiert"]
+    L["<b>LANDING ZONE</b><br/>Rohdaten · Unveränderlich · Vollständig protokolliert"]
+    O[("Objektspeicher-Fundament")]
+    K --> S
+    S --> C
+    S --> E
+    C --> P
+    E --> P
+    P --> L
+    L --> O
+```
+
+ASCII-Fallback:
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        KONSUMSCHICHT                            │
@@ -118,6 +138,23 @@ Die Serving-Schicht ist die Schnittstelle zwischen der Plattform und ihren Konsu
 ## 7.3 Datenfluss
 
 Der vollständige Datenfluss von der Quelle bis zum Konsumenten folgt diesem Muster:
+
+```mermaid
+flowchart TD
+    Q[Datenquelle] --> IA[Ingestion-Adapter<br/>Format- und Vollständigkeitsprüfung]
+    IA --> LZ[(LANDING ZONE)]
+    LZ --> SP[Standardisierungs-Pipeline<br/>KRS-Transformation · Formatkonvertierung<br/>Geometrievalidierung · Partitionierung]
+    SP --> PZ[(PROCESSED ZONE)]
+    PZ --> DP[Domänen-Pipeline<br/>Fachliche Anreicherung · Klassifikation<br/>Qualitätssicherung · Katalogeintrag]
+    PZ --> EP[Enrichment-Pipeline<br/>Domänenübergreifende Verschneidung]
+    DP --> CZ[(CURATED ZONE)]
+    EP --> EZ[(ENRICHMENT ZONE)]
+    CZ --> SL[Serving-Schicht]
+    EZ --> SL
+    SL --> KON[Konsumenten]
+```
+
+ASCII-Fallback:
 
 ```
 Datenquelle

@@ -102,6 +102,37 @@ Beschaffungsprozesse im militärischen Umfeld haben lange Vorlaufzeiten. Die Ent
 
 ## 10.4 Risikoübersicht
 
+```mermaid
+quadrantChart
+    title Risiko-Matrix (Wahrscheinlichkeit × Schaden)
+    x-axis "Niedrig" --> "Hoch"
+    y-axis "Niedrig" --> "Hoch"
+    quadrant-1 "Kritisch"
+    quadrant-2 "Mittel (Schaden-getrieben)"
+    quadrant-3 "Niedrig"
+    quadrant-4 "Mittel (Häufigkeits-getrieben)"
+    R-01: [0.85, 0.85]
+    R-02: [0.55, 0.85]
+    R-03: [0.85, 0.85]
+    R-04: [0.85, 0.55]
+    R-05: [0.55, 0.55]
+    R-06: [0.85, 0.55]
+    R-07: [0.55, 0.55]
+    R-08: [0.55, 0.85]
+    R-09: [0.55, 0.55]
+    R-10: [0.25, 0.85]
+    R-11: [0.85, 0.55]
+    R-12: [0.85, 0.85]
+    R-13: [0.55, 0.85]
+    R-14: [0.55, 0.85]
+    R-15: [0.55, 0.85]
+    R-16: [0.85, 0.85]
+    R-17: [0.85, 0.55]
+    R-18: [0.55, 0.85]
+```
+
+ASCII-Fallback:
+
 ```
 Schaden
   │
