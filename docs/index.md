@@ -14,7 +14,7 @@ hide:
 > A cloud-native spatial data lake consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment geodata under a common zone-based architecture.
 
 !!! info "Status — Phase 0 (PoC)"
-    **Owner:** Marco Sciaini (opendefense) · **Substrate:** local k3s + GitHub Actions + Pages
+    **Co-Owners:** Marco Sciaini + Johannes Schlundt (opendefense) · **Substrate:** local k3s + GitHub Actions + Pages
     **Focus domain for PoC:** Gelände & Umwelt · **Sample data:** GeoTIFF / Shapefile / KML / GPKG
     See the [Phase-0 roadmap](PHASE-0-ROADMAP.md) for the active plan.
 
