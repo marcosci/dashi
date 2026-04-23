@@ -1,6 +1,6 @@
 # Catalog — pgstac + stac-fastapi
 
-Spatial-temporal catalog (Strang D in [PHASE-0-ROADMAP](../../../docs/PHASE-0-ROADMAP.md)). Backs F-12, F-13, F-14, F-15. See [ADR-006](../../../adr/ADR-006-data-catalog.md) for the decision.
+Spatial-temporal catalog (Strang D). Backs F-12, F-13, F-14, F-15. See [ADR-006](../../../adr/ADR-006-data-catalog.md) for the decision.
 
 ## Components
 

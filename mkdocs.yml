@@ -101,6 +101,10 @@ nav:
       - 10. Offene Fragen & Risiken: 10-risks-open-questions.md
   - Planung:
       - Phase-0-Roadmap: PHASE-0-ROADMAP.md
+      - Gate-1 Acceptance (PoC): GATE-1-ACCEPTANCE.md
+  - Betrieb:
+      - Operations Runbook: OPERATIONS.md
+      - Troubleshooting: TROUBLESHOOTING.md
   - Referenz:
       - ID-Referenz: id-reference.md
       - Glossar: GLOSSARY.md
@@ -120,6 +124,14 @@ nav:
   - PoC:
       - Überblick: poc/README.md
       - k3s Setup: poc/docs/k3s-setup.md
+      - Manifests:
+          - RustFS Objektspeicher: poc/manifests/rustfs/README.md
+          - pgstac + stac-fastapi: poc/manifests/pgstac/README.md
+          - TiTiler Serving: poc/manifests/titiler/README.md
+          - DuckDB SQL Endpoint: poc/manifests/duckdb-endpoint/README.md
+      - Custom Images:
+          - titiler-endpoint (arm64 Rebuild): poc/titiler-endpoint/README.md
+          - duckdb-endpoint: poc/duckdb-endpoint/README.md
 
 extra:
   social:
