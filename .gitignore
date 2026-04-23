@@ -1,0 +1,19 @@
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+node_modules/
+.env
+.env.local
+
+# Work-in-progress drafts — promote to docs/ when ready
+drafts/
+scratch/
+
+# Large binary attachments shouldn't sit in the spec repo
+*.pdf
+*.xlsx
+*.pptx
+!docs/**/*.pdf
