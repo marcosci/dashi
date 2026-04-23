@@ -21,7 +21,7 @@ Offene Fragen sind ungeklärte Sachverhalte, die eine Entscheidung oder Informat
 |------|-------|---------|----------------|--------------|:------:|
 | F-01 | Welche Klassifizierungsstufen müssen auf der Plattform verarbeitet werden — und in getrennten oder gemeinsamen Zonen? | Sicherheit / Architektur | Sicherheitsbeauftragter | Ende Phase 1 | 🔴 |
 | F-02 | Welche Infrastruktur steht zur Verfügung — Cloud, on-premise oder hybrid? Gibt es bestehende Verträge oder Vorgaben? | Infrastruktur | Initiative Owner | Monat 1 | 🟢 |
-|   | **Geklärt 2026-04-23:** PoC läuft auf lokalem k3s-Cluster, entwickelt im opendefense GitLab. Siehe [ADR-011](../adr/ADR-011-infra-substrate.md). | | | | |
+|   | **Geklärt 2026-04-23:** PoC läuft auf lokalem k3s-Cluster, entwickelt im opendefense GitLab. Siehe [ADR-011](adr/ADR-011-infra-substrate.md). | | | | |
 | F-03 | Gibt es Echtzeit-Anforderungen aus dem C2-Bereich, die eine gesonderte Architekturkomponente erfordern? | Architektur / C2 | Data Owner C2 | Ende Phase 1 | 🟡 |
 | F-04 | Welche externen Systeme — Bündnispartner, nationale Behörden, NATO-Infrastruktur — müssen angebunden werden? | Interoperabilität | Initiative Owner | Phase 2 Start | 🟡 |
 | F-05 | Wie lange müssen Rohdaten in der Landing Zone aufbewahrt werden? Gibt es gesetzliche oder regulatorische Archivierungsfristen? | Governance / Recht | Initiative Owner | Ende Phase 1 | 🟡 |

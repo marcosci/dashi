@@ -9,7 +9,7 @@
 ## Ausgangslage (was geklärt ist)
 
 - **Owner + Architect + Lead:** Marco Sciaini in Personalunion (siehe [§4](04-stakeholders.md))
-- **Infrastruktur:** lokales k3s, opendefense GitLab für CI/CD (siehe [ADR-011](../adr/ADR-011-infra-substrate.md))
+- **Infrastruktur:** lokales k3s, opendefense GitLab für CI/CD (siehe [ADR-011](adr/ADR-011-infra-substrate.md))
 - **Fokusdomäne:** Gelände & Umwelt (siehe [§9 Phase 1](09-phases.md))
 - **Sample-Datensatz:** ~500 MB–1 GB, Formate GeoTIFF, Shapefile, KML, GPKG (liefert Marco)
 - **Offene ADRs für PoC scope:**

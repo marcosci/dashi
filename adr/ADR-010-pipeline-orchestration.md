@@ -1,8 +1,8 @@
-# ADR-010 — Pipeline-Orchestrierung
+# ADR-010 — Pipeline-Orchestrierung: Prefect
 
-**Status:** ⏳ Offen
+**Status:** ✅ Entschieden (PoC / Phase 1)
 
-**Fälligkeit:** Ende Phase 1
+**Beschlossen:** 2026-04-23
 
 ## Kontext
 
@@ -19,17 +19,20 @@ Datenpipelines müssen zuverlässig geplant, überwacht, bei Fehlern neu gestart
 
 ## Entscheidung
 
-**Offen** — Entscheidung abhängig von verfügbarer Infrastruktur und Teamgröße.
+**Prefect** für PoC und Phase 1. Python-nativ, niedriger Einstieg, kein JVM-Stack nötig. Passt zum 1-Personen-PoC-Team unter [ADR-011](ADR-011-infra-substrate.md).
 
-**Empfehlung:**
-- **Prefect** für kleinere Teams
-- **Airflow** wenn bestehende Organisationsinfrastruktur vorhanden ist
+Re-Evaluierung mit Phase-2-Übergang an ein produktives Betriebsteam — falls bestehende Airflow-Infrastruktur in der Zielorganisation verfügbar wird, ist ein Wechsel dann vertretbar (Flows sind relativ portierbar).
 
-**Entscheidung erforderlich bis:** [Datum — Ende Phase 1]
+## Konsequenzen
 
-## Konsequenzen (je Entscheidung)
+- Flows werden als Python-Module unter `poc/flows/` versioniert
+- Prefect-Server läuft als k3s-Deployment im Namespace `miso-data` (siehe [k3s setup](../poc/docs/k3s-setup.md))
+- Worker nutzen denselben Cluster — keine Remote-Runner im PoC
+- Blob-Storage-Zugriff über `boto3` gegen MinIO, Credentials via K8s Secret
+- Alerts initial nur via Prefect-UI; Monitoring-Dashboard-Anbindung (NF-16) in Phase 2
 
-- **Prefect:** modernere DX, weniger Betriebsaufwand, kleineres Ökosystem
-- **Airflow:** breiteres Ökosystem, höherer Betriebsaufwand, höhere organisatorische Verankerung
-- **Dagster:** beste Observability, aber höchste Einstiegshürde
-- **Cron:** nur für PoC tragbar, nicht produktiv
+## Verworfene Alternativen
+
+- **Airflow:** höherer Betriebsaufwand, Python-Code-Struktur zwang-DAG-förmig — ohne Legacy-Investment im Team nicht zu rechtfertigen
+- **Dagster:** beste Observability und Asset-Modell, aber steile Lernkurve für PoC-Scope zu teuer
+- **Cron + Skripte:** keine Abhängigkeitsverwaltung, kein Retry — reicht nicht einmal für Gate-1

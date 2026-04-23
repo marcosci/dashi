@@ -1,8 +1,10 @@
-# CldGIS Geodatalake
+# MISO
 
-Architecture, planning, and delivery workspace for the **CldGIS Spatial Data Lake** — a cloud-native geospatial data platform consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment data under a common zone-based architecture.
+**Map Infrastructure & Spatial Orchestration** — a cloud-native spatial data lake consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment data under a common zone-based architecture. Implementation workspace for the CldGIS Geodatalake specification.
 
-> Living document. Source of truth for architectural decisions, phase scope, open questions, and risks. Updated continuously as requirements are refined.
+> Living document. Source of truth for architectural decisions, phase scope, open questions, and risks.
+
+**Rendered documentation:** [opendefense.gitlab.io/miso](https://opendefense.gitlab.io/miso/) _(once GitLab project exists)_
 
 ## Status
 
@@ -11,27 +13,42 @@ Architecture, planning, and delivery workspace for the **CldGIS Spatial Data Lak
 - **Target:** Operational readiness within 18 months (3 phases) — military accreditation track deferred
 - **Domains:** Aufklärung & ISR · Missionsplanung & C2 · Logistik & Versorgung · **Gelände & Umwelt** (PoC focus)
 
+## Local docs preview
+
+```bash
+python -m pip install -r requirements-docs.txt
+mkdocs serve          # http://localhost:8000
+```
+
+## Local PoC bootstrap
+
+```bash
+cd poc
+make k3s-up           # start local k3d / k3s cluster
+# ... full target list: make help
+```
+
+See [poc/docs/k3s-setup.md](poc/docs/k3s-setup.md) for prerequisites and troubleshooting.
+
 ## Repository Layout
 
 ```
-cldgis-geodatalake/
+miso/
 ├── README.md                      # This file
 ├── CLAUDE.md                      # Agent working instructions
-├── docs/                          # Chapter-by-chapter architecture doc
-│   ├── INDEX.md                   # Every F-NN / NF-NN / W-NN / ADR / R-NN lookup
+├── mkdocs.yml                     # MkDocs Material site config
+├── requirements-docs.txt          # Docs site build dependencies
+├── .gitlab-ci.yml                 # CI: site build + GitLab Pages deploy
+├── docs/                          # Chapter-by-chapter architecture doc + site root
+│   ├── index.md                   # MkDocs landing page (public homepage)
+│   ├── id-reference.md            # Every F-NN / NF-NN / W-NN / ADR / R-NN lookup
 │   ├── GLOSSARY.md                # Acronyms + domain terms
-│   ├── 01-summary.md
-│   ├── 02-context.md
-│   ├── 03-goals.md
-│   ├── 04-stakeholders.md
-│   ├── 05-requirements.md
-│   ├── 06-baseline.md
-│   ├── 07-logical-architecture.md
-│   ├── 08-technology-decisions.md
-│   ├── 09-phases.md
-│   └── 10-risks-open-questions.md
-├── source/                        # Archived original PDF for traceability
-├── poc/                           # Phase 0 PoC scaffold — k3s manifests, ingest, flows
+│   ├── adrs.md                    # ADR overview (site nav entry)
+│   ├── PHASE-0-ROADMAP.md         # Active spec → PoC roadmap
+│   ├── assets/                    # Logo, favicon
+│   ├── 01-summary.md … 10-risks-open-questions.md
+│   ├── adr → ../adr               # symlink (so MkDocs renders ADRs)
+│   └── poc → ../poc               # symlink (so MkDocs renders PoC docs)
 ├── adr/                           # Architecture Decision Records (per-decision)
 │   ├── ADR-001-object-storage.md
 │   ├── ADR-002-vector-format-geoparquet.md
@@ -42,9 +59,21 @@ cldgis-geodatalake/
 │   ├── ADR-007-processing-engine.md
 │   ├── ADR-008-spatial-partitioning-h3.md
 │   ├── ADR-009-serving-layer.md
-│   └── ADR-010-pipeline-orchestration.md
+│   ├── ADR-010-pipeline-orchestration.md
+│   └── ADR-011-infra-substrate.md
+├── source/                        # Archived original PDF for traceability
+├── poc/                           # Phase 0 PoC — k3s manifests, ingest pipelines, flows
+│   ├── README.md
+│   ├── Makefile
+│   ├── docs/k3s-setup.md
+│   ├── scripts/k3s-up.sh · k3s-down.sh
+│   ├── manifests/                 # k8s manifests per component
+│   ├── ingest/                    # Python ingestion + standardization
+│   ├── flows/                     # Prefect flows
+│   ├── smoke/                     # End-to-end acceptance checks
+│   └── sample-data/               # (gitignored) local sample datasets
 ├── agents/                        # Agent-specific task briefs
-└── templates/                     # Doc templates (ADR, requirement, risk)
+└── templates/                     # Doc templates (ADR, requirement, risk, question)
 ```
 
 ## Quick Navigation
@@ -61,10 +90,11 @@ cldgis-geodatalake/
 | [08](docs/08-technology-decisions.md) | ADR-Übersicht |
 | [09](docs/09-phases.md) | PoC → MVP → Vollbetrieb (18 Monate) |
 | [10](docs/10-risks-open-questions.md) | Offene Fragen & Risikoregister |
-| [INDEX](docs/INDEX.md) | Lookup aller IDs (F/NF/W/ADR/R) |
-| [GLOSSARY](docs/GLOSSARY.md) | Abkürzungen + Fachbegriffe |
+| [ID-Referenz](docs/id-reference.md) | Lookup aller IDs (F/NF/W/ADR/R) |
+| [Glossar](docs/GLOSSARY.md) | Abkürzungen + Fachbegriffe |
+| [Phase-0-Roadmap](docs/PHASE-0-ROADMAP.md) | Spec → PoC Arbeitsstränge |
 
 ## Working Language
 
 - Architecture content: **German** (source of truth preserved from original spec)
-- Agent instructions, commit messages, code: **English**
+- Agent instructions, commit messages, code, site meta: **English**

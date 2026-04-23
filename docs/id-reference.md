@@ -72,17 +72,17 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 
 | ID | Bereich | Entscheidung | Status | Datei |
 |----|---------|--------------|:------:|-------|
-| ADR-001 | Speicherfundament | S3-kompatibler Objektspeicher | ✅ | [→](../adr/ADR-001-object-storage.md) |
-| ADR-002 | Vektorformat | GeoParquet | ✅ | [→](../adr/ADR-002-vector-format-geoparquet.md) |
-| ADR-003 | Rasterformat | COG + Zarr | ✅ | [→](../adr/ADR-003-raster-format-cog.md) |
-| ADR-004 | Punktwolkenformat | COPC | ✅ | [→](../adr/ADR-004-pointcloud-copc.md) |
-| ADR-005 | Tabellenformat | Iceberg vs. Delta Lake | 🔄 | [→](../adr/ADR-005-table-format.md) |
-| ADR-006 | Datenkatalog | STAC + techn. Katalog offen | 🔄 | [→](../adr/ADR-006-data-catalog.md) |
-| ADR-007 | Verarbeitungs-Engine | Spark+Sedona / DuckDB | 🔄 | [→](../adr/ADR-007-processing-engine.md) |
-| ADR-008 | Partitionierung | H3 | ✅ | [→](../adr/ADR-008-spatial-partitioning-h3.md) |
-| ADR-009 | Serving | Modularer Ansatz | 🔄 | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-010 | Orchestrierung | Prefect / Airflow offen | ⏳ | [→](../adr/ADR-010-pipeline-orchestration.md) |
-| ADR-011 | Infra-Substrat | k3s lokal + GitLab | ✅ | [→](../adr/ADR-011-infra-substrate.md) |
+| ADR-001 | Speicherfundament | S3-kompatibler Objektspeicher | ✅ | [→](adr/ADR-001-object-storage.md) |
+| ADR-002 | Vektorformat | GeoParquet | ✅ | [→](adr/ADR-002-vector-format-geoparquet.md) |
+| ADR-003 | Rasterformat | COG + Zarr | ✅ | [→](adr/ADR-003-raster-format-cog.md) |
+| ADR-004 | Punktwolkenformat | COPC | ✅ | [→](adr/ADR-004-pointcloud-copc.md) |
+| ADR-005 | Tabellenformat | Iceberg vs. Delta Lake | 🔄 | [→](adr/ADR-005-table-format.md) |
+| ADR-006 | Datenkatalog | STAC + techn. Katalog offen | 🔄 | [→](adr/ADR-006-data-catalog.md) |
+| ADR-007 | Verarbeitungs-Engine | Spark+Sedona / DuckDB | 🔄 | [→](adr/ADR-007-processing-engine.md) |
+| ADR-008 | Partitionierung | H3 | ✅ | [→](adr/ADR-008-spatial-partitioning-h3.md) |
+| ADR-009 | Serving | Modularer Ansatz | 🔄 | [→](adr/ADR-009-serving-layer.md) |
+| ADR-010 | Orchestrierung | Prefect | ✅ | [→](adr/ADR-010-pipeline-orchestration.md) |
+| ADR-011 | Infra-Substrat | k3s lokal + GitLab | ✅ | [→](adr/ADR-011-infra-substrate.md) |
 
 ## Open Questions (F-01 – F-10, question register)
 

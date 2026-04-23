@@ -14,27 +14,27 @@ Dieses Format macht Entscheidungen nachvollziehbar, revidierbar und kommunizierb
 
 ## ADR-Übersicht
 
-Jede ADR wird als eigenständige Datei im [`adr/`](../adr/) Verzeichnis geführt. Die folgende Tabelle verlinkt auf die Detaildokumente.
+Jede ADR wird als eigenständige Datei im [`adr/`](adr/) Verzeichnis geführt. Die folgende Tabelle verlinkt auf die Detaildokumente.
 
 | ID      | Bereich                    | Entscheidung           | Technologie            | Status | Detail |
 |---------|----------------------------|------------------------|------------------------|:------:|--------|
-| ADR-001 | Speicherfundament          | Objektspeicher         | S3-kompatibel (MinIO)  | ✅    | [→](../adr/ADR-001-object-storage.md) |
-| ADR-002 | Vektorformat               | Primärformat           | GeoParquet             | ✅    | [→](../adr/ADR-002-vector-format-geoparquet.md) |
-| ADR-003 | Rasterformat               | Primärformat           | COG                    | ✅    | [→](../adr/ADR-003-raster-format-cog.md) |
-| ADR-004 | Punktwolkenformat          | Primärformat           | COPC                   | ✅    | [→](../adr/ADR-004-pointcloud-copc.md) |
-| ADR-005 | Tabellenformat             | Transaktional          | Iceberg / Delta Lake   | 🔄    | [→](../adr/ADR-005-table-format.md) |
-| ADR-006 | Räumlicher Katalog         | Entdeckung             | STAC                   | ✅    | [→](../adr/ADR-006-data-catalog.md) |
-| ADR-006 | Technischer Katalog        | Lineage & Metadaten    | Offen                  | 🔄    | [→](../adr/ADR-006-data-catalog.md) |
-| ADR-007 | Verarbeitungs-Engine       | Batch / Groß           | Spark + Sedona         | 🔄    | [→](../adr/ADR-007-processing-engine.md) |
-| ADR-007 | Verarbeitungs-Engine       | Analytisch             | DuckDB + Spatial       | ✅    | [→](../adr/ADR-007-processing-engine.md) |
-| ADR-008 | Partitionierung            | Räumlich               | H3                     | ✅    | [→](../adr/ADR-008-spatial-partitioning-h3.md) |
-| ADR-009 | Serving — SQL              | Analytisch             | DuckDB / SQL-Engine    | ✅    | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-009 | Serving — OGC              | WMS/WFS                | GeoServer / MapServer  | 🔄    | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-009 | Serving — Kacheln          | Vektor                 | Martin / pg_tileserv   | 🔄    | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-009 | Serving — Raster           | COG-Tiles              | TiTiler                | ✅    | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-009 | Serving — STAC             | API                    | stac-fastapi           | ✅    | [→](../adr/ADR-009-serving-layer.md) |
-| ADR-010 | Orchestrierung             | Pipeline-Management    | Prefect / Airflow      | ⏳    | [→](../adr/ADR-010-pipeline-orchestration.md) |
-| ADR-011 | Infrastruktur-Substrat     | PoC / MVP              | k3s lokal + GitLab     | ✅    | [→](../adr/ADR-011-infra-substrate.md) |
+| ADR-001 | Speicherfundament          | Objektspeicher         | S3-kompatibel (MinIO)  | ✅    | [→](adr/ADR-001-object-storage.md) |
+| ADR-002 | Vektorformat               | Primärformat           | GeoParquet             | ✅    | [→](adr/ADR-002-vector-format-geoparquet.md) |
+| ADR-003 | Rasterformat               | Primärformat           | COG                    | ✅    | [→](adr/ADR-003-raster-format-cog.md) |
+| ADR-004 | Punktwolkenformat          | Primärformat           | COPC                   | ✅    | [→](adr/ADR-004-pointcloud-copc.md) |
+| ADR-005 | Tabellenformat             | Transaktional          | Iceberg / Delta Lake   | 🔄    | [→](adr/ADR-005-table-format.md) |
+| ADR-006 | Räumlicher Katalog         | Entdeckung             | STAC                   | ✅    | [→](adr/ADR-006-data-catalog.md) |
+| ADR-006 | Technischer Katalog        | Lineage & Metadaten    | Offen                  | 🔄    | [→](adr/ADR-006-data-catalog.md) |
+| ADR-007 | Verarbeitungs-Engine       | Batch / Groß           | Spark + Sedona         | 🔄    | [→](adr/ADR-007-processing-engine.md) |
+| ADR-007 | Verarbeitungs-Engine       | Analytisch             | DuckDB + Spatial       | ✅    | [→](adr/ADR-007-processing-engine.md) |
+| ADR-008 | Partitionierung            | Räumlich               | H3                     | ✅    | [→](adr/ADR-008-spatial-partitioning-h3.md) |
+| ADR-009 | Serving — SQL              | Analytisch             | DuckDB / SQL-Engine    | ✅    | [→](adr/ADR-009-serving-layer.md) |
+| ADR-009 | Serving — OGC              | WMS/WFS                | GeoServer / MapServer  | 🔄    | [→](adr/ADR-009-serving-layer.md) |
+| ADR-009 | Serving — Kacheln          | Vektor                 | Martin / pg_tileserv   | 🔄    | [→](adr/ADR-009-serving-layer.md) |
+| ADR-009 | Serving — Raster           | COG-Tiles              | TiTiler                | ✅    | [→](adr/ADR-009-serving-layer.md) |
+| ADR-009 | Serving — STAC             | API                    | stac-fastapi           | ✅    | [→](adr/ADR-009-serving-layer.md) |
+| ADR-010 | Orchestrierung             | Pipeline-Management    | Prefect                | ✅    | [→](adr/ADR-010-pipeline-orchestration.md) |
+| ADR-011 | Infrastruktur-Substrat     | PoC / MVP              | k3s lokal + GitLab     | ✅    | [→](adr/ADR-011-infra-substrate.md) |
 
 ## 8.1 Technologie-Stack-Übersicht (konsolidiert)
 
@@ -55,7 +55,7 @@ Jede ADR wird als eigenständige Datei im [`adr/`](../adr/) Verzeichnis geführt
 | Serving — Kacheln     | Vektor              | Martin / pg_tileserv    | 🔄    |
 | Serving — Raster      | COG-Tiles           | TiTiler                 | ✅    |
 | Serving — STAC        | API                 | stac-fastapi            | ✅    |
-| Orchestrierung        | Pipeline-Management | Prefect / Airflow       | ⏳    |
+| Orchestrierung        | Pipeline-Management | Prefect                 | ✅    |
 | Infrastruktur-Substrat | PoC / MVP          | k3s lokal + GitLab      | ✅    |
 
 ## 8.2 Offene Technologieentscheidungen
@@ -67,5 +67,4 @@ Die folgenden Entscheidungen sind noch ausstehend und müssen spätestens zum En
 | ADR-005 | Iceberg vs. Delta Lake             | Wahl der Query-Engine   | Ende Phase 1  |
 | ADR-007 | Spark vs. Dask als primäre Engine  | Infrastrukturentscheidung | Ende Phase 1 |
 | ADR-009 | OGC-Server: GeoServer vs. MapServer | Anforderungen FüInfoSys | Phase 2 Start |
-| ADR-010 | Pipeline-Orchestrierung            | Teamgröße und Infrastruktur | Ende Phase 1 |
 | —       | Technischer Metadatenkatalog       | Evaluierung in Phase 1  | Ende Phase 1  |

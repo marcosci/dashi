@@ -45,11 +45,11 @@ make smoke           # Run Gate-1 acceptance checks
 
 ## Current State
 
-**Not yet bootstrapped.** This directory is a scaffold plan. See [PHASE-0-ROADMAP.md](../docs/PHASE-0-ROADMAP.md) for sequence.
+**Not yet bootstrapped.** This directory is a scaffold plan. See [PHASE-0-ROADMAP.md](../PHASE-0-ROADMAP.md) for sequence.
 
 ## Related Spec
 
-- Architecture: [docs/07-logical-architecture.md](../docs/07-logical-architecture.md)
-- Requirements in scope: F-01, F-03, F-05, F-07, F-09, F-10, F-11, F-12, F-14, F-16, F-20 — see [docs/INDEX.md](../docs/INDEX.md)
+- Architecture: [docs/07-logical-architecture.md](../07-logical-architecture.md)
+- Requirements in scope: F-01, F-03, F-05, F-07, F-09, F-10, F-11, F-12, F-14, F-16, F-20 — see [docs/id-reference.md](../id-reference.md)
 - Substrate decision: [adr/ADR-011-infra-substrate.md](../adr/ADR-011-infra-substrate.md)
-- Gate-1 acceptance: [docs/09-phases.md](../docs/09-phases.md#abnahmekriterien--gate-1)
+- Gate-1 acceptance: [docs/09-phases.md](../09-phases.md#abnahmekriterien--gate-1)

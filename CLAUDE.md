@@ -18,7 +18,7 @@ This repo is the **living architecture specification** for a military-grade clou
 README.md                    → repo map, quick nav
 CLAUDE.md (this file)        → agent rules
 docs/NN-*.md                 → one chapter per file, mirrors original PDF structure
-docs/INDEX.md                → ID lookup (F-NN / NF-NN / W-NN / ADR-NNN / R-NN)
+docs/id-reference.md                → ID lookup (F-NN / NF-NN / W-NN / ADR-NNN / R-NN)
 docs/GLOSSARY.md             → acronyms + domain terms
 adr/ADR-NNN-*.md             → one Architecture Decision Record per file
 source/                      → archived original PDF (read-only, historical)
@@ -45,8 +45,8 @@ When asked to edit "chapter 7" or "ADR-03", go straight to the numbered file.
 ## Review Checklist Before Committing
 
 - [ ] All IDs unique and sequential
-- [ ] ADR status badge consistent across all four surfaces (ADR file, chapter 8 overview, README, `docs/INDEX.md`)
-- [ ] New requirements/ADRs/risks are also listed in `docs/INDEX.md`
+- [ ] ADR status badge consistent across all four surfaces (ADR file, chapter 8 overview, README, `docs/id-reference.md`)
+- [ ] New requirements/ADRs/risks are also listed in `docs/id-reference.md`
 - [ ] Open questions have a `Verantwortlich` and `Benötigt bis`
 - [ ] No placeholders silently resolved
 - [ ] Table column count matches header everywhere
