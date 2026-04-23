@@ -34,15 +34,19 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 | H3 | K8s NetworkPolicies: ingress in `miso-platform` nur aus `miso-data` und `miso-serving`; egress aus `miso-serving` nur zu RustFS und stac-fastapi | F-23 |
 | H4 | Secret-Rotation-Runbook: wie rotiert man RustFS Root-Credential + mirrorte Client-Credentials | [R-14](id-reference.md#risks-r-01-r-18) |
 
-### Strang I — Beobachtbarkeit
+### Strang I — Beobachtbarkeit ✅ (Grundplattform)
 
-| Schritt | Output | Anforderung |
-|---------|--------|-------------|
-| I1 | Prometheus Operator in `miso-monitoring` Namespace installiert | NF-16 |
-| I2 | ServiceMonitors für RustFS, pgstac Postgres, stac-fastapi, DuckDB-Endpoint, TiTiler, Prefect | NF-16 |
-| I3 | Grafana Dashboards: Ingest-Throughput, Pipeline-Fehlerrate, Tile-Latenz, DuckDB-Query-Latenz, STAC-Item-Zuwachs | NF-16, NF-17 |
-| I4 | Alert-Regeln: Pipeline-Fehlerrate > 5 % über 30 min, Serving-5xx > 1 %, PVC-Füllgrad > 80 % | NF-16 |
-| I5 | Audit-Log-Sammlung (vector.dev oder Loki) für alle API-Zugriffe auf stac-fastapi, duckdb-endpoint, titiler | NF-10 |
+**Status:** Core-Stack abgeschlossen 2026-04-23. Smoke: [`poc/smoke/monitoring.sh`](https://github.com/marcosci/dashi/blob/main/poc/smoke/monitoring.sh) — 8 Checks grün. App-Level-Exporter (I2) + Audit-Logs (I5) bleiben offen.
+
+| Schritt | Output | Stand |
+|---------|--------|:-----:|
+| I1 | Prometheus (operator-free, 7-Tage-Retention) + kube-state-metrics + Grafana im Namespace `miso-monitoring` | ✅ |
+| I2 | Scrape-Discovery via Pod-Annotations `prometheus.io/scrape: true` — Anwendungs-Exporter (postgres_exporter, RustFS Prometheus endpoint, Request-Metriken auf duckdb-endpoint / titiler-endpoint) sind Phase-2-Erweiterungen | ⏳ teilweise |
+| I3 | Grafana-Dashboard `dashi · Platform Overview` pre-provisioniert: Pods Running/Crash, PVC-Fill, Namespace-Count, Restart-Trend, CPU + Memory je Namespace | ✅ |
+| I4 | PrometheusRules: `PodCrashLoop`, `DashiPodDown`, `PVCFull`, `DashiIngestFlowFailure` | ✅ |
+| I5 | Audit-Log-Sammlung (Loki / Vector) | ⏳ Phase 3 |
+
+Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `miso-*` Namespaces via `kube_pod_info` sichtbar, 4 Alert-Rules geladen.
 
 ### Strang J — OGC-Dienste (F-21, F-22)
 

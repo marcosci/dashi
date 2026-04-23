@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: miso-monitoring
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - kube-state-metrics.yaml
+  - prometheus.yaml
+  - grafana.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: miso
+    includeSelectors: false

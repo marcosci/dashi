@@ -1,0 +1,198 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: grafana-admin
+  namespace: miso-monitoring
+type: Opaque
+stringData:
+  GF_SECURITY_ADMIN_USER: admin
+  GF_SECURITY_ADMIN_PASSWORD: CHANGE_ME_GRAFANA_ADMIN
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: miso-monitoring
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.miso-monitoring.svc.cluster.local:9090
+        isDefault: true
+        editable: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: miso-monitoring
+data:
+  provider.yaml: |
+    apiVersion: 1
+    providers:
+      - name: dashi
+        orgId: 1
+        folder: dashi
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: miso-monitoring
+data:
+  dashi-platform.json: |
+    {
+      "title": "dashi · Platform Overview",
+      "schemaVersion": 38,
+      "version": 1,
+      "refresh": "30s",
+      "tags": ["dashi", "platform"],
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Pods Running",
+          "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+          "targets": [{"expr": "sum(kube_pod_status_phase{namespace=~\"miso-.*\", phase=\"Running\"})", "refId": "A"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#c8821f"}, "unit": "short"}}
+        },
+        {
+          "type": "stat",
+          "title": "Pods CrashLooping",
+          "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+          "targets": [{"expr": "sum(kube_pod_container_status_waiting_reason{namespace=~\"miso-.*\", reason=\"CrashLoopBackOff\"})", "refId": "A"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#b8421f"}, "unit": "short"}}
+        },
+        {
+          "type": "stat",
+          "title": "PVC Used %",
+          "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+          "targets": [{"expr": "max(1 - kubelet_volume_stats_available_bytes / kubelet_volume_stats_capacity_bytes) * 100", "refId": "A"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "#3d5a3a", "value": null}, {"color": "#c8821f", "value": 70}, {"color": "#b8421f", "value": 90}]}, "unit": "percent"}}
+        },
+        {
+          "type": "stat",
+          "title": "Namespaces (miso-*)",
+          "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+          "targets": [{"expr": "count(count by (namespace) (kube_namespace_created{namespace=~\"miso-.*\"}))", "refId": "A"}],
+          "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#3d5a3a"}, "unit": "short"}}
+        },
+        {
+          "type": "timeseries",
+          "title": "Pod restarts (last hour)",
+          "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+          "targets": [{"expr": "sum by (namespace) (increase(kube_pod_container_status_restarts_total{namespace=~\"miso-.*\"}[1h]))", "refId": "A", "legendFormat": "{{namespace}}"}]
+        },
+        {
+          "type": "timeseries",
+          "title": "Container CPU (by namespace)",
+          "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+          "targets": [{"expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"miso-.*\",container!=\"\"}[5m]))", "refId": "A", "legendFormat": "{{namespace}}"}]
+        },
+        {
+          "type": "timeseries",
+          "title": "Container memory RSS (by namespace)",
+          "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+          "targets": [{"expr": "sum by (namespace) (container_memory_working_set_bytes{namespace=~\"miso-.*\",container!=\"\"})", "refId": "A", "legendFormat": "{{namespace}}"}],
+          "fieldConfig": {"defaults": {"unit": "bytes"}}
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: miso-monitoring
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/part-of: miso
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: grafana
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.4.0
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: grafana-admin
+          env:
+            - name: GF_AUTH_ANONYMOUS_ENABLED
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: "Viewer"
+            - name: GF_USERS_ALLOW_SIGN_UP
+              value: "false"
+            - name: GF_INSTALL_PLUGINS
+              value: ""
+          volumeMounts:
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
+            - name: data
+              mountPath: /var/lib/grafana/data
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: miso-monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: grafana
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

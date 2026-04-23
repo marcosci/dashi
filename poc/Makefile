@@ -1,8 +1,8 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
-        ingest-sample smoke teardown docs-serve docs-build
+        monitoring-up ingest-sample smoke teardown docs-serve docs-build
 
 help:
-	@echo "MISO PoC targets"
+	@echo "dashi PoC targets"
 	@echo ""
 	@echo "  Cluster"
 	@echo "    k3s-up          Start local k3d cluster (macOS/Windows) or native k3s (Linux)"
@@ -12,7 +12,8 @@ help:
 	@echo "    storage-deploy    Deploy RustFS + create zone buckets (landing/processed/curated)"
 	@echo "    catalog-deploy  Deploy stac-fastapi + PostgreSQL"
 	@echo "    serving-deploy  Deploy TiTiler + DuckDB query endpoint"
-	@echo "    prefect-up      Start Prefect server"
+	@echo "    prefect-up      Start Prefect server + worker (K8s work pool)"
+	@echo "    monitoring-up   Deploy Prometheus + Grafana + kube-state-metrics"
 	@echo ""
 	@echo "  Data"
 	@echo "    ingest-sample   Run ingestion pipeline against poc/sample-data/"
@@ -62,6 +63,20 @@ catalog-deploy:
 
 serving-deploy:
 	@bash scripts/serving-deploy.sh
+
+monitoring-up:
+	@bash scripts/apply-with-secret.sh manifests/monitoring grafana.yaml CHANGE_ME_GRAFANA_ADMIN
+	@echo ""
+	@echo "→ Waiting for Prometheus"
+	kubectl -n miso-monitoring rollout status deployment/prometheus --timeout=180s
+	@echo "→ Waiting for kube-state-metrics"
+	kubectl -n miso-monitoring rollout status deployment/kube-state-metrics --timeout=120s
+	@echo "→ Waiting for Grafana"
+	kubectl -n miso-monitoring rollout status deployment/grafana --timeout=180s
+	@echo ""
+	@echo "✓ Monitoring up. Port-forwards:"
+	@echo "  kubectl -n miso-monitoring port-forward svc/prometheus 9090:9090"
+	@echo "  kubectl -n miso-monitoring port-forward svc/grafana    3000:3000"
 
 prefect-up:
 	@bash scripts/apply-with-secret.sh manifests/prefect statefulset-postgres.yaml CHANGE_ME_PREFECT_DB
