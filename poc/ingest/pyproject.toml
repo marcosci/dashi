@@ -5,7 +5,7 @@ description = "MISO ingestion + standardization pipeline — generic geo-format 
 requires-python = ">=3.11"
 authors = [
   { name = "Marco Sciaini", email = "marco@kaldera.dev" },
-  { name = "Johannes Schlundt" },
+  { name = "Johannes Schlund" },
 ]
 dependencies = [
   "geopandas>=1.0",

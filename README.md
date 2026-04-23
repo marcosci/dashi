@@ -9,7 +9,7 @@
 ## Status
 
 - **Phase:** Phase 0 — PoC implementation on local k3s (see [docs/PHASE-0-ROADMAP.md](docs/PHASE-0-ROADMAP.md))
-- **Co-Owners:** Marco Sciaini + Johannes Schlundt (opendefense)
+- **Co-Owners:** Marco Sciaini + Johannes Schlund (opendefense)
 - **Target:** Operational readiness within 18 months (3 phases) — military accreditation track deferred
 - **Domains:** Aufklärung & ISR · Missionsplanung & C2 · Logistik & Versorgung · **Gelände & Umwelt** (PoC focus)
 

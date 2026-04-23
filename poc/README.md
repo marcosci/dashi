@@ -2,7 +2,7 @@
 
 Local k3s-based Proof of Concept validating the zone architecture end-to-end with real sample data.
 
-**Co-Owners:** Marco Sciaini + Johannes Schlundt · **Substrate:** k3s (lokal) + GitHub Actions + Pages · **Scope:** Gelände & Umwelt, ~500MB–1GB sample data
+**Co-Owners:** Marco Sciaini + Johannes Schlund · **Substrate:** k3s (lokal) + GitHub Actions + Pages · **Scope:** Gelände & Umwelt, ~500MB–1GB sample data
 
 ## Planned Layout
 
