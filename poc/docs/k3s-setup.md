@@ -13,7 +13,7 @@ Step-by-step setup for a local Kubernetes cluster running k3s (or k3s-in-Docker)
 | Docker | Container runtime (macOS/Windows only) | `brew install --cask docker` or [OrbStack](https://orbstack.dev) | — | Docker Desktop |
 | k3d | k3s-in-Docker wrapper (macOS/Windows only) | `brew install k3d` | — | `choco install k3d` |
 | kubectl | Kubernetes CLI | `brew install kubectl` | package manager | `choco install kubernetes-cli` |
-| helm | Package manager (used for MinIO etc.) | `brew install helm` | [script](https://helm.sh/docs/intro/install/) | `choco install kubernetes-helm` |
+| helm | Package manager (used for RustFS etc.) | `brew install helm` | [script](https://helm.sh/docs/intro/install/) | `choco install kubernetes-helm` |
 | make | Task runner | preinstalled | preinstalled | WSL2 or Git-Bash |
 
 Verify:
@@ -79,7 +79,7 @@ Convention:
 
 | Namespace | Contents |
 |-----------|----------|
-| `miso-platform` | MinIO, monitoring, shared platform services |
+| `miso-platform` | RustFS, monitoring, shared platform services |
 | `miso-catalog` | stac-fastapi + its PostgreSQL backend |
 | `miso-serving` | TiTiler, DuckDB-query endpoint |
 | `miso-data` | Prefect server + workers, pipeline-scoped secrets |
@@ -89,7 +89,7 @@ Convention:
 ## 4. Next: deploy the platform
 
 ```bash
-make minio-deploy       # Strang B2 in the roadmap
+make storage-deploy     # Strang B2 in the roadmap
 make catalog-deploy     # Strang D1
 make serving-deploy     # Strang E1
 make prefect-up         # Strang F1
@@ -123,9 +123,9 @@ On macOS/Windows this deletes the k3d cluster (data wiped). On Linux it runs the
 
 ## Resource budget
 
-For a full PoC deployment (MinIO + stac-fastapi + Postgres + TiTiler + DuckDB endpoint + Prefect) expect:
+For a full PoC deployment (RustFS + stac-fastapi + Postgres + TiTiler + DuckDB endpoint + Prefect) expect:
 
 - ~4 vCPU, ~6 GB RAM idle
-- ~10 GB disk (mostly MinIO sample data + Postgres)
+- ~10 GB disk (mostly RustFS sample data + Postgres)
 
 Adjust Docker Desktop / OrbStack limits accordingly.

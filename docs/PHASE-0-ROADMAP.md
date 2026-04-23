@@ -44,7 +44,7 @@
 | Schritt | Output | Dauer |
 |---------|--------|-------|
 | B1 | k3s lokal installiert, `kubectl` Zugriff | 0,5 Tage |
-| B2 | MinIO als Helm-Chart / Manifest deployed, Buckets für 3 Zonen angelegt (`landing` / `processed` / `curated`) | 1 Tag |
+| B2 | RustFS als Helm-Chart / Manifest deployed, Buckets für 3 Zonen angelegt (`landing` / `processed` / `curated`) | 1 Tag |
 | B3 | Namespaces + RBAC: Platform-Service-Account mit Schreibrecht je Zone | 1 Tag |
 
 ### Strang C — Ingestion & Standardisierung
@@ -94,7 +94,7 @@ gantt
     A3 CI baseline          :a3, after a2, 1
     section Strang B — k3s
     B1 k3s install          :b1, 1, 1
-    B2 MinIO deploy         :b2, after b1, 1
+    B2 RustFS deploy         :b2, after b1, 1
     B3 RBAC + buckets       :b3, after b2, 1
     section Strang C — Ingestion
     C1 load samples         :c1, after b3, 1

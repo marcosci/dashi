@@ -13,7 +13,7 @@ poc/
 ├── sample-data/             # Local sample data — .gitignored, NOT committed
 │   └── .gitkeep
 ├── manifests/               # k8s manifests / Helm values
-│   ├── minio/
+│   ├── rustfs/              # S3-compatible object storage (see ADR-001)
 │   ├── stac-fastapi/
 │   ├── titiler/
 │   ├── duckdb-endpoint/
@@ -34,8 +34,8 @@ poc/
 ## Bootstrap (once Phase 0 begins)
 
 ```bash
-make k3s-up          # Install k3s, configure kubectl
-make minio-deploy    # Deploy MinIO + create zone buckets
+make k3s-up          # Install k3s/k3d, configure kubectl
+make storage-deploy  # Deploy RustFS + create zone buckets (landing/processed/curated)
 make catalog-deploy  # Deploy stac-fastapi + PostgreSQL
 make serving-deploy  # Deploy TiTiler + DuckDB endpoint
 make prefect-up      # Start Prefect server

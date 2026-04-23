@@ -1,4 +1,4 @@
-.PHONY: help k3s-up k3s-down minio-deploy catalog-deploy serving-deploy prefect-up \
+.PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         ingest-sample smoke teardown docs-serve docs-build
 
 help:
@@ -9,7 +9,7 @@ help:
 	@echo "    k3s-down        Tear cluster down"
 	@echo ""
 	@echo "  Platform"
-	@echo "    minio-deploy    Deploy MinIO + create zone buckets"
+	@echo "    storage-deploy    Deploy RustFS + create zone buckets (landing/processed/curated)"
 	@echo "    catalog-deploy  Deploy stac-fastapi + PostgreSQL"
 	@echo "    serving-deploy  Deploy TiTiler + DuckDB query endpoint"
 	@echo "    prefect-up      Start Prefect server"
@@ -33,8 +33,8 @@ k3s-up:
 k3s-down:
 	@bash scripts/k3s-down.sh $(CLUSTER_NAME)
 
-minio-deploy:
-	@echo "TODO: apply manifests/minio/"
+storage-deploy:
+	@echo "TODO: apply manifests/rustfs/"
 	@exit 1
 
 catalog-deploy:

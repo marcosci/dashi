@@ -68,11 +68,11 @@ Single lookup for every identified requirement, workload, ADR, open question, an
 
 Details: [§5.3](05-requirements.md#53-workload-katalog)
 
-## Architecture Decision Records (ADR-001 – ADR-010)
+## Architecture Decision Records (ADR-001 – ADR-011)
 
 | ID | Bereich | Entscheidung | Status | Datei |
 |----|---------|--------------|:------:|-------|
-| ADR-001 | Speicherfundament | S3-kompatibler Objektspeicher | ✅ | [→](adr/ADR-001-object-storage.md) |
+| ADR-001 | Speicherfundament | RustFS (S3-kompatibel) | ✅ | [→](adr/ADR-001-object-storage.md) |
 | ADR-002 | Vektorformat | GeoParquet | ✅ | [→](adr/ADR-002-vector-format-geoparquet.md) |
 | ADR-003 | Rasterformat | COG + Zarr | ✅ | [→](adr/ADR-003-raster-format-cog.md) |
 | ADR-004 | Punktwolkenformat | COPC | ✅ | [→](adr/ADR-004-pointcloud-copc.md) |

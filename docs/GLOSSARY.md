@@ -105,7 +105,8 @@ Abkürzungen und Fachbegriffe, die in dieser Spezifikation verwendet werden.
 | **pg_tileserv** | PostGIS-basierter Vector-Tile-Server |
 | **TiTiler** | FastAPI-basierter COG-Tile-Dienst |
 | **stac-fastapi** | FastAPI-Implementierung des STAC-API-Standards |
-| **MinIO** | S3-kompatibler on-premise Objektspeicher |
+| **RustFS** | Rust-basierter, MinIO-API-kompatibler S3-Objektspeicher (Apache 2.0); primäre Speicherwahl im PoC, siehe [ADR-001](adr/ADR-001-object-storage.md) |
+| **MinIO** | S3-kompatibler on-premise Objektspeicher (Go-basiert, AGPL, 2025 Community-Edition ausgedünnt — in MISO durch RustFS ersetzt) |
 
 ## KI / ML
 

@@ -57,4 +57,4 @@ kubectl get nodes
 
 echo ""
 echo "✓ Cluster '${CLUSTER_NAME}' ready."
-echo "  Next: make minio-deploy"
+echo "  Next: make storage-deploy"

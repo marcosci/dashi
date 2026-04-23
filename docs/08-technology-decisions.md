@@ -18,7 +18,7 @@ Jede ADR wird als eigenständige Datei im [`adr/`](adr/) Verzeichnis geführt. D
 
 | ID      | Bereich                    | Entscheidung           | Technologie            | Status | Detail |
 |---------|----------------------------|------------------------|------------------------|:------:|--------|
-| ADR-001 | Speicherfundament          | Objektspeicher         | S3-kompatibel (MinIO)  | ✅    | [→](adr/ADR-001-object-storage.md) |
+| ADR-001 | Speicherfundament          | Objektspeicher         | S3-kompatibel (RustFS) | ✅    | [→](adr/ADR-001-object-storage.md) |
 | ADR-002 | Vektorformat               | Primärformat           | GeoParquet             | ✅    | [→](adr/ADR-002-vector-format-geoparquet.md) |
 | ADR-003 | Rasterformat               | Primärformat           | COG                    | ✅    | [→](adr/ADR-003-raster-format-cog.md) |
 | ADR-004 | Punktwolkenformat          | Primärformat           | COPC                   | ✅    | [→](adr/ADR-004-pointcloud-copc.md) |
@@ -40,7 +40,7 @@ Jede ADR wird als eigenständige Datei im [`adr/`](adr/) Verzeichnis geführt. D
 
 | Bereich               | Entscheidung        | Technologie             | Status |
 |-----------------------|---------------------|-------------------------|:------:|
-| Speicherfundament     | Objektspeicher      | S3-kompatibel (MinIO o.ä.) | ✅ |
+| Speicherfundament     | Objektspeicher      | S3-kompatibel (RustFS)  | ✅    |
 | Vektorformat          | Primärformat        | GeoParquet              | ✅    |
 | Rasterformat          | Primärformat        | COG                     | ✅    |
 | Punktwolkenformat     | Primärformat        | COPC                    | ✅    |

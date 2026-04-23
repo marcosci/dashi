@@ -12,7 +12,7 @@ Jede Entscheidung ist als eigenständige ADR-Datei versioniert. Übersicht mit S
 
 | ID | Bereich | Entscheidung | Status |
 |----|---------|--------------|:------:|
-| [ADR-001](adr/ADR-001-object-storage.md) | Speicherfundament | S3-kompatibler Objektspeicher (MinIO) | ✅ |
+| [ADR-001](adr/ADR-001-object-storage.md) | Speicherfundament | RustFS (S3-kompatibel, Apache 2.0) | ✅ |
 | [ADR-002](adr/ADR-002-vector-format-geoparquet.md) | Vektorformat | GeoParquet | ✅ |
 | [ADR-003](adr/ADR-003-raster-format-cog.md) | Rasterformat | Cloud Optimized GeoTIFF (+ Zarr) | ✅ |
 | [ADR-004](adr/ADR-004-pointcloud-copc.md) | Punktwolkenformat | COPC | ✅ |

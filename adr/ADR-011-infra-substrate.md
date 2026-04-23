@@ -30,8 +30,8 @@ Die Wahl muss:
 
 ## Konsequenzen
 
-- Alle Plattformkomponenten (MinIO, stac-fastapi, TiTiler, DuckDB-Query-Endpoint, Pipeline-Orchestrator) werden als K8s-Manifests gepackt
-- Persistent Volumes für MinIO werden lokal gemappt — produktives Tiering (ADR-001 Konsequenz) bleibt offen
+- Alle Plattformkomponenten (RustFS, stac-fastapi, TiTiler, DuckDB-Query-Endpoint, Pipeline-Orchestrator) werden als K8s-Manifests gepackt
+- Persistent Volumes für RustFS werden lokal gemappt — produktives Tiering (ADR-001 Konsequenz) bleibt offen
 - GitLab CI/CD pipelines verifizieren Manifest-Rendering und Integrationstests vor Merge
 - Keine Docker-Compose-Only-Tooling im Repo — entweder K8s-Manifest oder GitLab-Job
 - Migrationspfad nach Phase 3 in eine produktive militärische K8s-Umgebung bleibt offen, aber die Manifests sind portierbar
@@ -40,5 +40,5 @@ Die Wahl muss:
 
 - Helm vs. reines kustomize — Entscheidung bis zum ersten Deployment
 - Ingress-Controller (Traefik als k3s-Default behalten oder austauschen)
-- Storage-Class für MinIO PVs in der Zielumgebung
+- Storage-Class für RustFS PVs in der Zielumgebung
 - Secrets-Management (sealed-secrets / vault / GitLab CI variables) — Phase 2 Entscheidung
