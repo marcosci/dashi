@@ -82,13 +82,14 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 | ADR-008 | Partitionierung | H3 | ✅ | [→](../adr/ADR-008-spatial-partitioning-h3.md) |
 | ADR-009 | Serving | Modularer Ansatz | 🔄 | [→](../adr/ADR-009-serving-layer.md) |
 | ADR-010 | Orchestrierung | Prefect / Airflow offen | ⏳ | [→](../adr/ADR-010-pipeline-orchestration.md) |
+| ADR-011 | Infra-Substrat | k3s lokal + GitLab | ✅ | [→](../adr/ADR-011-infra-substrate.md) |
 
 ## Open Questions (F-01 – F-10, question register)
 
 | ID | Kurz | Bereich | Status | Benötigt bis |
 |----|------|---------|:------:|--------------|
 | F-01 | Klassifizierungsstufen + Zonentrennung | Sicherheit | 🔴 | Ende Phase 1 |
-| F-02 | Infrastruktur (Cloud/on-prem/hybrid) | Infrastruktur | 🔴 | Monat 1 |
+| F-02 | Infrastruktur (Cloud/on-prem/hybrid) — geklärt via ADR-011 | Infrastruktur | 🟢 | Monat 1 |
 | F-03 | Echtzeit-Anforderungen C2 | C2 | 🟡 | Ende Phase 1 |
 | F-04 | Externe Systeme / Bündnispartner | Interoperabilität | 🟡 | Phase 2 Start |
 | F-05 | Rohdaten-Archivierungsfristen | Governance / Recht | 🟡 | Ende Phase 1 |

@@ -6,9 +6,10 @@ Architecture, planning, and delivery workspace for the **CldGIS Spatial Data Lak
 
 ## Status
 
-- **Phase:** Pre-Phase 1 (documentation and stakeholder alignment)
-- **Target:** Operational readiness within 18 months (3 phases)
-- **Domains:** Aufklärung & ISR · Missionsplanung & C2 · Logistik & Versorgung · Gelände & Umwelt
+- **Phase:** Phase 0 — PoC implementation on local k3s (see [docs/PHASE-0-ROADMAP.md](docs/PHASE-0-ROADMAP.md))
+- **Owner:** Marco Sciaini (opendefense)
+- **Target:** Operational readiness within 18 months (3 phases) — military accreditation track deferred
+- **Domains:** Aufklärung & ISR · Missionsplanung & C2 · Logistik & Versorgung · **Gelände & Umwelt** (PoC focus)
 
 ## Repository Layout
 
@@ -30,6 +31,7 @@ cldgis-geodatalake/
 │   ├── 09-phases.md
 │   └── 10-risks-open-questions.md
 ├── source/                        # Archived original PDF for traceability
+├── poc/                           # Phase 0 PoC scaffold — k3s manifests, ingest, flows
 ├── adr/                           # Architecture Decision Records (per-decision)
 │   ├── ADR-001-object-storage.md
 │   ├── ADR-002-vector-format-geoparquet.md

@@ -14,7 +14,7 @@ Zusätzlich wird pro Domäne ein **Workload-Katalog** geführt, der die konkrete
 
 | ID   | Anforderung | Priorität |
 |------|-------------|-----------|
-| F-01 | Das System muss Geodaten aus heterogenen Quellformaten (GeoTIFF, Shapefile, GeoPackage, GeoJSON, LAZ, CSV mit Koordinaten) aufnehmen können | Hoch |
+| F-01 | Das System muss Geodaten aus heterogenen Quellformaten (GeoTIFF, Shapefile, GeoPackage, GeoJSON, KML, LAZ, CSV mit Koordinaten) aufnehmen können | Hoch |
 | F-02 | Das System muss sowohl batch-basierte als auch kontinuierliche Datenlieferungen unterstützen | Hoch |
 | F-03 | Jede Datenlieferung muss automatisch auf Vollständigkeit, Formatkonformität und Geometriegültigkeit geprüft werden | Hoch |
 | F-04 | Abgelehnte Lieferungen müssen mit strukturiertem Fehlerprotokoll an den Datenlieferanten zurückgemeldet werden | Mittel |

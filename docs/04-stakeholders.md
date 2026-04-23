@@ -6,29 +6,31 @@ Im militärischen Kontext ist die Klärung von Verantwortlichkeiten keine Formal
 
 ## Rollenmodell
 
+> **Besetzungsstand (2026-04-23, Pre-Phase-1 / PoC):** Marco Sciaini hält alle aktiven Rollen in Personalunion, solange die Initiative als interne Entwicklung im opendefense-Kontext betrieben wird. Rollenverteilung auf mehrere Personen erfolgt mit Phase-2-Übergabe in den Produktivbetrieb.
+
 ### Initiative Owner / Auftraggeber
 Trägt die organisatorische Verantwortung für die Initiative. Trifft finale Entscheidungen bei Eskalationen, sichert Ressourcen und Budget, und gibt die Phasenübergänge frei.
 
-| Rolle            | Name / Einheit                   | Kontakt    |
-|------------------|----------------------------------|------------|
-| Initiative Owner | [Name / Dienstgrad / Einheit]    | [Kontakt]  |
+| Rolle            | Name / Einheit                   | Kontakt             |
+|------------------|----------------------------------|---------------------|
+| Initiative Owner | Marco Sciaini / opendefense      | marco@kaldera.dev   |
 
 ### Platform Architect
 Verantwortet die technische Gesamtarchitektur der Plattform. Trifft und dokumentiert Architekturentscheidungen, bewertet Technologieoptionen, definiert Zonenverträge und Schnittstellenstandards. Eskalationspunkt für technische Konflikte zwischen Teams.
 
-| Rolle              | Name / Einheit | Kontakt    |
-|--------------------|----------------|------------|
-| Platform Architect | [Name]         | [Kontakt]  |
+| Rolle              | Name / Einheit               | Kontakt             |
+|--------------------|------------------------------|---------------------|
+| Platform Architect | Marco Sciaini / opendefense  | marco@kaldera.dev   |
 
 ### Platform Team
 Verantwortlich für Aufbau, Betrieb und Weiterentwicklung der Plattforminfrastruktur. Stellt die Zonenarchitektur, Pipelines, den Katalog und die Serving-Schicht bereit.
 
-| Rolle                   | Name   | Kontakt   |
-|-------------------------|--------|-----------|
-| Platform Lead           | [Name] | [Kontakt] |
-| Infrastructure Engineer | [Name] | [Kontakt] |
-| Data Engineer           | [Name] | [Kontakt] |
-| Security Engineer       | [Name] | [Kontakt] |
+| Rolle                   | Name                         | Kontakt             |
+|-------------------------|------------------------------|---------------------|
+| Platform Lead           | Marco Sciaini                | marco@kaldera.dev   |
+| Infrastructure Engineer | Marco Sciaini (PoC)          | marco@kaldera.dev   |
+| Data Engineer           | Marco Sciaini (PoC)          | marco@kaldera.dev   |
+| Security Engineer       | [offen — nach Phase 2]       | [tbd]               |
 
 ### Domänen-Dateneigentümer (Data Owner)
 Pro Domäne wird ein verantwortlicher Dateneigentümer benannt. Dieser ist zuständig für die inhaltliche Korrektheit der Daten seiner Domäne, die Einhaltung von Qualitätsstandards, die Freigabe von Schemaänderungen und die Benennung von Datenlieferanten.

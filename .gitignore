@@ -12,6 +12,10 @@ node_modules/
 drafts/
 scratch/
 
+# PoC sample data — never commit source material
+poc/sample-data/*
+!poc/sample-data/.gitkeep
+
 # Large binary attachments shouldn't sit in the spec repo
 *.pdf
 *.xlsx
