@@ -9,7 +9,7 @@
 ## Ausgangslage (was geklärt ist)
 
 - **Owner + Architect + Lead:** Marco Sciaini in Personalunion (siehe [§4](04-stakeholders.md))
-- **Infrastruktur:** lokales k3s, opendefense GitLab für CI/CD (siehe [ADR-011](adr/ADR-011-infra-substrate.md))
+- **Infrastruktur:** lokales k3s, GitHub Repo (marcosci/dashi) für CI/CD (siehe [ADR-011](adr/ADR-011-infra-substrate.md))
 - **Fokusdomäne:** Gelände & Umwelt (siehe [§9 Phase 1](09-phases.md))
 - **Sample-Datensatz:** ~500 MB–1 GB, Formate GeoTIFF, Shapefile, KML, GPKG (liefert Marco)
 - **Offene ADRs für PoC scope:**
@@ -36,8 +36,8 @@
 | Schritt | Output | Dauer |
 |---------|--------|-------|
 | A1 | `poc/` Unterverzeichnis scaffolden mit README, Struktur, Makefile | 0,5 Tage |
-| A2 | Projekt in opendefense GitLab anlegen + Initial-Push | 0,5 Tage |
-| A3 | Minimale GitLab CI (lint markdown, validate K8s manifests, build Python image) | 1 Tag |
+| A2 | Projekt in GitHub Repo (marcosci/dashi) anlegen + Initial-Push | 0,5 Tage |
+| A3 | Minimale GitHub Actions CI (lint markdown, validate K8s manifests, build Python image) | 1 Tag |
 
 ### Strang B — k3s + Objektspeicher
 
@@ -90,7 +90,7 @@ gantt
     axisFormat Woche %s
     section Strang A — Repo
     A1 poc/ scaffold        :a1, 1, 1
-    A2 GitLab project       :a2, after a1, 1
+    A2 GitHub repo       :a2, after a1, 1
     A3 CI baseline          :a3, after a2, 1
     section Strang B — k3s
     B1 k3s install          :b1, 1, 1
@@ -149,6 +149,6 @@ Abgeleitet aus §9 Phase 1 Gate-1-Tabelle, auf PoC-Scope reduziert.
 2. A1 ausführen: `poc/` Verzeichnisstruktur + README anlegen
 3. B1 ausführen: k3s lokal installieren, Sanity-Check
 4. ADR-010-Entscheidung treffen (Prefect empfohlen) und Status auf ✅ setzen
-5. GitLab-Projekt anlegen und Initial-Commit pushen
+5. GitHub-Projekt anlegen und Initial-Commit pushen
 
 Alle weiteren Strang-B/C-Schritte starten erst, wenn A1+B1 abgeschlossen sind.

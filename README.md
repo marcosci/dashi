@@ -4,7 +4,7 @@
 
 > Living document. Source of truth for architectural decisions, phase scope, open questions, and risks.
 
-**Rendered documentation:** [opendefense.gitlab.io/miso](https://opendefense.gitlab.io/miso/) _(once GitLab project exists)_
+**Rendered documentation:** [marcosci.github.io/dashi](https://marcosci.github.io/dashi/) _(activates once pushed to GitHub with Pages enabled)_
 
 ## Status
 
@@ -38,7 +38,7 @@ miso/
 ├── CLAUDE.md                      # Agent working instructions
 ├── mkdocs.yml                     # MkDocs Material site config
 ├── requirements-docs.txt          # Docs site build dependencies
-├── .gitlab-ci.yml                 # CI: site build + GitLab Pages deploy
+├── .github/workflows/docs.yml     # CI: site build + GitHub Pages deploy
 ├── docs/                          # Chapter-by-chapter architecture doc + site root
 │   ├── index.md                   # MkDocs landing page (public homepage)
 │   ├── id-reference.md            # Every F-NN / NF-NN / W-NN / ADR / R-NN lookup

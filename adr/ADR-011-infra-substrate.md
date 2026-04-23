@@ -1,4 +1,4 @@
-# ADR-011 — Infrastruktur-Substrat: lokales k3s + GitLab (opendefense)
+# ADR-011 — Infrastruktur-Substrat: lokales k3s + GitHub (marcosci/dashi)
 
 **Status:** ✅ Entschieden (PoC / Phase 1)
 
@@ -12,7 +12,7 @@ Die Wahl muss:
 - Kubernetes-Semantik abbilden (spätere Migration in militärische K8s-Infrastruktur ohne Architekturbruch)
 - Lokal auf einer Entwickler-Maschine lauffähig sein
 - Zum Produktivbetrieb kompatibel sein (keine Docker-Compose-only Pattern, die im Cluster brechen)
-- GitLab CI/CD-tauglich sein (opendefense GitLab ist die Zielplattform)
+- GitHub Actions + Pages-tauglich sein (GitHub Repo (marcosci/dashi) ist die Zielplattform)
 
 ## Bewertete Alternativen
 
@@ -26,14 +26,14 @@ Die Wahl muss:
 
 ## Entscheidung
 
-**k3s als lokales Substrat für PoC und MVP.** Entwicklung im opendefense GitLab mit CI/CD. Manifests (Helm oder reines YAML) gelten verbindlich für lokale und spätere produktive Umgebungen.
+**k3s als lokales Substrat für PoC und MVP.** Entwicklung im GitHub Repo (marcosci/dashi) mit CI/CD. Manifests (Helm oder reines YAML) gelten verbindlich für lokale und spätere produktive Umgebungen.
 
 ## Konsequenzen
 
 - Alle Plattformkomponenten (RustFS, stac-fastapi, TiTiler, DuckDB-Query-Endpoint, Pipeline-Orchestrator) werden als K8s-Manifests gepackt
 - Persistent Volumes für RustFS werden lokal gemappt — produktives Tiering (ADR-001 Konsequenz) bleibt offen
-- GitLab CI/CD pipelines verifizieren Manifest-Rendering und Integrationstests vor Merge
-- Keine Docker-Compose-Only-Tooling im Repo — entweder K8s-Manifest oder GitLab-Job
+- GitHub Actions + Pages pipelines verifizieren Manifest-Rendering und Integrationstests vor Merge
+- Keine Docker-Compose-Only-Tooling im Repo — entweder K8s-Manifest oder GitHub-Actions-Job
 - Migrationspfad nach Phase 3 in eine produktive militärische K8s-Umgebung bleibt offen, aber die Manifests sind portierbar
 
 ## Offen / Nachgelagerte Entscheidungen
@@ -41,4 +41,4 @@ Die Wahl muss:
 - Helm vs. reines kustomize — Entscheidung bis zum ersten Deployment
 - Ingress-Controller (Traefik als k3s-Default behalten oder austauschen)
 - Storage-Class für RustFS PVs in der Zielumgebung
-- Secrets-Management (sealed-secrets / vault / GitLab CI variables) — Phase 2 Entscheidung
+- Secrets-Management (sealed-secrets / vault / GitHub Actions secrets) — Phase 2 Entscheidung

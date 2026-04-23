@@ -82,7 +82,7 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 | ADR-008 | Partitionierung | H3 | ✅ | [→](adr/ADR-008-spatial-partitioning-h3.md) |
 | ADR-009 | Serving | Modularer Ansatz | 🔄 | [→](adr/ADR-009-serving-layer.md) |
 | ADR-010 | Orchestrierung | Prefect | ✅ | [→](adr/ADR-010-pipeline-orchestration.md) |
-| ADR-011 | Infra-Substrat | k3s lokal + GitLab | ✅ | [→](adr/ADR-011-infra-substrate.md) |
+| ADR-011 | Infra-Substrat | k3s lokal + GitHub | ✅ | [→](adr/ADR-011-infra-substrate.md) |
 
 ## Open Questions (F-01 – F-10, question register)
 

@@ -34,7 +34,7 @@ Jede ADR wird als eigenständige Datei im [`adr/`](adr/) Verzeichnis geführt. D
 | ADR-009 | Serving — Raster           | COG-Tiles              | TiTiler                | ✅    | [→](adr/ADR-009-serving-layer.md) |
 | ADR-009 | Serving — STAC             | API                    | stac-fastapi           | ✅    | [→](adr/ADR-009-serving-layer.md) |
 | ADR-010 | Orchestrierung             | Pipeline-Management    | Prefect                | ✅    | [→](adr/ADR-010-pipeline-orchestration.md) |
-| ADR-011 | Infrastruktur-Substrat     | PoC / MVP              | k3s lokal + GitLab     | ✅    | [→](adr/ADR-011-infra-substrate.md) |
+| ADR-011 | Infrastruktur-Substrat     | PoC / MVP              | k3s lokal + GitHub     | ✅    | [→](adr/ADR-011-infra-substrate.md) |
 
 ## 8.1 Technologie-Stack-Übersicht (konsolidiert)
 
@@ -56,7 +56,7 @@ Jede ADR wird als eigenständige Datei im [`adr/`](adr/) Verzeichnis geführt. D
 | Serving — Raster      | COG-Tiles           | TiTiler                 | ✅    |
 | Serving — STAC        | API                 | stac-fastapi            | ✅    |
 | Orchestrierung        | Pipeline-Management | Prefect                 | ✅    |
-| Infrastruktur-Substrat | PoC / MVP          | k3s lokal + GitLab      | ✅    |
+| Infrastruktur-Substrat | PoC / MVP          | k3s lokal + GitHub      | ✅    |
 
 ## 8.2 Offene Technologieentscheidungen
 

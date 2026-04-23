@@ -34,8 +34,18 @@ k3s-down:
 	@bash scripts/k3s-down.sh $(CLUSTER_NAME)
 
 storage-deploy:
-	@echo "TODO: apply manifests/rustfs/"
-	@exit 1
+	@if ! grep -q 'secret-key: CHANGE_ME_ROOT_PASSWORD' manifests/rustfs/secret.yaml 2>/dev/null; then :; \
+	  else echo "ERROR: manifests/rustfs/secret.yaml contains placeholder CHANGE_ME_ROOT_PASSWORD. Rotate before deploy."; exit 1; fi
+	kubectl apply -k manifests/rustfs
+	@echo ""
+	@echo "→ Waiting for RustFS to be Ready"
+	kubectl -n miso-platform rollout status statefulset/rustfs --timeout=180s
+	@echo ""
+	@echo "→ Waiting for bucket-init Job"
+	kubectl -n miso-platform wait --for=condition=complete job/rustfs-create-buckets --timeout=120s
+	@echo ""
+	@echo "✓ RustFS ready. Buckets: landing / processed / curated"
+	@echo "  Port-forward with: kubectl -n miso-platform port-forward svc/rustfs 9000:9000 9001:9001"
 
 catalog-deploy:
 	@echo "TODO: apply manifests/stac-fastapi/"

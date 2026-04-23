@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rustfs-create-buckets
+  namespace: miso-platform
+  labels:
+    app.kubernetes.io/part-of: miso
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rustfs-bucket-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: mc
+          image: minio/mc:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              echo "Waiting for RustFS to be reachable ..."
+              until mc alias set miso http://rustfs:9000 "$ACCESS_KEY" "$SECRET_KEY"; do
+                sleep 3
+              done
+              for bucket in landing processed curated; do
+                mc mb --ignore-existing miso/${bucket}
+                mc anonymous set none miso/${bucket}
+                echo "ensured bucket: ${bucket}"
+              done
+              echo "bucket init complete"
+          env:
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-root
+                  key: access-key
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rustfs-root
+                  key: secret-key
