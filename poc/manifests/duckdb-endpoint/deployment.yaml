@@ -31,12 +31,12 @@ spec:
             - name: RUSTFS_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rustfs-client
+                  name: dashi-rustfs-serving
                   key: access-key
             - name: RUSTFS_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rustfs-client
+                  name: dashi-rustfs-serving
                   key: secret-key
             - name: QUERY_TIMEOUT_SEC
               value: "30"

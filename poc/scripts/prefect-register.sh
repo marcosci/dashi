@@ -24,9 +24,6 @@ fi
 
 echo "→ registering flow miso-ingest/main against work pool '$POOL' with image '$IMAGE'"
 
-ACCESS=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-SECRET=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-
 cd "$REPO_ROOT/ingest"   # so Prefect records a relative entrypoint that
                          # resolves inside the image (WORKDIR /app)
 
@@ -38,22 +35,15 @@ image = "$IMAGE"
 pool = "$POOL"
 sample_path = "$SAMPLE_PATH"
 
-# NOTE (Phase-2 Strang H follow-up): Prefect's default kubernetes base job
-# template accepts env as {KEY: VALUE} but not valueFrom.secretKeyRef. For
-# PoC we inject RustFS credentials as plain values — they end up in the
-# Prefect DB. Strang H will customise the base job template to support
-# envFrom.secretRef so credentials stay on K8s-side only.
+# Strang H — RustFS credentials are baked into the work pool's base job
+# template via valueFrom.secretKeyRef (see scripts/prefect-patch-pool.sh).
+# The deployment no longer carries credentials. Run prefect-patch-pool.sh
+# once after the pool is created; this register script is idempotent after.
 job_variables = {
     "image": image,
     "image_pull_policy": "IfNotPresent",
     "namespace": "miso-data",
     "service_account_name": "prefect-worker",
-    "env": {
-        "MISO_S3_ENDPOINT":   "http://rustfs.miso-platform.svc.cluster.local:9000",
-        "MISO_STAC_URL":      "http://stac-fastapi.miso-catalog.svc.cluster.local:8080",
-        "MISO_S3_ACCESS_KEY": "$ACCESS",
-        "MISO_S3_SECRET_KEY": "$SECRET",
-    },
 }
 
 from prefect.client.schemas.schedules import CronSchedule

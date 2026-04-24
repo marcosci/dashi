@@ -101,6 +101,7 @@ nav:
       - Phase-2-Roadmap: PHASE-2-ROADMAP.md
   - Betrieb:
       - Operations Runbook: OPERATIONS.md
+      - RBAC & Secret-Rotation: RBAC-RUNBOOK.md
       - Troubleshooting: TROUBLESHOOTING.md
   - Referenz:
       - ID-Referenz: id-reference.md
@@ -128,6 +129,7 @@ nav:
           - DuckDB SQL Endpoint: poc/manifests/duckdb-endpoint/README.md
           - Prefect Orchestrierung: poc/manifests/prefect/README.md
           - Observability (Prometheus + Grafana): poc/manifests/monitoring/README.md
+          - NetworkPolicies: poc/manifests/network-policies/README.md
       - Custom Images:
           - titiler-endpoint (arm64 Rebuild): poc/titiler-endpoint/README.md
           - duckdb-endpoint: poc/duckdb-endpoint/README.md

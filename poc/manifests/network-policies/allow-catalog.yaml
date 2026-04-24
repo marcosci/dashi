@@ -1,0 +1,57 @@
+# stac-fastapi in miso-catalog accepts ingress from miso-data (flow runs
+# POST STAC items), miso-serving (TiTiler reads collection metadata in
+# future), miso-monitoring (scraper), and kube-system (port-forward).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-stac-fastapi-clients
+  namespace: miso-catalog
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: stac-fastapi
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: miso-data
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: miso-serving
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: miso-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# pgstac Postgres is only reachable from stac-fastapi (same namespace) and
+# from monitoring for a future postgres_exporter.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-pgstac-clients
+  namespace: miso-catalog
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pgstac
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: stac-fastapi
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: miso-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 5432

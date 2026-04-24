@@ -32,13 +32,14 @@ k3d image import "$DUCKDB_IMG" "$TITILER_IMG" -c "$CLUSTER_NAME"
 echo "→ Ensuring miso-serving namespace"
 kubectl apply -f "$REPO_ROOT/manifests/titiler/namespace.yaml"
 
-echo "→ Mirroring RustFS root credential into miso-serving as rustfs-client"
-ACCESS=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-SECRET=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-kubectl -n miso-serving create secret generic rustfs-client \
-  --from-literal=access-key="$ACCESS" \
-  --from-literal=secret-key="$SECRET" \
-  --dry-run=client -o yaml | kubectl apply -f -
+echo "→ Verifying per-zone RustFS credentials are present"
+if ! kubectl -n miso-serving get secret dashi-rustfs-serving >/dev/null 2>&1; then
+  echo ""
+  echo "ERROR: secret miso-serving/dashi-rustfs-serving missing."
+  echo "       Run: bash poc/scripts/rbac-bootstrap.sh"
+  echo "       This creates the per-zone RustFS users + scoped K8s Secrets."
+  exit 1
+fi
 
 echo "→ Applying TiTiler"
 # Apply but skip re-creating the placeholder secret.yaml (we manage rustfs-client above)

@@ -1,5 +1,6 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
-        monitoring-up ingest-sample smoke teardown docs-serve docs-build
+        monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
+        ingest-sample smoke teardown docs-serve docs-build
 
 help:
 	@echo "dashi PoC targets"
@@ -64,6 +65,17 @@ catalog-deploy:
 serving-deploy:
 	@bash scripts/serving-deploy.sh
 
+rbac-bootstrap:
+	@bash scripts/rbac-bootstrap.sh
+
+network-policies-up:
+	kubectl apply -k manifests/network-policies
+	@echo ""
+	@echo "✓ NetworkPolicies applied (12 total: default-deny per namespace + scoped allows)"
+
+prefect-patch-pool:
+	@bash scripts/prefect-patch-pool.sh
+
 monitoring-up:
 	@bash scripts/apply-with-secret.sh manifests/monitoring grafana.yaml CHANGE_ME_GRAFANA_ADMIN
 	@echo ""
@@ -100,6 +112,8 @@ smoke:
 	@bash smoke/ingest.sh
 	@bash smoke/serving.sh
 	@bash smoke/prefect.sh
+	@bash smoke/rbac.sh
+	@bash smoke/monitoring.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

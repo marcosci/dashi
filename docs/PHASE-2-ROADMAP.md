@@ -25,14 +25,17 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 | G5 | `miso-ingest/main` Deployment registriert, Flow-Runs laufen als K8s Jobs (`prefect.io/flow-run-id` label), Pod-Status `Completed` verifiziert | ✅ |
 | G6 | Cron-Schedule `0 * * * *` am Deployment angehängt — stündlicher Landing-Zone-Sweep | ✅ |
 
-### Strang H — Rollenbasierte Zugriffskontrolle (F-23)
+### Strang H — Rollenbasierte Zugriffskontrolle (F-23) ✅
 
-| Schritt | Output | ADR / Anforderung |
-|---------|--------|-------------------|
-| H1 | Drei separate RustFS Service-Accounts: `miso-ingest-writer`, `miso-serving-reader`, `miso-analyst-reader` statt dem gemeinsamen Root-Credential | F-23 |
-| H2 | IAM-Policies pro Bucket: ingest darf nur in `landing/` schreiben, pipeline darf aus `landing/` lesen und in `processed/` schreiben, serving nur `processed/`+`curated/` lesen | F-23, [NF-09](id-reference.md#non-functional-requirements-nf-01-nf-18) |
-| H3 | K8s NetworkPolicies: ingress in `miso-platform` nur aus `miso-data` und `miso-serving`; egress aus `miso-serving` nur zu RustFS und stac-fastapi | F-23 |
-| H4 | Secret-Rotation-Runbook: wie rotiert man RustFS Root-Credential + mirrorte Client-Credentials | [R-14](id-reference.md#risks-r-01-r-18) |
+**Status:** abgeschlossen 2026-04-24. Smoke: [`poc/smoke/rbac.sh`](https://github.com/marcosci/dashi/blob/main/poc/smoke/rbac.sh) — 8/8 grün. Runbook: [RBAC-RUNBOOK](RBAC-RUNBOOK.md).
+
+| Schritt | Output | Stand |
+|---------|--------|:-----:|
+| H1 | Drei RustFS IAM-Users mit bucket-scoped Policies: `dashi-ingest` (RW landing/), `dashi-pipeline` (R landing/ + RW processed/+curated/), `dashi-serving-reader` (R processed/+curated/) — bootstrap via [`scripts/rbac-bootstrap.sh`](https://github.com/marcosci/dashi/blob/main/poc/scripts/rbac-bootstrap.sh) | ✅ |
+| H2 | Per-zone Policy-JSON unter `poc/manifests/rustfs/policies/` versioniert; Least-Privilege im Smoke nachgewiesen (serving-reader kann nicht nach `processed/` schreiben) | ✅ |
+| H3 | Prefect `miso-default` Work-Pool Base-Job-Template patched: RustFS-Credentials via `valueFrom.secretKeyRef` statt plain env — Creds verlassen K8s nicht mehr (`scripts/prefect-patch-pool.sh`) | ✅ |
+| H4 | NetworkPolicies: 12 Regeln — default-deny pro Namespace + explizite allow-lists (rustfs accessible nur aus `miso-data` / `miso-serving` / `miso-monitoring`, pgstac nur aus stac-fastapi, prefect-db nur aus prefect-server). _CNI-Enforcement erfordert Cilium/Calico — k3d Flannel rendert die Regeln als dokumentierte Absicht_ | ✅ |
+| H5 | Rotation-Runbook mit Eskalation für Per-Zone-Keys + RustFS-Root + Prefect-DB-Wiederherstellung | ✅ |
 
 ### Strang I — Beobachtbarkeit ✅ (Grundplattform)
 

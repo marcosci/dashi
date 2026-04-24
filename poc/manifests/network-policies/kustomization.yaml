@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - default-deny.yaml
+  - allow-platform.yaml
+  - allow-catalog.yaml
+  - allow-data-internal.yaml
+  - allow-serving.yaml
+  - allow-monitoring.yaml
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: miso
+    includeSelectors: false

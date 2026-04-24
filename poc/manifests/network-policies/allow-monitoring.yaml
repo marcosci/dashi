@@ -1,0 +1,12 @@
+# Prometheus + Grafana reachable from anywhere during PoC (port-forward).
+# Also allow Prometheus to reach other namespaces for scraping.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-monitoring-public
+  namespace: miso-monitoring
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+  ingress:
+    - {}
