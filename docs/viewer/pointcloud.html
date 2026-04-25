@@ -126,20 +126,28 @@
   <div id="legend">RGB · drag-rotate · wheel-zoom · shift-drag pan</div>
 
   <!--
-    Use UMD bundles. deck.gl 9.x dropped UMD; ESM imports from jsdelivr/+esm
-    fail with peer-dep prototype mismatches because each package gets its own
-    copy of the shared @luma.gl runtime. deck.gl 8.9.x ships a single UMD that
-    bundles everything together — so does loaders.gl 3.4.x.
+    Use esm.sh import-map + bundled imports. Each `?bundle` URL inlines the
+    package's transitive deps (luma.gl, math.gl, gl-matrix, …) so versions
+    do not collide across imports. A shared import-map pins the loaders.gl
+    versions consistently across deck.gl and the standalone loader imports.
   -->
-  <script src="https://unpkg.com/deck.gl@8.9.36/dist.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@loaders.gl/core@3.4.15/dist/dist.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@loaders.gl/las@3.4.15/dist/dist.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@loaders.gl/3d-tiles@3.4.15/dist/dist.min.js" crossorigin></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "deck.gl":             "https://esm.sh/v135/deck.gl@8.9.36/es2020/deck.gl.bundle.mjs",
+      "@loaders.gl/core":    "https://esm.sh/v135/@loaders.gl/core@3.4.15/es2020/core.bundle.mjs",
+      "@loaders.gl/las":     "https://esm.sh/v135/@loaders.gl/las@3.4.15/es2020/las.bundle.mjs",
+      "@loaders.gl/3d-tiles":"https://esm.sh/v135/@loaders.gl/3d-tiles@3.4.15/es2020/3d-tiles.bundle.mjs"
+    }
+  }
+  </script>
 
-  <script>
+  <script type="module">
     'use strict';
-    const {Deck, OrbitView, PointCloudLayer, Tile3DLayer} = window.deck;
-    const {load, LASLoader, Tiles3DLoader} = window.loaders;
+    const {Deck, OrbitView, PointCloudLayer, Tile3DLayer} = await import('deck.gl');
+    const {load}                                          = await import('@loaders.gl/core');
+    const {LASLoader}                                     = await import('@loaders.gl/las');
+    const {Tiles3DLoader}                                 = await import('@loaders.gl/3d-tiles');
 
     const $url    = document.getElementById('url-input');
     const $btn    = document.getElementById('load-btn');
