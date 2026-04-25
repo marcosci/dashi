@@ -10,7 +10,7 @@ export function DomainPicker({value, onChange, disabled}: Props) {
   const q = useDomains();
 
   if (q.isPending) {
-    return <div className="text-sm text-cream/50">loading domains…</div>;
+    return <div className="text-sm text-ink-soft">loading domains…</div>;
   }
   if (q.isError) {
     return (
@@ -26,7 +26,7 @@ export function DomainPicker({value, onChange, disabled}: Props) {
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled || domains.length === 0}
-      className="w-full rounded-md bg-cream-deep text-ink px-3 py-2 text-sm font-mono border border-cream/20 focus:outline-none focus:ring-2 focus:ring-amber"
+      className="w-full rounded-lg bg-paper text-ink px-3.5 py-2.5 text-sm font-mono border border-line shadow-sm hover:border-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-amber/40 focus:border-amber transition disabled:opacity-50"
     >
       <option value="" disabled>
         — pick a domain —

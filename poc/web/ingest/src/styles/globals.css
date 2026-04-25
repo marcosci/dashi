@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  /* dashi palette — keep in sync with docs/assets/README.md */
-  --color-ink:         #1a1612;
-  --color-paper:       #faf6ee;
-  --color-cream:       #f4ede1;
-  --color-cream-deep:  #ebe1cb;
-  --color-amber:       #c8821f;
-  --color-amber-light: #e8a547;
-  --color-amber-deep:  #8a5410;
-  --color-kombu:       #3d5a3a;
-  --color-seal:        #b8421f;
+  /* dashi palette — light theme. Kept in sync with docs/assets/README.md. */
+  --color-ink:          #14110d;   /* primary text */
+  --color-ink-soft:     #4a423a;   /* secondary text */
+  --color-line:         #e6dfd2;   /* hairlines + dividers */
+  --color-paper:        #ffffff;   /* page background */
+  --color-cream:        #faf6ee;   /* tonal surface */
+  --color-cream-deep:   #f1eadb;   /* hover/active surface */
+  --color-amber:        #c8821f;   /* primary accent */
+  --color-amber-light:  #e8a547;
+  --color-amber-deep:   #8a5410;
+  --color-kombu:        #3d5a3a;   /* success */
+  --color-seal:         #b8421f;   /* error */
 
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -19,8 +21,21 @@
 html, body, #root {
   min-height: 100%;
 }
+
 body {
   font-family: var(--font-sans);
-  background: var(--color-ink);
-  color: var(--color-cream);
+  font-feature-settings: "ss01", "cv11";
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Numeric tabulars in tables / mono fields */
+.font-mono { font-variant-numeric: tabular-nums; }
+
+/* Selection picks up the brand accent. */
+::selection {
+  background: color-mix(in oklab, var(--color-amber) 22%, transparent);
+  color: var(--color-ink);
 }

@@ -18,6 +18,15 @@ type Stage =
   | {kind: "done"; run: TriggerResponse}
   | {kind: "error"; message: string};
 
+function StatusLine({label}: {label: string}) {
+  return (
+    <div className="flex items-center gap-2 text-sm text-ink-soft">
+      <span className="inline-block h-2 w-2 rounded-full bg-amber animate-pulse" />
+      <span className="font-mono">{label}</span>
+    </div>
+  );
+}
+
 export function Ingest() {
   const [domain, setDomain] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -56,24 +65,34 @@ export function Ingest() {
     setStage({kind: "idle"});
   };
 
-  const busy = stage.kind === "uploading" || stage.kind === "scanning" || stage.kind === "triggering";
+  const busy =
+    stage.kind === "uploading" ||
+    stage.kind === "scanning" ||
+    stage.kind === "triggering";
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-amber-light">Ingest a dataset</h1>
-        <p className="text-sm text-cream/70 mt-1">
-          Drop a file, pick a domain, preview detection, submit. The Prefect run takes it from there.
+    <div className="space-y-10">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-semibold tracking-tight text-ink">
+          Ingest a dataset
+        </h1>
+        <p className="text-sm text-ink-soft">
+          Drop a file, pick a domain, preview detection, submit. The Prefect
+          run takes it from there.
         </p>
-      </div>
+      </header>
 
       <section className="space-y-2">
-        <label className="text-xs uppercase tracking-wide text-cream/50">Domain</label>
+        <label className="block text-xs font-medium uppercase tracking-wider text-ink-soft">
+          Domain
+        </label>
         <DomainPicker value={domain} onChange={setDomain} disabled={busy} />
       </section>
 
       <section className="space-y-2">
-        <label className="text-xs uppercase tracking-wide text-cream/50">File</label>
+        <label className="block text-xs font-medium uppercase tracking-wider text-ink-soft">
+          File
+        </label>
         <FileDropzone
           file={file}
           onFile={(f) => {
@@ -86,48 +105,50 @@ export function Ingest() {
       </section>
 
       {stage.kind === "idle" && (
-        <button
-          type="button"
-          disabled={!file || !domain}
-          onClick={() => uploadAndScan.mutate()}
-          className="rounded-md bg-amber text-ink px-5 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-light"
-        >
-          Upload + scan
-        </button>
+        <div>
+          <button
+            type="button"
+            disabled={!file || !domain}
+            onClick={() => uploadAndScan.mutate()}
+            className="inline-flex items-center justify-center rounded-lg bg-ink text-paper px-5 py-2.5 text-sm font-medium shadow-sm hover:bg-ink-soft transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Upload + scan
+          </button>
+        </div>
       )}
 
       {stage.kind === "uploading" && (
-        <div className="text-sm text-cream/70 font-mono">uploading {file?.name}…</div>
+        <StatusLine label={`uploading ${file?.name ?? ""}…`} />
       )}
       {stage.kind === "scanning" && (
-        <div className="text-sm text-cream/70 font-mono">running detect.discover…</div>
+        <StatusLine label="running detect.discover…" />
       )}
 
       {stage.kind === "scanned" && (
         <div className="space-y-4">
           <ScanPreview scan={stage.scan} />
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={() => trigger.mutate()}
               disabled={stage.scan.primary_count === 0}
-              className="rounded-md bg-kombu text-cream px-5 py-2 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-kombu/80"
+              className="inline-flex items-center justify-center rounded-lg bg-amber text-ink px-5 py-2.5 text-sm font-medium shadow-sm hover:bg-amber-light transition disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Submit ingest run
+              Submit ingest run →
             </button>
             <button
               type="button"
               onClick={reset}
-              className="text-xs text-cream/60 hover:text-seal"
+              className="text-sm text-ink-soft hover:text-seal underline-offset-2 hover:underline"
             >
-              cancel + start over
+              cancel
             </button>
           </div>
         </div>
       )}
 
       {stage.kind === "triggering" && (
-        <div className="text-sm text-cream/70 font-mono">creating Prefect flow run…</div>
+        <StatusLine label="creating Prefect flow run…" />
       )}
 
       {stage.kind === "done" && (
@@ -136,7 +157,7 @@ export function Ingest() {
           <button
             type="button"
             onClick={reset}
-            className="text-sm text-amber hover:underline"
+            className="text-sm text-amber-deep hover:text-amber underline-offset-2 hover:underline font-medium"
           >
             ingest another →
           </button>
@@ -144,15 +165,22 @@ export function Ingest() {
       )}
 
       {stage.kind === "error" && (
-        <div className="rounded-md border border-seal/40 bg-seal/10 px-4 py-3 text-sm">
-          <div className="text-seal font-mono">✗ {stage.message}</div>
-          <button
-            type="button"
-            onClick={reset}
-            className="mt-2 text-xs text-cream/60 hover:text-amber"
-          >
-            try again →
-          </button>
+        <div className="rounded-lg border border-seal/30 bg-seal/5 px-5 py-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-seal text-paper text-xs">
+              !
+            </span>
+            <div className="flex-1">
+              <div className="text-sm text-seal font-mono">{stage.message}</div>
+              <button
+                type="button"
+                onClick={reset}
+                className="mt-3 text-xs text-ink-soft hover:text-amber-deep underline-offset-2 hover:underline"
+              >
+                try again →
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
