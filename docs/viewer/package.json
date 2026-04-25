@@ -1,20 +1,15 @@
 {
   "name": "dashi-viewer",
   "private": true,
-  "version": "0.1.0",
-  "description": "Pre-bundled deck.gl + loaders.gl viewer for dashi point clouds",
+  "version": "0.2.0",
+  "description": "dashi point cloud viewer — wraps opengeos/maplibre-gl-lidar for COPC streaming over a MapLibre basemap",
   "type": "module",
   "scripts": {
-    "build": "esbuild src/entry.js --bundle --format=esm --target=es2020 --outfile=viewer.bundle.js --minify --legal-comments=none"
+    "build": "esbuild src/entry.js --bundle --format=esm --target=es2020 --outfile=viewer.bundle.js --minify --legal-comments=none --loader:.css=text"
   },
   "dependencies": {
-    "@deck.gl/core":       "^9.0.32",
-    "@deck.gl/layers":     "^9.0.32",
-    "@deck.gl/geo-layers": "^9.0.32",
-    "@loaders.gl/core":    "^4.3.2",
-    "@loaders.gl/las":     "^4.3.2",
-    "@loaders.gl/3d-tiles":"^4.3.2",
-    "copc":                "^0.0.8"
+    "maplibre-gl":       "^4.7.1",
+    "maplibre-gl-lidar": "^0.11.1"
   },
   "devDependencies": {
     "esbuild": "^0.24.0"

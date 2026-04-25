@@ -1,14 +1,17 @@
-// Single entry point — esbuild bundles every dep into one self-contained
-// ESM file at docs/viewer/viewer.bundle.js. No CDN peer-dep collisions.
+// Single ESM entry. esbuild bundles into docs/viewer/viewer.bundle.js.
 //
-// Build: docs/viewer/build.sh
+// Adopts opengeos/maplibre-gl-lidar wholesale — that lib already implements
+// COPC streaming, EPT, color schemes, classification legend, percentile
+// coloring, point picking, Z-offset, elevation filter, and a control-panel
+// UI. The dashi viewer is a thin wrapper that wires it to the dashi serving
+// surface (presigned RustFS URL passed via ?url=…).
 
-export {Deck, OrbitView, COORDINATE_SYSTEM} from '@deck.gl/core';
-export {PointCloudLayer}                    from '@deck.gl/layers';
-export {Tile3DLayer}                        from '@deck.gl/geo-layers';
-export {load}                               from '@loaders.gl/core';
-export {LASLoader}                          from '@loaders.gl/las';
-export {Tiles3DLoader}                      from '@loaders.gl/3d-tiles';
-// copc.js handles LAS 1.4 / COPC chunked range reads — loaders.gl/las
-// still pins to a laz-perf build that caps at LAS 1.3.
-export {Copc, Getter, Hierarchy, Las}       from 'copc';
+import maplibregl       from 'maplibre-gl';
+import {LidarControl}   from 'maplibre-gl-lidar';
+
+// CSS shipped as text via esbuild --loader:.css=text. The viewer page
+// injects them into <style> tags so we ship a single bundle.
+import maplibreCss      from 'maplibre-gl/dist/maplibre-gl.css';
+import lidarCss         from 'maplibre-gl-lidar/style.css';
+
+export {maplibregl, LidarControl, maplibreCss, lidarCss};

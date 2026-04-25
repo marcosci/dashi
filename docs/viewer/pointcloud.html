@@ -10,6 +10,7 @@
       --paper: #faf6ee;
       --cream: #f4ede1;
       --amber: #c8821f;
+      --amber-light: #e8a547;
       --kombu: #3d5a3a;
       --seal: #b8421f;
     }
@@ -35,7 +36,7 @@
       backdrop-filter: blur(8px);
       border: 1px solid rgba(244, 237, 225, 0.15);
       border-radius: 8px;
-      padding: 16px 18px;
+      padding: 14px 16px;
       max-width: 380px;
       font-size: 13px;
       line-height: 1.5;
@@ -75,245 +76,116 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    #panel button:hover {
-      background: #e8a547;
-    }
-    #panel button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    #panel button:hover { background: var(--amber-light); }
+    #panel button:disabled { opacity: 0.5; cursor: not-allowed; }
     #status {
       margin-top: 10px;
       padding-top: 10px;
       border-top: 1px solid rgba(244, 237, 225, 0.15);
       font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-size: 11px;
-      opacity: 0.75;
+      opacity: 0.85;
       min-height: 1em;
     }
     #status.error { color: var(--seal); }
     #status.ok    { color: var(--kombu); }
-    #legend {
-      position: absolute;
-      bottom: 16px;
-      left: 16px;
-      z-index: 10;
-      background: rgba(26, 22, 18, 0.7);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-size: 11px;
-      opacity: 0.85;
-    }
+    .maplibregl-ctrl-attrib { font-size: 10px; }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <div id="panel">
     <h1>dashi point cloud viewer</h1>
-    <p>Browser-side rendering. Two modes:</p>
-    <p><strong>direct</strong> — paste a URL to a single LAS/LAZ/COPC file (downloads in full).<br>
-       <strong>3dtiles</strong> — paste a URL to a <code>tileset.json</code> (streams chunks).</p>
-    <input id="url-input" type="text" placeholder="https://…/tileset.json   or   http://localhost:19100/.../points.copc.laz?…">
-    <select id="mode-select" style="margin-top:8px;width:100%;padding:6px;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper);color:var(--ink);border:1px solid rgba(244,237,225,0.2);border-radius:4px;">
-      <option value="auto">auto (URL ends with tileset.json → 3dtiles, else direct)</option>
-      <option value="direct">direct LAS/LAZ</option>
-      <option value="3dtiles">3D Tiles tileset</option>
-    </select>
+    <p>Powered by <a href="https://github.com/opengeos/maplibre-gl-lidar" target="_blank" style="color:var(--amber)">opengeos/maplibre-gl-lidar</a> over a MapLibre basemap. Paste a presigned URL to a COPC/LAZ file or a tileset URL.</p>
+    <input id="url-input" type="text" placeholder="http://localhost:19100/.../points.copc.laz?…">
     <button id="load-btn">Load</button>
     <div id="status"></div>
   </div>
-  <div id="legend">RGB · drag-rotate · wheel-zoom · shift-drag pan</div>
 
-  <!--
-    Pre-bundled viewer (esbuild). Single self-contained ESM with deck.gl 8.9 +
-    loaders.gl 3.4 inlined. No CDN peer-dep runtime risk. Rebuild with:
-      bash docs/viewer/build.sh
-  -->
   <script type="module">
     'use strict';
+
     const {
-      Deck, OrbitView, COORDINATE_SYSTEM,
-      PointCloudLayer, Tile3DLayer,
-      load, LASLoader, Tiles3DLoader,
-      Copc, Hierarchy
+      maplibregl, LidarControl, maplibreCss, lidarCss
     } = await import('./viewer.bundle.js');
+
+    // Inject CSS bundled by esbuild as text.
+    const styleEl = document.createElement('style');
+    styleEl.textContent = maplibreCss + '\n' + lidarCss;
+    document.head.appendChild(styleEl);
 
     const $url    = document.getElementById('url-input');
     const $btn    = document.getElementById('load-btn');
-    const $mode   = document.getElementById('mode-select');
     const $status = document.getElementById('status');
-
-    // Pre-fill with a hint of where the bundled sample lives.
-    const params = new URLSearchParams(location.search);
-    if (params.get('url')) $url.value = params.get('url');
-
-    const deckInstance = new Deck({
-      parent: document.getElementById('map'),
-      views: new OrbitView({fov: 50, near: 0.1, far: 1e9}),
-      initialViewState: {
-        target: [0, 0, 0],
-        rotationX: 30,
-        rotationOrbit: 0,
-        zoom: 1
-      },
-      controller: true,
-      onLoad: () => setStatus('Ready. Paste a URL above.', 'ok')
-    });
 
     function setStatus(msg, kind) {
       $status.textContent = msg;
       $status.className = kind || '';
     }
 
-    function detectMode(url) {
-      const m = $mode.value;
-      if (m !== 'auto') return m;
-      return url.toLowerCase().endsWith('tileset.json') ? '3dtiles' : 'direct';
-    }
+    const params = new URLSearchParams(location.search);
+    if (params.get('url')) $url.value = params.get('url');
 
-    async function loadTileset(url) {
-      const layer = new Tile3DLayer({
-        id: 'tileset',
-        data: url,
-        loader: Tiles3DLoader,
-        pointSize: 1.5,
-        onTilesetLoad: (tileset) => {
-          const {cartographicCenter, zoom} = tileset;
-          deckInstance.setProps({
-            initialViewState: {
-              target: [0, 0, 0],
-              rotationX: 30,
-              rotationOrbit: 0,
-              zoom: zoom ?? 1
-            }
-          });
-          setStatus(
-            `Loaded tileset · root tiles=${tileset.tiles?.length ?? '?'} · `
-            + `centre=${cartographicCenter?.map(v=>v.toFixed(3)).join(' ')}`,
-            'ok'
-          );
-        }
-      });
-      deckInstance.setProps({layers: [layer]});
-    }
+    // MapLibre basemap — CartoDB voyager (free, no API key, retina-ready).
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+      center: [0, 20],
+      zoom: 2,
+      pitch: 60,
+      maxPitch: 85,
+      attributionControl: {compact: true}
+    });
 
-    async function loadCloud(url) {
+    map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), 'top-right');
+
+    // The lidar control runs the deck.gl PointCloudLayer under the hood,
+    // streams COPC via copc.js + laz-perf.wasm (which esbuild bundles into
+    // the viewer bundle automatically).
+    const lidarControl = new LidarControl({
+      title: 'Lidar Controls',
+      collapsed: true,
+      pointSize: 2,
+      colorScheme: 'elevation',
+      pickable: true
+    });
+    map.addControl(lidarControl, 'top-right');
+
+    lidarControl.on('load', (e) => {
+      const pc = e.pointCloud || e.detail?.pointCloud;
+      const n = pc?.pointCount ?? pc?.header?.pointCount ?? '?';
+      setStatus(`Loaded ${Number(n).toLocaleString()} points · click panel ▼ for color/legend/picking`, 'ok');
+      lidarControl.flyToPointCloud();
+      $btn.disabled = false;
+    });
+    lidarControl.on('error', (e) => {
+      const msg = e.error?.message || e.detail?.error?.message || 'load failed';
+      setStatus(`Error: ${msg}`, 'error');
+      $btn.disabled = false;
+    });
+
+    async function load(url) {
       $btn.disabled = true;
-      const mode = detectMode(url);
-      setStatus(`Fetching ${url.slice(0, 60)}…  [mode: ${mode}]`);
-
+      setStatus(`Loading ${url.slice(0, 60)}…`);
       try {
-        if (mode === '3dtiles') {
-          await loadTileset(url);
-          $btn.disabled = false;
-          return;
-        }
-
-        // Browser-side COPC reader (HTTP range). loaders.gl/las is capped
-        // at LAS 1.3; PDAL writers.copc emits LAS 1.4 → 'copc' lib handles
-        // both. Caps total points to keep memory under control.
-        const POINT_BUDGET = 5_000_000;
-        async function fetchRange(begin, end) {
-          const r = await fetch(url, {headers: {Range: `bytes=${begin}-${end - 1}`}});
-          if (!r.ok && r.status !== 206) throw new Error(`range fetch ${r.status}`);
-          return new Uint8Array(await r.arrayBuffer());
-        }
-        const copc = await Copc.create(fetchRange);
-        setStatus(`COPC header read · ${copc.header.pointCount.toLocaleString()} pts total · sampling first ${POINT_BUDGET.toLocaleString()}…`);
-
-        const rootPage = await Copc.loadHierarchyPage(fetchRange, copc.info.rootHierarchyPage);
-        // Sort nodes shallow→deep so we get a representative thinned cloud first.
-        const nodeKeys = Object.keys(rootPage.nodes).sort((a, b) => {
-          const da = parseInt(a.split('-')[0], 10);
-          const db = parseInt(b.split('-')[0], 10);
-          return da - db;
-        });
-
-        const flatPositions = [];
-        const flatColors = [];
-        let hasColor = false;
-        let collected = 0;
-
-        for (const key of nodeKeys) {
-          if (collected >= POINT_BUDGET) break;
-          const node = rootPage.nodes[key];
-          const view = await Copc.loadPointDataView(fetchRange, copc, node);
-          const getX = view.getter('X');
-          const getY = view.getter('Y');
-          const getZ = view.getter('Z');
-          const getR = view.dimensions.Red   ? view.getter('Red')   : null;
-          const getG = view.dimensions.Green ? view.getter('Green') : null;
-          const getB = view.dimensions.Blue  ? view.getter('Blue')  : null;
-          if (getR && getG && getB) hasColor = true;
-          const n = view.pointCount;
-          for (let i = 0; i < n; i++) {
-            flatPositions.push(getX(i), getY(i), getZ(i));
-            if (hasColor) flatColors.push(getR(i) >> 8, getG(i) >> 8, getB(i) >> 8, 255);
-          }
-          collected += n;
-          setStatus(`Loading node ${key}… ${collected.toLocaleString()} / ${POINT_BUDGET.toLocaleString()} pts`);
-        }
-
-        const n = flatPositions.length / 3;
-        if (n === 0) throw new Error('no points decoded');
-        const positions = Float64Array.from(flatPositions);
-        const colors    = hasColor ? Uint8Array.from(flatColors) : null;
-
-        // Centre + scale so the cloud fits a 1000-unit cube.
-        let cx=0, cy=0, cz=0;
-        for (let i=0; i<n; i++) {
-          cx += positions[i*3];
-          cy += positions[i*3+1];
-          cz += positions[i*3+2];
-        }
-        cx /= n; cy /= n; cz /= n;
-
-        let span = 0;
-        for (let i=0; i<n; i++) {
-          const dx = positions[i*3]   - cx;
-          const dy = positions[i*3+1] - cy;
-          const dz = positions[i*3+2] - cz;
-          span = Math.max(span, Math.abs(dx), Math.abs(dy), Math.abs(dz));
-        }
-        const scale = span > 0 ? 500 / span : 1;
-
-        // Centred + scaled coordinates.
-        const out = new Float32Array(positions.length);
-        for (let i=0; i<n; i++) {
-          out[i*3]   = (positions[i*3]   - cx) * scale;
-          out[i*3+1] = (positions[i*3+1] - cy) * scale;
-          out[i*3+2] = (positions[i*3+2] - cz) * scale;
-        }
-
-        const layer = new PointCloudLayer({
-          id: 'cloud',
-          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-          data: {length: n, attributes: {
-            getPosition: {value: out, size: 3},
-            ...(colors ? {getColor: {value: colors, size: 4, normalized: true}} : {})
-          }},
-          getColor: colors ? undefined : [200, 130, 31],
-          pointSize: 1.5
-        });
-
-        deckInstance.setProps({layers: [layer]});
-
-        setStatus(`Loaded ${n.toLocaleString()} points · centre ${cx.toFixed(0)} ${cy.toFixed(0)} ${cz.toFixed(0)}`, 'ok');
-      } catch (e) {
-        console.error(e);
-        setStatus(`Error: ${e.message}`, 'error');
-      } finally {
+        await lidarControl.loadPointCloud(url);
+      } catch (err) {
+        console.error(err);
+        setStatus(`Error: ${err.message}`, 'error');
         $btn.disabled = false;
       }
     }
 
     $btn.addEventListener('click', () => {
       const url = $url.value.trim();
-      if (url) loadCloud(url);
+      if (url) load(url);
     });
 
-    if ($url.value) loadCloud($url.value);
+    map.on('load', () => {
+      setStatus('Ready. Paste a URL above.', 'ok');
+      if ($url.value) load($url.value);
+    });
   </script>
 </body>
 </html>
