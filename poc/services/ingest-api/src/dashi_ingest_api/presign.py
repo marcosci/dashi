@@ -64,11 +64,7 @@ def presign(
     # with the SPA → no CORS. Override via DASHI_API_S3_PUBLIC_ENDPOINT
     # for production ingress setups.
     fwd_proto = request.headers.get("x-forwarded-proto") or request.url.scheme
-    fwd_host = (
-        request.headers.get("x-forwarded-host")
-        or request.headers.get("host")
-        or "localhost"
-    )
+    fwd_host = request.headers.get("x-forwarded-host") or request.headers.get("host") or "localhost"
     # No /s3 prefix — SigV4 includes the path in the canonical request,
     # so any prefix-mount would break the signature at RustFS. nginx
     # routes /landing/, /processed/, /curated/, /backups/ to RustFS

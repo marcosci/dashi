@@ -39,7 +39,7 @@ export function ScanPreview({scan}: {scan: ScanResponse}) {
         </thead>
         <tbody className="font-mono">
           {scan.rows.map((r, i) => (
-            <tr key={i} className="border-t border-line">
+            <tr key={i} className="border-t border-line align-top">
               <td className="px-4 py-2.5">
                 <span
                   className={
@@ -53,7 +53,23 @@ export function ScanPreview({scan}: {scan: ScanResponse}) {
               <td className="px-4 py-2.5 text-ink-soft">{r.driver ?? "—"}</td>
               <td className="px-4 py-2.5 text-ink-soft">{r.layer ?? "—"}</td>
               <td className="px-4 py-2.5 text-ink">{r.path}</td>
-              <td className="px-4 py-2.5 text-ink-soft">{r.reason ?? ""}</td>
+              <td className="px-4 py-2.5 text-ink-soft space-y-0.5">
+                {r.errors.length > 0 && (
+                  <div className="text-seal">
+                    {r.errors.map((e, j) => (
+                      <div key={j}>✗ {e}</div>
+                    ))}
+                  </div>
+                )}
+                {r.warnings.length > 0 && (
+                  <div className="text-amber-deep">
+                    {r.warnings.map((w, j) => (
+                      <div key={j}>! {w}</div>
+                    ))}
+                  </div>
+                )}
+                {r.errors.length === 0 && r.warnings.length === 0 && (r.reason ?? "")}
+              </td>
             </tr>
           ))}
         </tbody>

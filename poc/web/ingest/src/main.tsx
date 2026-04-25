@@ -6,6 +6,8 @@ import {BrowserRouter, Route, Routes, Navigate} from "react-router-dom";
 import "./styles/globals.css";
 import {App} from "./App";
 import {Ingest} from "./routes/Ingest";
+import {Catalog} from "./routes/Catalog";
+import {Runs} from "./routes/Runs";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +25,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route element={<App />}>
             <Route index element={<Ingest />} />
+            <Route path="catalog" element={<Catalog />} />
+            <Route path="runs" element={<Runs />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

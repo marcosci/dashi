@@ -5,7 +5,7 @@ from __future__ import annotations
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import domains, presign, scan, trigger
+from . import catalog, domains, presign, runs, scan, trigger
 from .auth import Principal, current_user
 from .settings import settings
 
@@ -32,6 +32,8 @@ app.include_router(domains.router, tags=["domains"])
 app.include_router(presign.router, tags=["upload"])
 app.include_router(scan.router, tags=["upload"])
 app.include_router(trigger.router, tags=["upload"])
+app.include_router(catalog.router, tags=["catalog"])
+app.include_router(runs.router, tags=["runs"])
 
 
 @app.get("/healthz", tags=["health"])
