@@ -125,13 +125,21 @@
   </div>
   <div id="legend">RGB · drag-rotate · wheel-zoom · shift-drag pan</div>
 
-  <script type="module">
-    import {Deck, OrbitView}        from 'https://cdn.jsdelivr.net/npm/@deck.gl/core@9.0.32/+esm';
-    import {PointCloudLayer}        from 'https://cdn.jsdelivr.net/npm/@deck.gl/layers@9.0.32/+esm';
-    import {Tile3DLayer}            from 'https://cdn.jsdelivr.net/npm/@deck.gl/geo-layers@9.0.32/+esm';
-    import {load}                   from 'https://cdn.jsdelivr.net/npm/@loaders.gl/core@4.3.2/+esm';
-    import {LASLoader}              from 'https://cdn.jsdelivr.net/npm/@loaders.gl/las@4.3.2/+esm';
-    import {Tiles3DLoader}          from 'https://cdn.jsdelivr.net/npm/@loaders.gl/3d-tiles@4.3.2/+esm';
+  <!--
+    Use UMD bundles. deck.gl 9.x dropped UMD; ESM imports from jsdelivr/+esm
+    fail with peer-dep prototype mismatches because each package gets its own
+    copy of the shared @luma.gl runtime. deck.gl 8.9.x ships a single UMD that
+    bundles everything together — so does loaders.gl 3.4.x.
+  -->
+  <script src="https://unpkg.com/deck.gl@8.9.36/dist.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@loaders.gl/core@3.4.15/dist/dist.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@loaders.gl/las@3.4.15/dist/dist.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@loaders.gl/3d-tiles@3.4.15/dist/dist.min.js" crossorigin></script>
+
+  <script>
+    'use strict';
+    const {Deck, OrbitView, PointCloudLayer, Tile3DLayer} = window.deck;
+    const {load, LASLoader, Tiles3DLoader} = window.loaders;
 
     const $url    = document.getElementById('url-input');
     const $btn    = document.getElementById('load-btn');
@@ -142,7 +150,7 @@
     const params = new URLSearchParams(location.search);
     if (params.get('url')) $url.value = params.get('url');
 
-    const deck = new Deck({
+    const deckInstance = new Deck({
       parent: document.getElementById('map'),
       views: new OrbitView({fov: 50, near: 0.1, far: 1e9}),
       initialViewState: {
@@ -174,7 +182,7 @@
         pointSize: 1.5,
         onTilesetLoad: (tileset) => {
           const {cartographicCenter, zoom} = tileset;
-          deck.setProps({
+          deckInstance.setProps({
             initialViewState: {
               target: [0, 0, 0],
               rotationX: 30,
@@ -189,7 +197,7 @@
           );
         }
       });
-      deck.setProps({layers: [layer]});
+      deckInstance.setProps({layers: [layer]});
     }
 
     async function loadCloud(url) {
@@ -252,7 +260,7 @@
           pointSize: 1.5
         });
 
-        deck.setProps({layers: [layer]});
+        deckInstance.setProps({layers: [layer]});
 
         setStatus(`Loaded ${n.toLocaleString()} points · centre ${cx.toFixed(0)} ${cy.toFixed(0)} ${cz.toFixed(0)}`, 'ok');
       } catch (e) {
