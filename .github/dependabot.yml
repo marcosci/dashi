@@ -1,0 +1,45 @@
+version: 2
+updates:
+  # Python — ingest pipeline + ingest-api shim
+  - package-ecosystem: pip
+    directory: /poc/ingest
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "deps(ingest)" }
+
+  - package-ecosystem: pip
+    directory: /poc/services/ingest-api
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "deps(ingest-api)" }
+
+  # Node — viewer bundle + ingest web UI
+  - package-ecosystem: npm
+    directory: /docs/viewer
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "deps(viewer)" }
+
+  - package-ecosystem: npm
+    directory: /poc/web/ingest
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "deps(web-ingest)" }
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    open-pull-requests-limit: 5
+    commit-message: { prefix: "ci" }
+
+  # Container images we build (Dockerfiles).
+  - package-ecosystem: docker
+    directory: /poc/services/ingest-api
+    schedule: { interval: weekly }
+    commit-message: { prefix: "deps(docker)" }
+
+  - package-ecosystem: docker
+    directory: /poc/web/ingest
+    schedule: { interval: weekly }
+    commit-message: { prefix: "deps(docker)" }
