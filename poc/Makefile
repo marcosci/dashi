@@ -1,6 +1,7 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
-        ogc-deploy ingest-sample smoke teardown docs-serve docs-build
+        ogc-deploy 3dtiles-build 3dtiles-deploy ingest-sample smoke teardown \
+        docs-serve docs-build
 
 help:
 	@echo "dashi PoC targets"
@@ -117,6 +118,17 @@ prefect-up:
 	@echo "  kubectl -n dashi-data port-forward svc/prefect-server 4200:4200"
 	@echo "  then visit http://localhost:4200/  (UI) and set PREFECT_API_URL=http://localhost:4200/api"
 
+3dtiles-build:
+	@docker build -t dashi/py3dtiles:dev py3dtiles
+	@k3d image import dashi/py3dtiles:dev -c $(CLUSTER_NAME)
+	@echo ""
+	@echo "✓ dashi/py3dtiles:dev imported into k3d cluster '$(CLUSTER_NAME)'"
+
+3dtiles-deploy: 3dtiles-build
+	@bash scripts/3dtiles-generate.sh
+	@echo ""
+	@echo "✓ 3D Tiles tilesets published under s3://curated/3dtiles/"
+
 ingest-sample:
 	@bash scripts/ingest-sample.sh
 
@@ -128,6 +140,7 @@ smoke:
 	@bash smoke/rbac.sh
 	@bash smoke/monitoring.sh
 	@bash smoke/martin.sh
+	@bash smoke/pointcloud.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

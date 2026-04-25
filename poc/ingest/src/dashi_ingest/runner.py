@@ -297,12 +297,23 @@ def _raster_assets(filename: str) -> dict:
 
 
 def _pointcloud_assets(filename: str) -> dict:
+    # The `data` asset doubles as the PoC-tier viewer source: the deck.gl
+    # viewer (docs/viewer/pointcloud.html) reads COPC LAZ directly via HTTP
+    # range. We flag that with the visualization role so a viewer can
+    # discover the asset deterministically. The production-tier 3D Tiles
+    # tileset (Prefect-generated) is added later as `assets.tileset3d`.
     return {
         "data": {
             "rel": filename,
             "media_type": "application/vnd.laszip+copc",
-            "roles": ["data"],
+            "roles": ["data", "visualization"],
             "title": "Cloud Optimized Point Cloud",
+        },
+        "viewer3d": {
+            "rel": filename,
+            "media_type": "application/vnd.laszip+copc",
+            "roles": ["visualization"],
+            "title": "Direct-load viewer source (deck.gl + loaders.gl LASLoader)",
         },
         "metadata": {
             "rel": "_metadata.json",
