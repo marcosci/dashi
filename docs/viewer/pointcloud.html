@@ -126,28 +126,17 @@
   <div id="legend">RGB · drag-rotate · wheel-zoom · shift-drag pan</div>
 
   <!--
-    Use esm.sh import-map + bundled imports. Each `?bundle` URL inlines the
-    package's transitive deps (luma.gl, math.gl, gl-matrix, …) so versions
-    do not collide across imports. A shared import-map pins the loaders.gl
-    versions consistently across deck.gl and the standalone loader imports.
+    Pre-bundled viewer (esbuild). Single self-contained ESM with deck.gl 8.9 +
+    loaders.gl 3.4 inlined. No CDN peer-dep runtime risk. Rebuild with:
+      bash docs/viewer/build.sh
   -->
-  <script type="importmap">
-  {
-    "imports": {
-      "deck.gl":             "https://esm.sh/v135/deck.gl@9.0.32/es2020/deck.gl.bundle.mjs",
-      "@loaders.gl/core":    "https://esm.sh/v135/@loaders.gl/core@4.3.2/es2020/core.bundle.mjs",
-      "@loaders.gl/las":     "https://esm.sh/v135/@loaders.gl/las@4.3.2/es2020/las.bundle.mjs",
-      "@loaders.gl/3d-tiles":"https://esm.sh/v135/@loaders.gl/3d-tiles@4.3.2/es2020/3d-tiles.bundle.mjs"
-    }
-  }
-  </script>
-
   <script type="module">
     'use strict';
-    const {Deck, OrbitView, PointCloudLayer, Tile3DLayer} = await import('deck.gl');
-    const {load}                                          = await import('@loaders.gl/core');
-    const {LASLoader}                                     = await import('@loaders.gl/las');
-    const {Tiles3DLoader}                                 = await import('@loaders.gl/3d-tiles');
+    const {
+      Deck, OrbitView, COORDINATE_SYSTEM,
+      PointCloudLayer, Tile3DLayer,
+      load, LASLoader, Tiles3DLoader
+    } = await import('./viewer.bundle.js');
 
     const $url    = document.getElementById('url-input');
     const $btn    = document.getElementById('load-btn');

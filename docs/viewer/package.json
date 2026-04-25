@@ -1,0 +1,21 @@
+{
+  "name": "dashi-viewer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Pre-bundled deck.gl + loaders.gl viewer for dashi point clouds",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/entry.js --bundle --format=esm --target=es2020 --outfile=viewer.bundle.js --minify --legal-comments=none"
+  },
+  "dependencies": {
+    "@deck.gl/core":       "^8.9.36",
+    "@deck.gl/layers":     "^8.9.36",
+    "@deck.gl/geo-layers": "^8.9.36",
+    "@loaders.gl/core":    "^3.4.15",
+    "@loaders.gl/las":     "^3.4.15",
+    "@loaders.gl/3d-tiles":"^3.4.15"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}

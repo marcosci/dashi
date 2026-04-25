@@ -40,3 +40,6 @@ poc/ingest/.dashi-ingest-result.json
 !docs/**/*.pdf
 !source/**/*.pdf
 .redeploy-logs/
+
+# Viewer build — node_modules already ignored above; lockfile is per-machine.
+docs/viewer/package-lock.json
