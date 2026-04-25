@@ -250,10 +250,12 @@ def ingest_one(
                 "dashi:source_layer": det.layer,
                 "dashi:source_crs": counts.get("source_crs"),
                 "dashi:object_count": n_objects,
-                # Lineage: link the STAC item to the Prefect run that
-                # produced it. Caller (the Prefect flow) supplies the
-                # lineage dict; the CLI passes None and these keys are
-                # simply absent.
+                # Default classification is `int` (internal). Callers may
+                # override via the lineage dict.
+                "dashi:classification": "int",
+                # Lineage + per-call overrides (Prefect run id, classification,
+                # etc.). Last write wins, so callers can override the default
+                # classification by passing `dashi:classification` here.
                 **({k: v for k, v in (lineage or {}).items() if v is not None}),
             },
             assets=assets,

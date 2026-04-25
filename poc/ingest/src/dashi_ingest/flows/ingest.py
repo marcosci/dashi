@@ -73,6 +73,7 @@ def ingest_one_task(
     stac_url: str,
     collection_description: str,
     h3_resolution: int,
+    classification: str = "int",
 ) -> dict:
     logger = get_run_logger()
     det = detect.Detection(
@@ -85,8 +86,10 @@ def ingest_one_task(
     s3_cfg = storage.S3Config.from_env()
 
     # Lineage: pull the live Prefect run context so the STAC item carries
-    # a deterministic link back to the run that produced it.
+    # a deterministic link back to the run that produced it. Also forward
+    # the per-run classification so the runner stamps it on the STAC item.
     lineage = _prefect_lineage()
+    lineage["dashi:classification"] = classification
 
     # Uploads are already gated by boto3 TransferConfig (8MB chunks, 2 threads).
     # Add a Prefect concurrency slot in Phase 2 once the deployment creates it
@@ -153,6 +156,7 @@ def ingest_flow(
     stac_url: str | None = None,
     collection_description: str = "Domain data processed via dashi ingestion pipeline",
     h3_resolution: int = 7,
+    classification: str = "int",
 ) -> list[dict]:
     """Discover every primary file/layer under source_path and ingest.
 
@@ -196,6 +200,7 @@ def ingest_flow(
             stac_url=stac_url,
             collection_description=collection_description,
             h3_resolution=h3_resolution,
+            classification=classification,
         )
         for d in real
     ]

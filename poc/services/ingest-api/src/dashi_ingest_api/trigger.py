@@ -15,7 +15,11 @@ router = APIRouter()
 class TriggerRequest(BaseModel):
     s3_uri: str
     domain: str
+    classification: str = "int"
     collection_description: str | None = None
+
+
+CLASSIFICATION_RANK = {"pub": 0, "int": 1, "rst": 2, "cnf": 3}
 
 
 class TriggerResponse(BaseModel):
@@ -36,9 +40,37 @@ async def trigger(
             detail=f"s3_uri must point at the {settings.landing_bucket} bucket",
         )
 
+    cls = req.classification.lower()
+    if cls not in CLASSIFICATION_RANK:
+        raise HTTPException(
+            status_code=400,
+            detail=f"classification must be one of {sorted(CLASSIFICATION_RANK)}",
+        )
+
+    # Enforce the domain's max_classification ceiling. Read from STAC
+    # collection extra_fields (populated at onboarding time, see
+    # docs/onboarding/domain-template.md).
+    from .clients import stac_client
+
+    async with stac_client() as client:
+        cr = await client.get(f"/collections/{req.domain}")
+        if cr.status_code == 200:
+            coll = cr.json()
+            extra = coll.get("extra_fields") or coll
+            ceiling = str(extra.get("dashi:max_classification", "cnf")).lower()
+            if ceiling in CLASSIFICATION_RANK and CLASSIFICATION_RANK[cls] > CLASSIFICATION_RANK[ceiling]:
+                raise HTTPException(
+                    status_code=403,
+                    detail=(
+                        f"classification '{cls}' exceeds the {req.domain} domain "
+                        f"ceiling '{ceiling}' — see docs/classification.md"
+                    ),
+                )
+
     parameters = {
         "source_path": req.s3_uri,
         "domain": req.domain,
+        "classification": cls,
     }
     if req.collection_description:
         parameters["collection_description"] = req.collection_description

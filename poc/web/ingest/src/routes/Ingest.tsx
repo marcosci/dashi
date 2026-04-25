@@ -27,8 +27,16 @@ function StatusLine({label}: {label: string}) {
   );
 }
 
+const CLASSIFICATIONS: {value: string; label: string}[] = [
+  {value: "pub", label: "pub — public, internet-publishable"},
+  {value: "int", label: "int — internal, operational data"},
+  {value: "rst", label: "rst — restricted, need-to-know"},
+  {value: "cnf", label: "cnf — confidential, audited access"},
+];
+
 export function Ingest() {
   const [domain, setDomain] = useState("");
+  const [classification, setClassification] = useState("int");
   const [file, setFile] = useState<File | null>(null);
   const [stage, setStage] = useState<Stage>({kind: "idle"});
 
@@ -54,7 +62,7 @@ export function Ingest() {
     mutationFn: async () => {
       if (stage.kind !== "scanned") throw new Error("scan not complete");
       setStage({kind: "triggering", s3_uri: stage.s3_uri, scan: stage.scan});
-      const run = await api.trigger({s3_uri: stage.s3_uri, domain});
+      const run = await api.trigger({s3_uri: stage.s3_uri, domain, classification});
       setStage({kind: "done", run});
     },
     onError: (e: Error) => setStage({kind: "error", message: e.message}),
@@ -82,11 +90,30 @@ export function Ingest() {
         </p>
       </header>
 
-      <section className="space-y-2">
-        <label className="block text-xs font-medium uppercase tracking-wider text-ink-soft">
-          Domain
-        </label>
-        <DomainPicker value={domain} onChange={setDomain} disabled={busy} />
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="block text-xs font-medium uppercase tracking-wider text-ink-soft">
+            Domain
+          </label>
+          <DomainPicker value={domain} onChange={setDomain} disabled={busy} />
+        </div>
+        <div className="space-y-2">
+          <label className="block text-xs font-medium uppercase tracking-wider text-ink-soft">
+            Classification
+          </label>
+          <select
+            value={classification}
+            onChange={(e) => setClassification(e.target.value)}
+            disabled={busy}
+            className="w-full rounded-lg bg-paper text-ink px-3.5 py-2.5 text-sm font-mono border border-line shadow-sm hover:border-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-amber/40 focus:border-amber transition disabled:opacity-50"
+          >
+            {CLASSIFICATIONS.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </section>
 
       <section className="space-y-2">

@@ -135,7 +135,12 @@ export const api = {
     }),
   scan: (s3_uri: string) =>
     request<ScanResponse>("/scan", {method: "POST", body: JSON.stringify({s3_uri})}),
-  trigger: (body: {s3_uri: string; domain: string; collection_description?: string}) =>
+  trigger: (body: {
+    s3_uri: string;
+    domain: string;
+    classification?: string;
+    collection_description?: string;
+  }) =>
     request<TriggerResponse>("/trigger", {method: "POST", body: JSON.stringify(body)}),
   catalog: (filters: {
     collection?: string;

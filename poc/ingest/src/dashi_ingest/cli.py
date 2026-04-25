@@ -27,10 +27,21 @@ def scan(path: Path = typer.Argument(..., exists=True, readable=True, file_okay=
     console.print(table)
 
 
+CLASSIFICATION_LEVELS = {"pub", "int", "rst", "cnf"}
+# Lower index = less sensitive. Items that exceed a domain's ceiling are rejected.
+CLASSIFICATION_RANK = {"pub": 0, "int": 1, "rst": 2, "cnf": 3}
+
+
 @app.command("ingest")
 def ingest(
     path: Path = typer.Argument(..., exists=True, readable=True, file_okay=True, dir_okay=True),
     domain: str = typer.Option(..., "--domain", help="STAC collection / zone domain, e.g. gelaende-umwelt"),
+    classification: str = typer.Option(
+        "int",
+        "--classification",
+        "-c",
+        help="Per-item classification level: pub | int | rst | cnf. See docs/classification.md.",
+    ),
     processed_bucket: str = typer.Option("processed", "--bucket", help="Target S3 bucket for processed data"),
     stac_url: str = typer.Option("http://localhost:18080", "--stac-url"),
     collection_description: str = typer.Option(
@@ -41,6 +52,12 @@ def ingest(
 ) -> None:
     """Discover files under PATH, route to the right transform, upload, catalog."""
     logging.basicConfig(level=log_level.upper(), format="%(asctime)s %(levelname)s %(message)s")
+
+    cls = classification.lower()
+    if cls not in CLASSIFICATION_LEVELS:
+        raise typer.BadParameter(
+            f"--classification must be one of {sorted(CLASSIFICATION_LEVELS)}, got {classification!r}"
+        )
 
     s3_cfg = storage.S3Config.from_env()
 
@@ -57,6 +74,7 @@ def ingest(
             collection_description=collection_description,
             s3_cfg=s3_cfg,
             h3_resolution=h3_resolution,
+            lineage={"dashi:classification": cls},
         )
         outcomes.append(outcome)
         status_color = {"ingested": "green", "rejected": "red", "skipped": "yellow"}.get(
