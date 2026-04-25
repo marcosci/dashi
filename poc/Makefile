@@ -1,6 +1,7 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
         ogc-deploy tipg-deploy 3dtiles-build 3dtiles-deploy pointcloud-presign \
+        web-ingest-deploy backup-deploy auth-bootstrap \
         ingest-sample smoke teardown docs-serve docs-build
 
 help:
@@ -121,6 +122,9 @@ prefect-up:
 pointcloud-presign:
 	@bash scripts/pointcloud-presign.sh
 
+web-ingest-deploy:
+	@bash scripts/web-ingest-deploy.sh
+
 backup-deploy:
 	@bash scripts/backup-bootstrap.sh
 
@@ -158,6 +162,8 @@ smoke:
 	@bash smoke/tipg.sh
 	@bash smoke/loki.sh
 	@bash smoke/backup.sh
+	@bash smoke/auth.sh
+	@bash smoke/web-ingest.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

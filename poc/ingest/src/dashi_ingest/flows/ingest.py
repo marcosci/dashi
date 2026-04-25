@@ -117,6 +117,36 @@ def ingest_one_task(
     return outcome.__dict__
 
 
+def _fetch_s3_to_tmp(s3_uri: str, dest: Path) -> Path:
+    """Download s3://bucket/key (or its prefix tree) into dest. Returns the
+    local path that detect.discover() should be pointed at.
+    """
+    s3 = storage.s3_client(storage.S3Config.from_env())
+    rest = s3_uri[len("s3://"):]
+    bucket, _, key = rest.partition("/")
+    dest.mkdir(parents=True, exist_ok=True)
+
+    # If key looks like a single object (has a dot/extension after the last /),
+    # download it as one file. Otherwise treat as a prefix and mirror the tree.
+    last = key.rsplit("/", 1)[-1] if "/" in key else key
+    if "." in last and last and not key.endswith("/"):
+        local = dest / last
+        s3.download_file(bucket, key, str(local))
+        return local
+
+    paginator = s3.get_paginator("list_objects_v2")
+    prefix = key.rstrip("/") + "/" if key else ""
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for obj in page.get("Contents", []) or []:
+            rel = obj["Key"][len(prefix):] if prefix else obj["Key"]
+            if not rel:
+                continue
+            target = dest / rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            s3.download_file(bucket, obj["Key"], str(target))
+    return dest
+
+
 @flow(name="dashi-ingest")
 def ingest_flow(
     source_path: str,
@@ -128,6 +158,12 @@ def ingest_flow(
 ) -> list[dict]:
     """Discover every primary file/layer under source_path and ingest.
 
+    `source_path` may be either a local filesystem path or an `s3://` URI
+    (single object or prefix). For S3 inputs the flow downloads the
+    referenced bytes into a tempdir, then runs detect.discover() on that
+    tempdir — keeps detect.py filesystem-only and lets the ingest-api shim
+    hand off browser-uploaded files via presigned PUT to landing/.
+
     Parameters come in via Prefect deployment default values or the
     `prefect deployment run` CLI — no code edits needed for a new run.
     """
@@ -136,7 +172,14 @@ def ingest_flow(
     stac_url = stac_url or os.environ.get(
         "DASHI_STAC_URL", "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080"
     )
-    src = Path(source_path)
+
+    if source_path.startswith("s3://"):
+        import tempfile
+        tmp = Path(tempfile.mkdtemp(prefix="dashi-flow-"))
+        logger.info("fetching %s → %s", source_path, tmp)
+        src = _fetch_s3_to_tmp(source_path, tmp)
+    else:
+        src = Path(source_path)
 
     detections = detect.discover(src)
     real = [d for d in detections if d.kind != "unknown"]

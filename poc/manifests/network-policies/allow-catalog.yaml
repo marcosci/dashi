@@ -25,6 +25,10 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
+        # ingest-api in dashi-web reads /collections.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-web
       ports:
         - protocol: TCP
           port: 8080

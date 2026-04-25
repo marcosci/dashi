@@ -120,3 +120,47 @@ jobs:
         run: |
           test -s docs/viewer/laz-perf.wasm
           test -s docs/viewer/laz_rs_wasm_bg.wasm
+
+  web-ingest:
+    name: Web ingest (Vite + Vitest + tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: poc/web/ingest/package.json
+
+      - name: Install + typecheck + test + build
+        run: |
+          cd poc/web/ingest
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Bundle size budget (≤200 KB gz JS)
+        run: |
+          cd poc/web/ingest
+          GZ=$(find dist/assets -name '*.js' -exec sh -c 'gzip -c "$1" | wc -c' _ {} \; | awk '{s+=$1} END {print s}')
+          echo "JS gz size: $GZ bytes"
+          test "$GZ" -le 204800 || { echo "JS bundle exceeds 200 KB gz budget"; exit 1; }
+
+  ingest-api:
+    name: Ingest API (FastAPI shim)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Lint (ruff) + import smoke
+        run: |
+          pip install ruff
+          ruff check poc/services/ingest-api/src
+          ruff format --check poc/services/ingest-api/src

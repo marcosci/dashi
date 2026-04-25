@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+  /* dashi palette — keep in sync with docs/assets/README.md */
+  --color-ink:         #1a1612;
+  --color-paper:       #faf6ee;
+  --color-cream:       #f4ede1;
+  --color-cream-deep:  #ebe1cb;
+  --color-amber:       #c8821f;
+  --color-amber-light: #e8a547;
+  --color-amber-deep:  #8a5410;
+  --color-kombu:       #3d5a3a;
+  --color-seal:        #b8421f;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body, #root {
+  min-height: 100%;
+}
+body {
+  font-family: var(--font-sans);
+  background: var(--color-ink);
+  color: var(--color-cream);
+}

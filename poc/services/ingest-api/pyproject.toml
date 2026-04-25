@@ -1,0 +1,35 @@
+[project]
+name = "dashi-ingest-api"
+version = "0.1.0"
+description = "Thin FastAPI shim for the dashi ingest web UI: presigned RustFS uploads + Prefect trigger + STAC-backed domain catalog."
+requires-python = ">=3.11"
+authors = [
+  { name = "Marco Sciaini", email = "marco@kaldera.dev" },
+  { name = "Johannes Schlund" },
+]
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "boto3>=1.35",
+  "httpx>=0.27",
+  "pydantic>=2.7",
+  "pydantic-settings>=2.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "httpx>=0.27", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dashi_ingest_api"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["B008"]
