@@ -19,6 +19,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # INGEST_API_UPSTREAM is templated by the official nginx entrypoint
 # (envsubst over /etc/nginx/templates/*.template) at container start.
 ENV INGEST_API_UPSTREAM="http://ingest-api.dashi-web.svc.cluster.local:8088"
+ENV RUSTFS_UPSTREAM="http://rustfs.dashi-platform.svc.cluster.local:9000"
 RUN mkdir -p /etc/nginx/templates && printf '%s\n' \
   'server {' \
   '  listen 8080;' \
@@ -28,13 +29,27 @@ RUN mkdir -p /etc/nginx/templates && printf '%s\n' \
   '  location /api/ {' \
   '    rewrite ^/api/(.*)$ /$1 break;' \
   '    proxy_pass ${INGEST_API_UPSTREAM};' \
-  '    proxy_set_header Host              $host;' \
+  '    proxy_set_header Host              $http_host;' \
   '    proxy_set_header X-Real-IP         $remote_addr;' \
   '    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;' \
   '    proxy_set_header X-Forwarded-Proto $scheme;' \
   '    proxy_set_header Remote-User       $http_remote_user;' \
   '    proxy_set_header Remote-Groups     $http_remote_groups;' \
   '    proxy_read_timeout                 300s;' \
+  '  }' \
+  '  # Bucket paths reverse-proxy to RustFS, preserving Host. No path' \
+  '  # rewrite — boto3 SigV4 includes the path in the signature, so we' \
+  '  # cannot prefix-mount RustFS without breaking the signature. Same' \
+  '  # origin as the SPA → no CORS for browser PUT.' \
+  '  location ~ ^/(landing|processed|curated|backups)(/|$) {' \
+  '    proxy_pass ${RUSTFS_UPSTREAM};' \
+  '    proxy_set_header Host              $http_host;' \
+  '    proxy_set_header X-Real-IP         $remote_addr;' \
+  '    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;' \
+  '    proxy_set_header X-Forwarded-Proto $scheme;' \
+  '    proxy_request_buffering            off;' \
+  '    proxy_read_timeout                 600s;' \
+  '    proxy_send_timeout                 600s;' \
   '  }' \
   '  location / { try_files $uri $uri/ /index.html; }' \
   '}' > /etc/nginx/templates/default.conf.template \

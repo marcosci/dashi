@@ -9,8 +9,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="DASHI_API_", case_sensitive=False)
 
-    # S3 / RustFS
+    # S3 / RustFS — `s3_endpoint` is the cluster-internal address used for
+    # /scan downloads (server-side). `s3_public_endpoint`, if set, is the
+    # browser-reachable address baked into presigned PUT URLs (the SigV4
+    # Host must match where the browser actually sends the request). For
+    # PoC port-forward use, set this to http://localhost:9000.
     s3_endpoint: str = Field(default="http://rustfs.dashi-platform.svc.cluster.local:9000")
+    s3_public_endpoint: str = ""
     s3_region: str = Field(default="us-east-1")
     s3_access_key: str = ""
     s3_secret_key: str = ""

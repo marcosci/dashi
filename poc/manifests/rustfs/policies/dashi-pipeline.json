@@ -15,6 +15,19 @@
       ]
     },
     {
+      "Sid": "LandingZoneWebUpload",
+      "Comment": "Web-UI presigned uploads land in landing/<domain>/incoming/. Phase-3 should split this off into a dedicated dashi-web-uploader user scoped to that prefix.",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::landing/*/incoming/*"
+      ]
+    },
+    {
       "Sid": "ProcessedZoneReadWrite",
       "Effect": "Allow",
       "Action": [

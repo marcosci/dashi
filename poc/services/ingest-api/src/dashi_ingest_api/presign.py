@@ -5,11 +5,11 @@ from __future__ import annotations
 import re
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .auth import Principal, current_user
-from .clients import s3_client
+from .clients import s3_presign_client_for
 from .settings import settings
 
 router = APIRouter()
@@ -38,6 +38,7 @@ class PresignResponse(BaseModel):
 @router.post("/presign", response_model=PresignResponse)
 def presign(
     req: PresignRequest,
+    request: Request,
     user: Principal = Depends(current_user),
 ) -> PresignResponse:
     if req.content_length > settings.upload_max_bytes:
@@ -58,7 +59,23 @@ def presign(
     upload_id = uuid.uuid4().hex
     key = f"{req.domain}/incoming/{upload_id}/{req.filename}"
 
-    url = s3_client().generate_presigned_url(
+    # Browser-reachable endpoint. The ingest-web nginx proxies /s3/* to
+    # RustFS while preserving Host, so the presigned URL is same-origin
+    # with the SPA → no CORS. Override via DASHI_API_S3_PUBLIC_ENDPOINT
+    # for production ingress setups.
+    fwd_proto = request.headers.get("x-forwarded-proto") or request.url.scheme
+    fwd_host = (
+        request.headers.get("x-forwarded-host")
+        or request.headers.get("host")
+        or "localhost"
+    )
+    # No /s3 prefix — SigV4 includes the path in the canonical request,
+    # so any prefix-mount would break the signature at RustFS. nginx
+    # routes /landing/, /processed/, /curated/, /backups/ to RustFS
+    # directly with Host preserved.
+    public_endpoint = settings.s3_public_endpoint or f"{fwd_proto}://{fwd_host}"
+
+    url = s3_presign_client_for(public_endpoint).generate_presigned_url(
         "put_object",
         Params={
             "Bucket": settings.landing_bucket,
