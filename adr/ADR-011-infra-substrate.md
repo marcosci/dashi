@@ -6,10 +6,10 @@
 
 ## Kontext
 
-Ursprüngliche Annahme aus §10.1 F-02 war eine Infrastrukturentscheidung zwischen Cloud, on-premise oder hybrid mit militärischer Beschaffungskette. Für den PoC wird dieser Weg verworfen — die Initiative läuft zunächst als interne Entwicklung im opendefense-Umfeld. Eine schnell verfügbare, reproduzierbare und produktionsnahe Substrat-Entscheidung wird benötigt.
+Ursprüngliche Annahme aus §10.1 F-02 war eine Infrastrukturentscheidung zwischen Cloud, on-premise oder hybrid mit regulierter Beschaffungskette. Für den PoC wird dieser Weg verworfen — die Initiative läuft zunächst als interne Entwicklung im independent project-Umfeld. Eine schnell verfügbare, reproduzierbare und produktionsnahe Substrat-Entscheidung wird benötigt.
 
 Die Wahl muss:
-- Kubernetes-Semantik abbilden (spätere Migration in militärische K8s-Infrastruktur ohne Architekturbruch)
+- Kubernetes-Semantik abbilden (spätere Migration in regulierte K8s-Infrastruktur ohne Architekturbruch)
 - Lokal auf einer Entwickler-Maschine lauffähig sein
 - Zum Produktivbetrieb kompatibel sein (keine Docker-Compose-only Pattern, die im Cluster brechen)
 - GitHub Actions + Pages-tauglich sein (GitHub Repo (marcosci/dashi) ist die Zielplattform)
@@ -34,7 +34,7 @@ Die Wahl muss:
 - Persistent Volumes für RustFS werden lokal gemappt — produktives Tiering (ADR-001 Konsequenz) bleibt offen
 - GitHub Actions + Pages pipelines verifizieren Manifest-Rendering und Integrationstests vor Merge
 - Keine Docker-Compose-Only-Tooling im Repo — entweder K8s-Manifest oder GitHub-Actions-Job
-- Migrationspfad nach Phase 3 in eine produktive militärische K8s-Umgebung bleibt offen, aber die Manifests sind portierbar
+- Migrationspfad nach Phase 3 in eine produktive regulierte K8s-Umgebung bleibt offen, aber die Manifests sind portierbar
 
 ## Offen / Nachgelagerte Entscheidungen
 

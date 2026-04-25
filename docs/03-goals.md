@@ -13,7 +13,7 @@ Die folgenden Ziele definieren den Erfolg dieser Initiative. Sie sind bewusst me
 
 ### Operative Ziele
 
-- Konsolidierung der Geodaten aus den vier Domänen Aufklärung & ISR, Missionsplanung & C2, Logistik & Versorgung sowie Gelände & Umwelt unter einer gemeinsamen Plattform
+- Konsolidierung der Geodaten aus den primären Anwendungsdomänen (Fernerkundung, operative Planung, Logistik & Lieferkette, Gelände & Umwelt, Forschung & Modellierung) unter einer gemeinsamen Plattform
 - Reduktion manueller Datenaufbereitungsaufwände um mindestens **[X %]** innerhalb der ersten zwölf Monate nach Produktivbetrieb
 - Bereitstellung nachvollziehbarer, versionierter und wiederholbarer Analyseprodukte für alle angebundenen Konsumententeams
 - Schaffung der technischen Voraussetzungen für KI/ML-gestützte Auswerteverfahren auf Geodaten
@@ -28,11 +28,11 @@ Die folgenden Ziele definieren den Erfolg dieser Initiative. Sie sind bewusst me
 
 Diese Punkte sind bewusst aus dem Scope ausgeschlossen. Sie werden hier explizit benannt, um Erwartungen zu steuern und Scope Creep frühzeitig zu verhindern.
 
-**Der Spatial Data Lake ist kein Echtzeit-Gefechtsinformationssystem.**
-Die Plattform ist auf analytische und planerische Workloads ausgelegt. Echtzeit-Datenströme mit taktischen Latenzanforderungen im Millisekundenbereich sind kein Ziel dieser Initiative und erfordern eine gesonderte Architektur.
+**Der Spatial Data Lake ist kein Echtzeit-Streaming-System.**
+Die Plattform ist auf analytische und planerische Workloads ausgelegt. Echtzeit-Datenströme mit Latenzen unter 100 ms (z. B. Live-Sensorströme) sind kein Ziel dieser Initiative und erfordern eine gesonderte Architektur.
 
-**Die Plattform ersetzt keine bestehenden Führungsinformationssysteme (FüInfoSys).**
-Bestehende operative Systeme bleiben in ihrer Funktion unberührt. Der Data Lake ergänzt diese Systeme als analytische Schicht — er löst sie nicht ab und greift nicht in ihre Prozesse ein.
+**Die Plattform ersetzt keine bestehenden GIS- oder Fachsysteme.**
+Bestehende Systeme bleiben in ihrer Funktion unberührt. Der Data Lake ergänzt sie als analytische Schicht — er löst sie nicht ab und greift nicht in ihre Prozesse ein.
 
 **Visualisierung und Kartendarstellung sind kein Bestandteil dieser Initiative.**
 Der Data Lake liefert Daten und Schnittstellen. Die Entwicklung von GIS-Clients, Kartenanwendungen oder Dashboards liegt außerhalb des Scopes und obliegt den jeweiligen Konsumententeams oder nachgelagerten Projekten.
@@ -43,5 +43,5 @@ Qualitätssicherung beginnt an der Grenze zwischen Landing Zone und Processed Zo
 **Migration historischer Altdatenbestände ist nicht Teil von Phase 1 und 2.**
 Die Überführung bestehender Datenarchive in die neue Plattform wird als separates Vorhaben betrachtet und ist nicht Bestandteil des initialen Lieferumfangs.
 
-**Der Betrieb von Klassifizierungsstufen oberhalb von [X] ist nicht Gegenstand dieser Initiative.**
-Anforderungen an den Betrieb von Daten höherer Geheimhaltungsstufen erfordern gesonderte Sicherheitsarchitektur, Akkreditierungsprozesse und Infrastruktur und werden in einem separaten Vorhaben adressiert.
+**Der Betrieb stark klassifizierter Daten ist nicht Gegenstand dieser Initiative.**
+Anforderungen an den Betrieb von Daten höherer Vertraulichkeitsstufen erfordern gesonderte Sicherheitsarchitektur, Compliance-Audits und Infrastruktur und werden in einem separaten Vorhaben adressiert.

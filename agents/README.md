@@ -1,6 +1,6 @@
 # Agent Briefs
 
-Task-specific briefs for agents contributing to the CldGIS Geodatalake specification.
+Task-specific briefs for agents contributing to the dashi specification.
 
 Each brief is a self-contained prompt that can be handed to a Claude Code agent without requiring the full conversation context. Briefs describe scope, inputs, expected outputs, and stopping conditions.
 
@@ -12,7 +12,7 @@ Each brief is a self-contained prompt that can be handed to a Claude Code agent 
 | [fill-baseline.md](fill-baseline.md) | Populate `docs/06-baseline.md` from stakeholder interview notes | Phase 1 baseline capture |
 | [add-requirement.md](add-requirement.md) | Add a new F-NN / NF-NN requirement | When stakeholder raises a new requirement |
 | [update-risk.md](update-risk.md) | Add or update an entry in the risk register | Steering committee review, new incident |
-| [translate-chapter.md](translate-chapter.md) | Produce an English reviewer-facing translation of one chapter | External review / bündnispartner handover |
+| [translate-chapter.md](translate-chapter.md) | Produce an English reviewer-facing translation of one chapter | External review / partner handover |
 
 ## Adding a new brief
 

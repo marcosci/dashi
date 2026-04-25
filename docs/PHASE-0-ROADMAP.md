@@ -2,7 +2,7 @@
 
 **Status:** Aktiv, Stand 2026-04-23
 **Co-Owners:** Marco Sciaini + Johannes Schlund
-**Ziel:** Vertikaler End-to-End-Datenfluss auf lokalem k3s, validiert mit echtem Sample-Datensatz, innerhalb 3–4 Wochen. Gate-1-Äquivalent erreichen, ohne militärischen Beschaffungs- und Akkreditierungsstrang.
+**Ziel:** Vertikaler End-to-End-Datenfluss auf lokalem k3s, validiert mit echtem Sample-Datensatz, innerhalb 3–4 Wochen. Gate-1-Äquivalent erreichen, ohne regulierten Beschaffungs- und Compliance-Auditsstrang.
 
 ---
 
@@ -10,7 +10,7 @@
 
 - **Owner + Architect + Lead:** Marco Sciaini + Johannes Schlund (Co-Owner-Modell) — Rollen gemeinsam gehalten, Entscheidungen einvernehmlich (siehe [§4](04-stakeholders.md))
 - **Infrastruktur:** lokales k3s, GitHub Repo (marcosci/dashi) für CI/CD (siehe [ADR-011](adr/ADR-011-infra-substrate.md))
-- **Fokusdomäne:** Gelände & Umwelt (siehe [§9 Phase 1](09-phases.md))
+- **Fokusdomäne:** terrain & environment (siehe [§9 Phase 1](09-phases.md))
 - **Sample-Datensatz:** ~500 MB–1 GB, Formate GeoTIFF, Shapefile, KML, GPKG (liefert Marco)
 - **Offene ADRs für PoC scope:**
   - ADR-005 (Tabellenformat) → **nicht PoC-relevant** (keine Updates auf Vektordaten im Sample)
@@ -20,12 +20,12 @@
 
 ## Nicht aktiv in Phase 0
 
-- R-12 Akkreditierung (militärischer Kontext — pausiert)
+- R-12 Compliance-Audit (regulierter Kontext — pausiert)
 - R-16 Beschaffung (entfällt durch ADR-011)
 - R-03 Teamkapazität (reduziert — 1-Personen-PoC)
 - Bestandsaufnahme §6.3 über alle 4 Domänen (beschränkt auf bereitgestelltes Sample)
 - OGC/WMS/WFS-Dienste (Phase 2)
-- Akkreditierungsvorbereitende Audit-Infrastruktur
+- Compliance-Auditsvorbereitende Audit-Infrastruktur
 
 ---
 

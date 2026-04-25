@@ -2,27 +2,27 @@
 
 ## Grundprinzip
 
-Im militärischen Kontext ist die Klärung von Verantwortlichkeiten keine Formalität — sie ist eine operative Notwendigkeit. Unklare Zuständigkeiten sind erfahrungsgemäß die häufigste Ursache für verzögerte Entscheidungen, blockierte Pipelines und gescheiterte Plattforminitiativen. Dieses Kapitel definiert verbindlich, wer welche Rolle in dieser Initiative übernimmt.
+Im regulierten Umgebungen ist die Klärung von Verantwortlichkeiten keine Formalität — sie ist eine operative Notwendigkeit. Unklare Zuständigkeiten sind erfahrungsgemäß die häufigste Ursache für verzögerte Entscheidungen, blockierte Pipelines und gescheiterte Plattforminitiativen. Dieses Kapitel definiert verbindlich, wer welche Rolle in dieser Initiative übernimmt.
 
 ## Rollenmodell
 
-> **Besetzungsstand (2026-04-23, Pre-Phase-1 / PoC):** Marco Sciaini und Johannes Schlund leiten die Initiative gemeinsam als Co-Owner, solange die Initiative als interne Entwicklung im opendefense-Kontext betrieben wird. Rollenverteilung auf zusätzliche Personen erfolgt mit Phase-2-Übergabe in den Produktivbetrieb.
+> **Besetzungsstand (2026-04-23, Pre-Phase-1 / PoC):** Marco Sciaini und Johannes Schlund leiten die Initiative gemeinsam als Co-Owner, solange die Initiative als interne Entwicklung im independent project-Kontext betrieben wird. Rollenverteilung auf zusätzliche Personen erfolgt mit Phase-2-Übergabe in den Produktivbetrieb.
 
 ### Initiative Owner / Auftraggeber
 Trägt die organisatorische Verantwortung für die Initiative. Trifft finale Entscheidungen bei Eskalationen, sichert Ressourcen und Budget, und gibt die Phasenübergänge frei. Zwei-Personen-Owner-Modell: beide gemeinsam verantwortlich, Entscheidungen einvernehmlich.
 
 | Rolle            | Name / Einheit                    | Kontakt             |
 |------------------|-----------------------------------|---------------------|
-| Initiative Owner | Marco Sciaini / opendefense       | marco@kaldera.dev   |
-| Initiative Owner | Johannes Schlund / opendefense   | [tbd]               |
+| Initiative Owner | Marco Sciaini / independent project       | marco@kaldera.dev   |
+| Initiative Owner | Johannes Schlund / independent project   | [tbd]               |
 
 ### Platform Architect
 Verantwortet die technische Gesamtarchitektur der Plattform. Trifft und dokumentiert Architekturentscheidungen, bewertet Technologieoptionen, definiert Zonenverträge und Schnittstellenstandards. Eskalationspunkt für technische Konflikte zwischen Teams.
 
 | Rolle              | Name / Einheit                    | Kontakt             |
 |--------------------|-----------------------------------|---------------------|
-| Platform Architect | Marco Sciaini / opendefense       | marco@kaldera.dev   |
-| Platform Architect | Johannes Schlund / opendefense   | [tbd]               |
+| Platform Architect | Marco Sciaini / independent project       | marco@kaldera.dev   |
+| Platform Architect | Johannes Schlund / independent project   | [tbd]               |
 
 ### Platform Team
 Verantwortlich für Aufbau, Betrieb und Weiterentwicklung der Plattforminfrastruktur. Stellt die Zonenarchitektur, Pipelines, den Katalog und die Serving-Schicht bereit.
@@ -39,10 +39,10 @@ Pro Domäne wird ein verantwortlicher Dateneigentümer benannt. Dieser ist zust�
 
 | Domäne             | Data Owner | Einheit   | Kontakt   |
 |--------------------|------------|-----------|-----------|
-| Aufklärung & ISR   | [Name]     | [Einheit] | [Kontakt] |
-| Missionsplanung & C2 | [Name]   | [Einheit] | [Kontakt] |
-| Logistik & Versorgung | [Name]  | [Einheit] | [Kontakt] |
-| Gelände & Umwelt   | [Name]     | [Einheit] | [Kontakt] |
+| Earth observation   | [Name]     | [Einheit] | [Kontakt] |
+| operational planning | [Name]   | [Einheit] | [Kontakt] |
+| logistics & supply chain | [Name]  | [Einheit] | [Kontakt] |
+| terrain & environment   | [Name]     | [Einheit] | [Kontakt] |
 
 ### Datenlieferanten (Data Producer)
 Teams oder Systeme, die Daten in die Plattform einspeisen. Verantwortlich für die Einhaltung der vereinbarten Lieferschnittstellen, Formate und Lieferzyklen.
@@ -58,7 +58,7 @@ Teams, Systeme oder Personen, die Daten aus der Plattform beziehen. **Kein Schre
 |----------------|-----------|--------------------------|-----------------|
 | [Team / System] | [Einheit] | [Analyseart / Anwendungsfall] | [Kontakt]   |
 
-### Sicherheits- & Akkreditierungsverantwortliche
+### Sicherheits- & Compliance-Auditsverantwortliche
 
 | Rolle                     | Name / Einheit | Kontakt   |
 |---------------------------|----------------|-----------|

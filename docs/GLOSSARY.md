@@ -2,14 +2,13 @@
 
 Abkürzungen und Fachbegriffe, die in dieser Spezifikation verwendet werden.
 
-## Organisatorisch / Militärisch
+## Organisatorisch
 
 | Begriff | Bedeutung |
 |---------|-----------|
-| **C2** | Command and Control — Führung und Kontrolle |
-| **ISR** | Intelligence, Surveillance, Reconnaissance — Aufklärung und Überwachung |
-| **FüInfoSys** | Führungsinformationssystem — bestehende operative Befehls- und Lagesysteme |
-| **NATO STANAG** | NATO Standardization Agreement — Interoperabilitätsstandards für Bündnispartner |
+| **EO** | Earth Observation — Fernerkundung und satellitengestützte Beobachtung |
+| **legacy GIS systems** | bestehende geographische Informationssysteme im Bestand |
+| **OGC** | Open Geospatial Consortium — Standardisierungsorganisation für Geodaten-APIs |
 | **RACI** | Responsible, Accountable, Consulted, Informed — Verantwortungsmatrix |
 | **RTO** | Recovery Time Objective — maximale tolerierbare Ausfallzeit |
 | **RPO** | Recovery Point Objective — maximal tolerierbarer Datenverlust |

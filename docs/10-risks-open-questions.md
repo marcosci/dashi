@@ -19,17 +19,17 @@ Offene Fragen sind ungeklärte Sachverhalte, die eine Entscheidung oder Informat
 
 | ID   | Frage | Bereich | Verantwortlich | Benötigt bis | Status |
 |------|-------|---------|----------------|--------------|:------:|
-| F-01 | Welche Klassifizierungsstufen müssen auf der Plattform verarbeitet werden — und in getrennten oder gemeinsamen Zonen? | Sicherheit / Architektur | Sicherheitsbeauftragter | Ende Phase 1 | 🔴 |
+| F-01 | Welche Datenklassifizierung müssen auf der Plattform verarbeitet werden — und in getrennten oder gemeinsamen Zonen? | Sicherheit / Architektur | Sicherheitsbeauftragter | Ende Phase 1 | 🔴 |
 | F-02 | Welche Infrastruktur steht zur Verfügung — Cloud, on-premise oder hybrid? Gibt es bestehende Verträge oder Vorgaben? | Infrastruktur | Initiative Owner | Monat 1 | 🟢 |
 |   | **Geklärt 2026-04-23:** PoC läuft auf lokalem k3s-Cluster, entwickelt im GitHub (marcosci/dashi). Siehe [ADR-011](adr/ADR-011-infra-substrate.md). | | | | |
-| F-03 | Gibt es Echtzeit-Anforderungen aus dem C2-Bereich, die eine gesonderte Architekturkomponente erfordern? | Architektur / C2 | Data Owner C2 | Ende Phase 1 | 🟡 |
-| F-04 | Welche externen Systeme — Bündnispartner, nationale Behörden, NATO-Infrastruktur — müssen angebunden werden? | Interoperabilität | Initiative Owner | Phase 2 Start | 🟡 |
+| F-03 | Gibt es Echtzeit-Anforderungen aus dem operational-Bereich, die eine gesonderte Architekturkomponente erfordern? | Architektur / Operations | Data Owner Operations | Ende Phase 1 | 🟡 |
+| F-04 | Welche externen Systeme — Partnerorganisationen, externe Behörden, kommerzielle Plattformen — müssen angebunden werden? | Interoperabilität | Initiative Owner | Phase 2 Start | 🟡 |
 | F-05 | Wie lange müssen Rohdaten in der Landing Zone aufbewahrt werden? Gibt es gesetzliche oder regulatorische Archivierungsfristen? | Governance / Recht | Initiative Owner | Ende Phase 1 | 🟡 |
 | F-06 | Welche Quellsysteme haben keine standardisierten Exportschnittstellen und erfordern individuelle Konnektoren? | Ingestion | Data Owner je Domäne | Ende Phase 1 | 🟡 |
-| F-07 | Ist eine NATO-STANAG-Konformität für bestimmte Datensätze oder Schnittstellen vorgeschrieben? | Interoperabilität / Recht | Initiative Owner | Phase 2 | 🟡 |
+| F-07 | Ist eine Standardkonformität (OGC, ISO 19115, STAC) für bestimmte Datensätze oder Schnittstellen vorgeschrieben? | Interoperabilität / Recht | Initiative Owner | Phase 2 | 🟡 |
 | F-08 | Welches Koordinatenreferenzsystem ist organisationsweit verbindlich vorzuschreiben — oder muss dies in Phase 1 erst entschieden werden? | Architektur | Platform Architect | Ende Phase 1 | 🟡 |
 | F-09 | Wer trägt die Betriebsverantwortung nach Abschluss von Phase 3 — ein dediziertes Team, eine bestehende IT-Einheit oder ein externer Dienstleister? | Betrieb / Organisation | Initiative Owner | Phase 2 | 🟡 |
-| F-10 | Gibt es Anforderungen an Offline-Betrieb oder eingeschränkte Konnektivität (z. B. taktische Randlagen ohne Netzanbindung)? | Architektur / Betrieb | Data Owner C2 / ISR | Ende Phase 1 | 🟡 |
+| F-10 | Gibt es Anforderungen an Offline-Betrieb oder eingeschränkte Konnektivität (z. B. Standorten mit eingeschränkter Konnektivität)? | Architektur / Betrieb | Data Owner Operations | Ende Phase 1 | 🟡 |
 
 ---
 
@@ -71,10 +71,10 @@ Das Risikoregister erfasst alle bekannten Risiken mit ihrer Eintrittswahrscheinl
 
 | ID   | Risiko | Wahrsch. | Schaden | Stufe | Gegenmaßnahme | Verantwortlich |
 |------|--------|----------|---------|:-----:|---------------|----------------|
-| R-12 | Akkreditierungsprozess dauert länger als geplant und verzögert den Produktivbetrieb | Hoch | Hoch | 🔴 | Sicherheitsbeauftragten ab Phase 1 vollständig einbinden; Akkreditierungsanforderungen frühzeitig erheben; Puffer in Zeitplan einplanen | Sicherheitsbeauftragter |
+| R-12 | Compliance-Audit-Prozess dauert länger als geplant und verzögert den Produktivbetrieb | Hoch | Hoch | 🔴 | Sicherheitsbeauftragten ab Phase 1 vollständig einbinden; Compliance-Auditsanforderungen frühzeitig erheben; Puffer in Zeitplan einplanen | Sicherheitsbeauftragter |
 | R-13 | Unbeabsichtigte Speicherung klassifizierter Daten in nicht akkreditierten Zonen | Mittel | Hoch | 🟠 | Klassifizierungsanforderungen in Phase 1 vollständig klären; technische Zugriffskontrollen und Zonentrennungen vor Produktivbetrieb prüfen | Security Engineer |
 | R-14 | Unbefugter Datenzugriff durch fehlkonfigurierte Zugriffsrechte | Mittel | Hoch | 🟠 | Rollenbasierte Zugriffskontrolle als Pflichtanforderung; regelmäßige Access-Reviews einplanen; Audit-Logging von Beginn an aktiv | Security Engineer |
-| R-15 | Abhängigkeit von Technologien mit ungeklärter Zulassung im militärischen Betrieb | Mittel | Hoch | 🟠 | Alle Technologieentscheidungen vor Umsetzung mit IT-Sicherheit und Beschaffung abstimmen; Open-Source-Lizenzen prüfen | Platform Architect |
+| R-15 | Abhängigkeit von Technologien mit ungeklärter Zulassung im regulierten Betrieb | Mittel | Hoch | 🟠 | Alle Technologieentscheidungen vor Umsetzung mit IT-Sicherheit und Beschaffung abstimmen; Open-Source-Lizenzen prüfen | Platform Architect |
 
 ### Zeitplan- & Ressourcenrisiken
 
@@ -93,11 +93,11 @@ Die folgenden Risiken erfordern unmittelbaren Handlungsbedarf noch vor dem offiz
 **R-03 — Teamkapazität**
 Ohne ausreichend qualifiziertes Personal ist diese Initiative nicht durchführbar. Die Ressourcenzusage muss vor Gate 1 formal vorliegen — nicht als Absichtserklärung, sondern als verbindliche Zuweisung.
 
-**R-12 — Akkreditierung**
-Im militärischen Kontext ist die Sicherheitsakkreditierung der am häufigsten unterschätzte Faktor. Ein zu später Start des Akkreditierungsprozesses kann den gesamten Produktivbetrieb um Monate verschieben. Der Sicherheitsbeauftragte muss ab Tag 1 eingebunden sein.
+**R-12 — Compliance-Audit**
+Im regulierten Umgebungen ist die Compliance-Audit der am häufigsten unterschätzte Faktor. Ein zu später Start des Compliance-Audit-Prozesses kann den gesamten Produktivbetrieb um Monate verschieben. Der Sicherheitsbeauftragte muss ab Tag 1 eingebunden sein.
 
 **R-16 — Infrastrukturbeschaffung**
-Beschaffungsprozesse im militärischen Umfeld haben lange Vorlaufzeiten. Die Entscheidung über die Infrastrukturgrundlage (Cloud, on-premise, hybrid) und die Einleitung des Beschaffungsvorgangs müssen parallel zur Planungsphase erfolgen — nicht danach.
+Beschaffungsprozesse im regulierten Umfeld haben lange Vorlaufzeiten. Die Entscheidung über die Infrastrukturgrundlage (Cloud, on-premise, hybrid) und die Einleitung des Beschaffungsvorgangs müssen parallel zur Planungsphase erfolgen — nicht danach.
 
 ---
 

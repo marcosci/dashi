@@ -1,10 +1,10 @@
-# Agent Instructions — CldGIS Geodatalake
+# Agent Instructions — dashi
 
 Working instructions for Claude Code agents contributing to this planning/architecture repo.
 
 ## Mission
 
-This repo is the **living architecture specification** for a military-grade cloud-native spatial data lake. It is primarily a documentation project at this stage — no application code yet. Phase 1 (Proof of Concept) will add a PoC implementation.
+This repo is the **living architecture specification** for a production-grade cloud-native spatial data lake. It is primarily a documentation project at this stage — no application code yet. Phase 1 (Proof of Concept) will add a PoC implementation.
 
 ## Language Conventions
 
@@ -56,10 +56,10 @@ When asked to edit "chapter 7" or "ADR-03", go straight to the numbered file.
 
 ## Domains (use these exact names)
 
-- Aufklärung & ISR
-- Missionsplanung & C2
-- Logistik & Versorgung
-- Gelände & Umwelt
+- Earth observation
+- operational planning
+- logistics & supply chain
+- terrain & environment
 
 ## Zones (use these exact names)
 
@@ -67,8 +67,8 @@ Landing → Processed → Curated → Enrichment → Serving
 
 ## Out of Scope (hard limits — do not design into these)
 
-- Real-time/tactical fire-control latencies (ms range)
-- Replacement of existing FüInfoSys
+- Real-time hard-deadline latencies (sub-second)
+- Replacement of existing legacy GIS systems
 - Map visualization / GIS clients / dashboards
 - Quality of raw source data (producers own that)
 - Migration of historical archives in Phase 1 and 2

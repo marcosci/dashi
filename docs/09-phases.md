@@ -10,14 +10,14 @@ Die Initiative wird in drei aufeinander aufbauenden Phasen umgesetzt. Jede Phase
 
 ```mermaid
 gantt
-    title CldGIS Geodatalake — 18-Monats-Plan
+    title dashi — 18-Monats-Plan
     dateFormat X
     axisFormat Monat %s
     section Phase 1
-    Proof of Concept (Gelände & Umwelt) :p1, 1, 4
+    Proof of Concept (terrain & environment) :p1, 1, 4
     Gate 1                              :milestone, after p1, 0
     section Phase 2
-    Minimum Viable Platform (ISR + C2)  :p2, 5, 11
+    Minimum Viable Platform (EO + Operations)  :p2, 5, 11
     Gate 2                              :milestone, after p2, 0
     section Phase 3
     Vollbetrieb (Logistik + Hardening)  :p3, 12, 18
@@ -48,7 +48,7 @@ Validierung der zentralen Architekturannahmen anhand eines vollständigen vertik
 
 ### Fokusdomäne
 
-**Gelände & Umwelt** — diese Domäne wird als erste umgesetzt, da Geländedaten in der Regel am zugänglichsten sind, keine komplexen Klassifizierungsanforderungen stellen und technisch gut verstanden sind.
+**terrain & environment** — diese Domäne wird als erste umgesetzt, da Geländedaten in der Regel am zugänglichsten sind, keine komplexen Klassifizierungsanforderungen stellen und technisch gut verstanden sind.
 
 ### Lieferumfang
 
@@ -112,7 +112,7 @@ Aufbau einer produktionsfähigen Plattform für die ersten zwei priorisierten Do
 
 ### Fokusdomänen
 
-**Aufklärung & ISR** sowie **Missionsplanung & C2** werden in dieser Phase onboardet. **Gelände & Umwelt** aus Phase 1 wird in den Produktivbetrieb überführt.
+**Earth observation** sowie **operational planning** werden in dieser Phase onboardet. **terrain & environment** aus Phase 1 wird in den Produktivbetrieb überführt.
 
 ### Lieferumfang
 
@@ -122,21 +122,21 @@ Aufbau einer produktionsfähigen Plattform für die ersten zwei priorisierten Do
 - [ ] Backup- und Recovery-Prozesse definiert und getestet
 - [ ] Zentrales Monitoring-Dashboard für alle Pipelines operativ
 
-**Domänen-Onboarding: Gelände & Umwelt (Produktivbetrieb)**
+**Domänen-Onboarding: terrain & environment (Produktivbetrieb)**
 - [ ] Alle bekannten Quellsysteme angebunden
 - [ ] Dateneigentümer formal benannt und eingewiesen
 - [ ] Curated-Zone-Produkte durch Dateneigentümer freigegeben
 - [ ] Erste Konsumenten-Teams aktiv
 
-**Domänen-Onboarding: Aufklärung & ISR**
+**Domänen-Onboarding: Earth observation**
 - [ ] Quellsysteme inventarisiert und Ingestion-Adapter entwickelt
 - [ ] Klassifizierungsanforderungen mit Sicherheitsbeauftragtem abgestimmt
-- [ ] ISR-spezifische STAC-Extensions definiert
+- [ ] EO-spezifische STAC-Extensions definiert
 - [ ] Curated-Zone-Produkte durch Dateneigentümer freigegeben
 
-**Domänen-Onboarding: Missionsplanung & C2**
-- [ ] Schnittstellen zu bestehenden C2-Systemen definiert und implementiert
-- [ ] Vektorkacheldienst für Missionsplanungsprodukte produktiv
+**Domänen-Onboarding: operational planning**
+- [ ] Schnittstellen zu bestehenden operational-Systemen definiert und implementiert
+- [ ] Vektorkacheldienst für operational planningsprodukte produktiv
 - [ ] OGC-Dienste (WMS/WFS) für externe Systemanbindung produktiv
 
 **Katalog & Metadaten**
@@ -153,7 +153,7 @@ Aufbau einer produktionsfähigen Plattform für die ersten zwei priorisierten Do
 **Sicherheit**
 - [ ] Rollenbasierte Zugriffskontrolle auf Zonen- und Domänenebene produktiv
 - [ ] Vollständiges Audit-Logging aktiv
-- [ ] Akkreditierungsprozess für Zielbetriebsumgebung eingeleitet
+- [ ] Compliance-Audit-Prozess für Zielbetriebsumgebung eingeleitet
 
 ### Abnahmekriterien — Gate 2
 
@@ -164,7 +164,7 @@ Aufbau einer produktionsfähigen Plattform für die ersten zwei priorisierten Do
 | Abfrageperformance   | Bounding-Box-Abfrage Curated Zone       | < 5 Sekunden          |
 | Katalogvollständigkeit | Anteil katalogisierter Datensätze      | > 95%                 |
 | Governance etabliert | Alle Dateneigentümer benannt und aktiv  | Bestanden             |
-| Sicherheit           | Akkreditierungsprozess eingeleitet      | Bestanden             |
+| Sicherheit           | Compliance-Audit-Prozess eingeleitet      | Bestanden             |
 | Nutzerzufriedenheit  | Feedback-Runde mit Konsumenten-Teams    | Keine kritischen Blocker |
 
 ---
@@ -175,15 +175,15 @@ Aufbau einer produktionsfähigen Plattform für die ersten zwei priorisierten Do
 
 ### Ziel
 
-Vollständiger Produktivbetrieb über alle vier Domänen. Abschluss der Sicherheitsakkreditierung. Übergabe der operativen Verantwortung an ein dauerhaft besetztes Betriebsteam. Vorbereitung der Plattform für KI/ML-Workloads.
+Vollständiger Produktivbetrieb über alle vier Domänen. Abschluss der Compliance-Audit. Übergabe der operativen Verantwortung an ein dauerhaft besetztes Betriebsteam. Vorbereitung der Plattform für KI/ML-Workloads.
 
 ### Fokusdomäne
 
-**Logistik & Versorgung** wird als letzte Domäne onboardet. Parallel: Härtung, Optimierung und Übergabe aller bestehenden Domänen.
+**logistics & supply chain** wird als letzte Domäne onboardet. Parallel: Härtung, Optimierung und Übergabe aller bestehenden Domänen.
 
 ### Lieferumfang
 
-**Domänen-Onboarding: Logistik & Versorgung**
+**Domänen-Onboarding: logistics & supply chain**
 - [ ] Alle Quellsysteme angebunden
 - [ ] Logistikspezifische Datenprodukte in Curated Zone produktiv
 - [ ] Verschneidung mit Gelände-Produkten (Enrichment Zone) produktiv
@@ -198,8 +198,8 @@ Vollständiger Produktivbetrieb über alle vier Domänen. Abschluss der Sicherhe
 - [ ] Exportpipeline für Trainingsdaten (Bildkacheln, Annotationen) produktiv
 - [ ] Erste ML-Pilotanwendung auf Plattformdaten validiert
 
-**Sicherheit & Akkreditierung**
-- [ ] Sicherheitsakkreditierung für Zielbetriebsumgebung abgeschlossen
+**Sicherheit & Compliance-Audit**
+- [ ] Compliance-Audit für Zielbetriebsumgebung abgeschlossen
 - [ ] Penetrationstest durchgeführt und Findings adressiert
 - [ ] Notfallprozesse (Incident Response) dokumentiert und geübt
 
@@ -210,15 +210,15 @@ Vollständiger Produktivbetrieb über alle vier Domänen. Abschluss der Sicherhe
 - [ ] SLA-Monitoring aktiv
 
 **Interoperabilität**
-- [ ] Schnittstellen zu Bündnispartnersystemen definiert und ggf. implementiert
-- [ ] NATO-STANAG-Konformität geprüft und dokumentiert (soweit relevant)
+- [ ] Schnittstellen zu Partnersystemen definiert und ggf. implementiert
+- [ ] Standardkonformität (OGC, ISO 19115, STAC) geprüft und dokumentiert (soweit relevant)
 
 ### Abnahmekriterien — Gate 3
 
 | Kriterium                | Messung                               | Zielwert    |
 |--------------------------|---------------------------------------|-------------|
 | Alle vier Domänen produktiv | Aktive Konsumenten in allen vier Domänen | Bestanden |
-| Akkreditierung abgeschlossen | Formales Akkreditierungsdokument vorhanden | Bestanden |
+| Compliance-Audit abgeschlossen | Formales Compliance-Auditsdokument vorhanden | Bestanden |
 | Verfügbarkeit            | Messung über 60 Tage                  | > 99,5%     |
 | Pipeline-Stabilität      | Fehlerrate über 60 Tage               | < 2%        |
 | Betriebsübergabe         | Betriebsteam eigenständig betriebsfähig | Bestanden |
@@ -235,12 +235,12 @@ Vollständiger Produktivbetrieb über alle vier Domänen. Abschluss der Sicherhe
 | Bestandsaufnahme abgeschlossen | 1   | Monat 3   | Platform Architect     |
 | End-to-End-Pipeline PoC      | 1     | Monat 4   | Platform Team          |
 | Gate 1 — Freigabe Phase 2    | 1→2   | Monat 4   | Lenkungsausschuss      |
-| ISR-Domäne produktiv         | 2     | Monat 8   | Data Owner ISR         |
-| C2-Domäne produktiv          | 2     | Monat 9   | Data Owner C2          |
-| Akkreditierungsprozess eingeleitet | 2 | Monat 9 | Security Engineer      |
+| EO-Domäne produktiv         | 2     | Monat 8   | Data Owner Earth Observation         |
+| operational-Domäne produktiv          | 2     | Monat 9   | Data Owner Operations          |
+| Compliance-Audit-Prozess eingeleitet | 2 | Monat 9 | Security Engineer      |
 | Gate 2 — Freigabe Phase 3    | 2→3   | Monat 11  | Lenkungsausschuss      |
 | Logistik-Domäne produktiv    | 3     | Monat 15  | Data Owner Logistik    |
-| Akkreditierung abgeschlossen | 3     | Monat 16  | Sicherheitsbeauftragter |
+| Compliance-Audit abgeschlossen | 3     | Monat 16  | Sicherheitsbeauftragter |
 | Betriebsübergabe abgeschlossen | 3   | Monat 17  | Platform Lead          |
 | Gate 3 — Projektabschluss    | 3     | Monat 18  | Lenkungsausschuss      |
 
@@ -252,6 +252,6 @@ Die folgenden Abhängigkeiten sind kritisch — eine Verzögerung hier verzöger
 
 - **Datenzugang durch Quellsysteme:** Jede Domäne kann erst onboardet werden, wenn die Datenlieferanten Exportschnittstellen bereitstellen. Frühzeitige Abstimmung mit allen Quellsystem-Betreibern ist zwingend.
 
-- **Sicherheitsakkreditierung:** Der Akkreditierungsprozess hat eine lange Vorlaufzeit und muss spätestens in Phase 2 eingeleitet werden, um Gate 3 nicht zu gefährden.
+- **Compliance-Audit:** Der Compliance-Audit-Prozess hat eine lange Vorlaufzeit und muss spätestens in Phase 2 eingeleitet werden, um Gate 3 nicht zu gefährden.
 
 - **Dateneigentümer-Benennung:** Ohne formal benannte Dateneigentümer können Curated-Zone-Produkte nicht freigegeben werden. Die Benennung muss vor dem jeweiligen Domänen-Onboarding abgeschlossen sein.

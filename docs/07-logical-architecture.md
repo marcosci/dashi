@@ -12,7 +12,7 @@ Die Plattform gliedert sich in fünf horizontale Schichten. Daten fließen grund
 
 ```mermaid
 flowchart TB
-    K["<b>KONSUMSCHICHT</b><br/>Analysten · Missionsplanung · ML-Pipelines · APIs"]
+    K["<b>KONSUMSCHICHT</b><br/>Analysten · operational planning · ML-Pipelines · APIs"]
     S["<b>SERVING-SCHICHT</b><br/>SQL-Engine · OGC-Dienste · Kachelserver · Feature Store"]
     C["<b>CURATED ZONE</b><br/>Domänenprodukte"]
     E["<b>ENRICHMENT ZONE</b><br/>Domänenübergreifende Produkte"]
@@ -33,7 +33,7 @@ ASCII-Fallback:
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        KONSUMSCHICHT                            │
-│        Analysten · Missionsplanung · ML-Pipelines · APIs        │
+│        Analysten · operational planning · ML-Pipelines · APIs        │
 ├─────────────────────────────────────────────────────────────────┤
 │                        SERVING-SCHICHT                          │
 │      SQL-Engine · OGC-Dienste · Kachelserver · Feature Store    │
@@ -101,8 +101,8 @@ Die Curated Zone enthält domänenspezifische Produkte, die für den direkten op
 **Typische Inhalte:**
 
 - Validierte und klassifizierte Geländemodelle
-- Aufbereitete ISR-Produkte mit Metadatenannotation
-- Bereinigte Logistiklagen mit Aktualitätsstempel
+- Aufbereitete EO-Produkte mit Metadatenannotation
+- Bereinigte Logistikdaten mit Aktualitätsstempel
 - Missionsrelevante Kartengrundlagen in Standardauflösung
 
 ---
@@ -113,9 +113,9 @@ Die Enrichment Zone ist der Ort für Produkte, die aus der Verschneidung mehrere
 
 **Beispiele:**
 
-- Geländeanalyse angereichert mit aktuellen ISR-Erkenntnissen
+- Geländeanalyse angereichert mit aktuellen EO-Erkenntnissen
 - Logistikrouten verschnitten mit Geländeklassifikation und Wetterinformation
-- Missionsplanungsprodukte mit integrierten Aufklärungsergebnissen
+- operational planningsprodukte mit integrierten Earth observationsergebnissen
 
 **Governance:** Jedes Enrichment-Produkt erfordert eine **explizite Freigabe aller beteiligten Dateneigentümer**.
 
@@ -130,7 +130,7 @@ Die Serving-Schicht ist die Schnittstelle zwischen der Plattform und ihren Konsu
 | Zugriffsart         | Zielgruppe                 | Komponente        |
 |---------------------|----------------------------|-------------------|
 | Analytisches SQL    | Geoinformationsanalysten   | SQL-Query-Engine  |
-| OGC-Dienste (WMS/WFS) | Externe Systeme, FüInfoSys | OGC-Server        |
+| OGC-Dienste (WMS/WFS) | Externe Systeme, legacy GIS systems | OGC-Server        |
 | Vektorkacheln       | Kartendarstellungen        | Kachelserver      |
 | STAC-API            | Bildauswertung, ML         | STAC-Endpunkt     |
 | Programmatischer Zugriff | ML-Pipelines, Entwickler | Daten-API        |

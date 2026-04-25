@@ -66,5 +66,5 @@ Die folgenden Entscheidungen sind noch ausstehend und müssen spätestens zum En
 |---------|------------------------------------|-------------------------|---------------|
 | ADR-005 | Iceberg vs. Delta Lake             | Wahl der Query-Engine   | Ende Phase 1  |
 | ADR-007 | Spark vs. Dask als primäre Engine  | Infrastrukturentscheidung | Ende Phase 1 |
-| ADR-009 | OGC-Server: GeoServer vs. MapServer | Anforderungen FüInfoSys | Phase 2 Start |
+| ADR-009 | OGC-Server: GeoServer vs. MapServer | Anforderungen legacy GIS systems | Phase 2 Start |
 | —       | Technischer Metadatenkatalog       | Evaluierung in Phase 1  | Ende Phase 1  |

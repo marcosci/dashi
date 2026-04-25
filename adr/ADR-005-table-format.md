@@ -6,7 +6,7 @@
 
 ## Kontext
 
-Für Vektordatensätze mit häufigen Aktualisierungen (z. B. Logistiklagen, ISR-Lagemeldungen) wird ein Format benötigt, das ACID-Transaktionen, Schema-Evolution und Zeitreisen (Time Travel) unterstützt.
+Für Vektordatensätze mit häufigen Aktualisierungen (z. B. Logistikdaten, EO-Datenströme) wird ein Format benötigt, das ACID-Transaktionen, Schema-Evolution und Zeitreisen (Time Travel) unterstützt.
 
 ## Bewertete Alternativen
 

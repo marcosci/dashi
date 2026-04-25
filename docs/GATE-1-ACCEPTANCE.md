@@ -59,7 +59,7 @@ Per [PHASE-0-ROADMAP.md](PHASE-0-ROADMAP.md#bewusst-außerhalb-gate-1-scope):
 - F-23 Rollenbasierte Zugriffskontrolle (Phase 2)
 - NF-10 Audit-Logging (Phase 2)
 - Bestandsaufnahme aller 4 Domänen (Phase 2 mit realen Stakeholdern)
-- R-12 Akkreditierung + NF-11 (pausiert, Produktivmigration)
+- R-12 Compliance-Audit + NF-11 (pausiert, Produktivmigration)
 
 ## Verbleibende Arbeit bis produktives Phase-1-Gate
 

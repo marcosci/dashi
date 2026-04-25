@@ -62,7 +62,7 @@ Lightweight backlog. No promise to ship. Capture, sort later. Promotion path: id
 ### Auto-derived keywords / controlled vocab mapping
 
 - **Why:** Free-text keywords degrade search.
-- **Sketch:** Embedding-based mapping from extracted terms to a small controlled vocabulary (Aufklärung / C2 / Logistik / Gelände). Run as part of the same enrichment flow.
+- **Sketch:** Embedding-based mapping from extracted terms to a small controlled vocabulary (Earth observation / C2 / Logistik / Gelände). Run as part of the same enrichment flow.
 - **Status:** idea
 
 ---

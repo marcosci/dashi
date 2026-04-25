@@ -45,7 +45,7 @@ Single lookup for every identified requirement, workload, ADR, open question, an
 | NF-08 | Pipeline-Betrieb bei Teilausfall | Pflicht | [§5.2](05-requirements.md#verfügbarkeit--resilienz) |
 | NF-09 | Verschlüsselung at rest + in transit | Pflicht | [§5.2](05-requirements.md#sicherheit) |
 | NF-10 | Audit-Logging aller Zugriffe | Pflicht | [§5.2](05-requirements.md#sicherheit) |
-| NF-11 | Akkreditierung Stufe [X] | Pflicht | [§5.2](05-requirements.md#sicherheit) |
+| NF-11 | Compliance-Audit Stufe [X] | Pflicht | [§5.2](05-requirements.md#sicherheit) |
 | NF-12 | Geometrie-basierte Zugriffsbeschränkungen | Hoch | [§5.2](05-requirements.md#sicherheit) |
 | NF-13 | Datenwachstum [X] TB/Jahr | Pflicht | [§5.2](05-requirements.md#skalierbarkeit) |
 | NF-14 | Domänen ohne Pipeline-Eingriff | Hoch | [§5.2](05-requirements.md#skalierbarkeit) |
@@ -58,11 +58,11 @@ Single lookup for every identified requirement, workload, ADR, open question, an
 
 | ID | Workload | Domäne | Volumen | Latenz | Häufigkeit |
 |----|----------|--------|---------|--------|------------|
-| W-01 | Historische Geländeanalyse | Gelände & Umwelt | Hoch | Std. | Täglich |
-| W-02 | Routenplanung + Zugänglichkeit | Logistik & C2 | Mittel | Min. | Mehrmals täglich |
-| W-03 | ISR/Gelände-Fusion | ISR / Gelände | Hoch | Std. | Bedarfsgesteuert |
-| W-04 | Missionsplanungs-Hintergrundkarten | Missionsplanung | Mittel | Sek. | Kontinuierlich |
-| W-05 | ML-Trainingsdaten-Extraktion | ISR / KI | Sehr hoch | Std. | Wöchentlich |
+| W-01 | Historische Geländeanalyse | terrain & environment | Hoch | Std. | Täglich |
+| W-02 | Routenplanung + Zugänglichkeit | Logistik | Mittel | Min. | Mehrmals täglich |
+| W-03 | EO/Gelände-Fusion | Earth Observation / Gelände | Hoch | Std. | Bedarfsgesteuert |
+| W-04 | operational plannings-Hintergrundkarten | operational planning | Mittel | Sek. | Kontinuierlich |
+| W-05 | ML-Trainingsdaten-Extraktion | Earth Observation / ML | Sehr hoch | Std. | Wöchentlich |
 | W-06 | Qualitätsprüfung Neueingang | Plattform intern | Niedrig | Min. | Bei Eingang |
 | W-07 | Ad-hoc-Analyse | Alle Domänen | Mittel | Min. | Täglich |
 
@@ -88,16 +88,16 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 
 | ID | Kurz | Bereich | Status | Benötigt bis |
 |----|------|---------|:------:|--------------|
-| F-01 | Klassifizierungsstufen + Zonentrennung | Sicherheit | 🔴 | Ende Phase 1 |
+| F-01 | Datenklassifizierung + Zonentrennung | Sicherheit | 🔴 | Ende Phase 1 |
 | F-02 | Infrastruktur (Cloud/on-prem/hybrid) — geklärt via ADR-011 | Infrastruktur | 🟢 | Monat 1 |
-| F-03 | Echtzeit-Anforderungen C2 | C2 | 🟡 | Ende Phase 1 |
-| F-04 | Externe Systeme / Bündnispartner | Interoperabilität | 🟡 | Phase 2 Start |
+| F-03 | Echtzeit-Anforderungen Operations | Operations | 🟡 | Ende Phase 1 |
+| F-04 | Externe Systeme / Partnerorganisationen | Interoperabilität | 🟡 | Phase 2 Start |
 | F-05 | Rohdaten-Archivierungsfristen | Governance / Recht | 🟡 | Ende Phase 1 |
 | F-06 | Quellsysteme ohne Export-Standard | Ingestion | 🟡 | Ende Phase 1 |
-| F-07 | STANAG-Konformitätspflicht | Interoperabilität | 🟡 | Phase 2 |
+| F-07 | Standardkonformitätspflicht (OGC/ISO/STAC) | Interoperabilität | 🟡 | Phase 2 |
 | F-08 | Organisationsweites Ziel-KRS | Architektur | 🟡 | Ende Phase 1 |
 | F-09 | Betriebsverantwortung nach Phase 3 | Betrieb | 🟡 | Phase 2 |
-| F-10 | Offline-Betrieb / taktische Randlagen | Architektur | 🟡 | Ende Phase 1 |
+| F-10 | Offline-Betrieb / eingeschränkten Standorten | Architektur | 🟡 | Ende Phase 1 |
 
 > **Hinweis:** Die Question-IDs `F-NN` kollidieren namentlich mit den Funktional-Anforderungs-IDs. Kontext entscheidet — Kapitel 5 vs. Kapitel 10.
 
@@ -116,10 +116,10 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 | R-09 | Performance domänenübergr. Abfragen | Technisch | 🟡 |
 | R-10 | Datenverlust durch fehlende Backups | Technisch | 🟡 |
 | R-11 | Schema-Drift der Quellsysteme | Technisch | 🟠 |
-| R-12 | Akkreditierungsprozess dauert | Sicherheit | 🔴 |
+| R-12 | Compliance-Audit-Prozess dauert | Sicherheit | 🔴 |
 | R-13 | Speicherung klassifizierter Daten | Sicherheit | 🟠 |
 | R-14 | Fehlkonfigurierte Zugriffsrechte | Sicherheit | 🟠 |
-| R-15 | Technologien ohne militär. Zulassung | Sicherheit | 🟠 |
+| R-15 | Technologien ohne Compliance-Zulassung | Sicherheit | 🟠 |
 | R-16 | Verzögerte Infrastrukturbeschaffung | Zeitplan | 🔴 |
 | R-17 | Scope Creep | Zeitplan | 🟠 |
 | R-18 | Schlüsselpersonen verlassen Projekt | Ressourcen | 🟠 |

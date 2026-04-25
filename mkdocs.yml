@@ -148,4 +148,4 @@ extra_css:
 extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
 
-copyright: "dashi · spatial data lake · Marco Sciaini + Johannes Schlund · opendefense"
+copyright: "dashi · spatial data lake · Marco Sciaini + Johannes Schlund · independent project"

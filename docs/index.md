@@ -11,14 +11,14 @@ hide:
 
 ## The *essential base* for spatial data
 
-> A cloud-native spatial data lake — layered, infused, re-usable. Ingests any OGR/GDAL-readable geodata (vector, raster, point cloud), standardises onto a common zone model (Landing → Processed → Curated → Enrichment → Serving), catalogs it via STAC, and serves it via SQL + COG tiles. Phase 2 extends with Prefect orchestration, Kubernetes work pools, and scheduled triggers.
+> A cloud-native spatial data lake — layered, infused, re-usable. Ingests any OGR/GDAL-readable geodata (vector, raster, point cloud), standardises onto a common zone model (Landing → Processed → Curated → Enrichment → Serving), catalogs everything via STAC, and serves it through SQL, COG raster tiles, and OGC API – Tiles vector tiles.
 >
-> Original spec: _CldGIS Geodatalake_ (German). Codename-become-brand: **dashi** — the Japanese broth that forms the base of every layered dish.
+> Visible brand: **dashi** — the Japanese broth that forms the base of every layered dish.
 
-!!! info "Status — Phase 0 (PoC)"
-    **Co-Owners:** Marco Sciaini + Johannes Schlund (opendefense) · **Substrate:** local k3s + GitHub Actions + Pages
-    **Focus domain for PoC:** Gelände & Umwelt · **Sample data:** GeoTIFF / Shapefile / KML / GPKG
-    See the [Phase-0 roadmap](PHASE-0-ROADMAP.md) for the active plan.
+!!! info "Status"
+    **Maintainers:** Marco Sciaini + Johannes Schlund · **License:** Apache 2.0 · **Substrate:** local k3s + GitHub Actions + Pages
+
+    Use cases: Earth observation, environmental analysis, urban planning, logistics, research — anywhere durable spatial storage with reproducible pipelines is needed.
 
 ---
 
@@ -31,7 +31,7 @@ hide:
     3. [Logical architecture](07-logical-architecture.md) — the zone model diagram
     4. [Phase-0 roadmap](PHASE-0-ROADMAP.md) — concrete next steps
 
-=== "I'm the Platform Architect"
+=== "I'm a Platform Architect"
 
     - [Technology decisions](08-technology-decisions.md) — ADR overview
     - [ADR catalogue](adrs.md) — one file per decision
@@ -41,14 +41,20 @@ hide:
 === "I'm a Data Owner"
 
     - [Stakeholders & roles](04-stakeholders.md) — responsibilities
-    - [Zone governance](07-logical-architecture.md#74-governance-der-zonenübergänge) — approvals required
+    - [Zone governance](07-logical-architecture.md) — approvals required
     - [Requirements](05-requirements.md) — quality + metadata expectations
 
 === "I'm onboarding the PoC"
 
     - [PoC overview](poc/README.md)
     - [k3s setup](poc/docs/k3s-setup.md) — step-by-step local cluster
-    - [Phase-0 roadmap](PHASE-0-ROADMAP.md#arbeitsstränge) — the six work tracks
+    - [Phase-0 roadmap](PHASE-0-ROADMAP.md) — the work tracks
+
+=== "I want to contribute"
+
+    - [Contributing guide](https://github.com/marcosci/dashi/blob/main/CONTRIBUTING.md)
+    - [Feature ideas backlog](FEATURE-IDEAS.md)
+    - [Code of Conduct](https://github.com/marcosci/dashi/blob/main/CODE_OF_CONDUCT.md)
 
 ---
 
@@ -68,17 +74,17 @@ hide:
 
     ADR-005 Iceberg vs Delta · ADR-006 technischer Katalog · ADR-007 Verarbeitungs-Engine · ADR-009 Serving-Komponenten
 
--   **Critical open questions**
+-   **Open backlog**
 
     ---
 
-    🔴 F-01 Klassifizierungsstufen · 🟡 F-08 Ziel-KRS · 🟡 F-10 Offline-Betrieb
+    See [FEATURE-IDEAS](FEATURE-IDEAS.md) — CI tooling, LLM metadata extraction, TiPG, MapLibre viewer, OIDC, and more.
 
--   **Critical risks**
+-   **License**
 
     ---
 
-    🔴 R-01 Data Owner access · 🔴 R-12 Akkreditierung · _(R-03 + R-16 neutralized by Phase-0 scope)_
+    Apache 2.0 — open source, contributions welcome.
 
 </div>
 
@@ -88,7 +94,8 @@ hide:
 
 - [ID reference](id-reference.md) — jump to any `F-NN`, `NF-NN`, `W-NN`, `ADR-NNN`, `R-NN`
 - [Glossary](GLOSSARY.md) — acronyms and domain terms
+- [GitHub repo](https://github.com/marcosci/dashi)
 
 ---
 
-<sub>dashi is under active development. Specification content is in German (matches stakeholder language); navigation and meta docs are in English.</sub>
+<sub>dashi is under active development. Specification chapters are in German (matches the original spec); navigation, code, and contributor docs are in English.</sub>

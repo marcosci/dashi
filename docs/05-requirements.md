@@ -114,11 +114,11 @@ Der Workload-Katalog beschreibt die primären Nutzungsszenarien der Plattform mi
 
 | ID   | Workload | Domäne | Zugriffsart | Volumen | Latenz | Häufigkeit |
 |------|----------|--------|-------------|---------|--------|------------|
-| W-01 | Historische Geländeanalyse (Sichtbarkeit, Geländeklassifikation) | Gelände & Umwelt | Batch SQL / Rasterverarbeitung | Hoch | Niedrig (Stunden) | Täglich |
-| W-02 | Aktuelle Routenplanung und Zugänglichkeitsanalyse | Logistik & C2 | Interaktive SQL-Abfrage | Mittel | Mittel (Minuten) | Mehrmals täglich |
-| W-03 | Fusionierung von ISR-Produkten mit Geländedaten | ISR / Gelände | Batch-Verschneidung | Hoch | Niedrig (Stunden) | Bedarfsgesteuert |
-| W-04 | Bereitstellung von Hintergrundkarten für Missionsplanungssysteme | Missionsplanung | Vektorkacheln / WMS | Mittel | Hoch (Sekunden) | Kontinuierlich |
-| W-05 | Extraktion von ML-Trainingsdaten (Bildkacheln, Annotationen) | ISR / KI | Batch-Export | Sehr hoch | Niedrig (Stunden) | Wöchentlich |
+| W-01 | Historische Geländeanalyse (Sichtbarkeit, Geländeklassifikation) | terrain & environment | Batch SQL / Rasterverarbeitung | Hoch | Niedrig (Stunden) | Täglich |
+| W-02 | Aktuelle Routenplanung und Zugänglichkeitsanalyse | Logistik | Interaktive SQL-Abfrage | Mittel | Mittel (Minuten) | Mehrmals täglich |
+| W-03 | Fusionierung von EO-Produkten mit Geländedaten | Earth Observation / Gelände | Batch-Verschneidung | Hoch | Niedrig (Stunden) | Bedarfsgesteuert |
+| W-04 | Bereitstellung von Hintergrundkarten für operational planningssysteme | operational planning | Vektorkacheln / WMS | Mittel | Hoch (Sekunden) | Kontinuierlich |
+| W-05 | Extraktion von ML-Trainingsdaten (Bildkacheln, Annotationen) | Earth Observation / ML | Batch-Export | Sehr hoch | Niedrig (Stunden) | Wöchentlich |
 | W-06 | Qualitätsprüfung neu eingehender Datensätze | Plattform intern | Pipeline-Trigger | Niedrig | Mittel (Minuten) | Bei Eingang |
 | W-07 | Ad-hoc-Analyse durch Geoinformationsanalysten | Alle Domänen | Notebook / SQL | Mittel | Mittel (Minuten) | Täglich |
 
@@ -128,9 +128,9 @@ Der Workload-Katalog beschreibt die primären Nutzungsszenarien der Plattform mi
 
 Die folgenden Punkte sind noch nicht ausreichend geklärt und erfordern eine Abstimmung mit den Stakeholdern vor Abschluss der Anforderungsphase:
 
-- Welche Klassifizierungsstufen müssen auf der Plattform verarbeitet werden können — und in getrennten oder gemeinsamen Zonen?
-- Gibt es Echtzeit-Anforderungen aus dem C2-Bereich, die eine gesonderte Architekturkomponente erfordern?
-- Welche externen Systeme (Bündnispartner, nationale Behörden) müssen über standardisierte Schnittstellen angebunden werden?
+- Welche Datenklassifizierung müssen auf der Plattform verarbeitet werden können — und in getrennten oder gemeinsamen Zonen?
+- Gibt es Echtzeit-Anforderungen aus dem operational-Bereich, die eine gesonderte Architekturkomponente erfordern?
+- Welche externen Systeme (Partnerorganisationen, externe Behörden) müssen über standardisierte Schnittstellen angebunden werden?
 - Wie lange müssen Rohdaten in der Landing Zone aufbewahrt werden (Archivierungsfristen)?
 - Welche bestehenden Quellsysteme haben keine standardisierten Exportschnittstellen und erfordern individuelle Konnektoren?
 

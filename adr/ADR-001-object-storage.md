@@ -26,7 +26,7 @@ Die Kernentscheidung ist zweistufig:
 | Alternative | Vorteile | Nachteile | PoC-Fit |
 |-------------|----------|-----------|---------|
 | **RustFS** | MinIO-API-kompatibel (`mc`, `boto3` unverändert), Apache 2.0, Rust (Memory Safety), Erasure Coding, Single-Binary | Junges Projekt (2024+), kleinere Community | ✅ |
-| MinIO | Reife, breite Verbreitung, Tooling-Ökosystem | Community-Edition 2024/2025 ausgedünnt, AGPL + kommerzielle Add-ons, Governance-Turbulenzen, R-15-Risiko bei militärischer Zulassung | ⚠️ |
+| MinIO | Reife, breite Verbreitung, Tooling-Ökosystem | Community-Edition 2024/2025 ausgedünnt, AGPL + kommerzielle Add-ons, Governance-Turbulenzen, R-15-Risiko bei regulierter Zulassung | ⚠️ |
 | Garage | Rust, kleinster Footprint, geo-Replikation nativ | Kein Erasure Coding, AGPL | Möglich |
 | SeaweedFS | Skaliert bis PB, stabile Community | 2-Komponenten-Modell (Master + Volume + S3 Gateway), komplexere Ops | Überdimensioniert für PoC |
 | Ceph via Rook | Industriestandard on-prem, voll Erasure-coded, RGW S3 | 10+ Pods, steile Lernkurve, >4 GB RAM Idle | Produktionsziel, nicht PoC |
@@ -37,9 +37,9 @@ Die Kernentscheidung ist zweistufig:
 
 **RustFS** als konkrete S3-Implementierung für PoC und Phase 1 — Begründung:
 
-- **Apache 2.0** statt MinIO-AGPL — reduziert R-15 (militärische Zulassungsrisiken, siehe Kapitel 10)
+- **Apache 2.0** statt MinIO-AGPL — reduziert R-15 (regulierte Zulassungsrisiken, siehe Kapitel 10)
 - **Drop-in-MinIO-Kompatibilität** — alle S3-Tools (`mc`, `aws-cli`, `boto3`, STAC, TiTiler, DuckDB `httpfs`) funktionieren unverändert
-- **Rust-Memory-Safety** — kleinere Angriffsfläche, relevant für spätere Akkreditierung (NF-11)
+- **Rust-Memory-Safety** — kleinere Angriffsfläche, relevant für spätere Compliance-Audit (NF-11)
 - **Erasure Coding** — produktionsreif von Anfang an, Migrationspfad nach Ceph/Rook ist sauber (S3 bleibt S3)
 - **Single-Binary** — geringerer Ops-Overhead als SeaweedFS oder Ceph
 

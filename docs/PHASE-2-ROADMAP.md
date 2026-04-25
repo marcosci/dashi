@@ -6,7 +6,7 @@
 
 **Phase-2-Ziel:** Plattform von "funktioniert demonstrierbar" auf "läuft autonom" heben. Keine Abhängigkeit mehr von Entwickler-Port-Forwards. Scheduled Triggers. Betriebliche Beobachtbarkeit. Rollenbasierte Zugriffsrechte als Fundament für spätere Multi-Domain-Onboarding.
 
-Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Hoster benannt ist.
+Regulierte Compliance-Audit (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Hoster benannt ist.
 
 ---
 
@@ -62,7 +62,7 @@ Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `dashi-*`
 | J3 | Martin v1.6 Deployment mit initContainer-Mirror der PMTiles aus `s3://curated/tiles/` in einen lokalen `emptyDir` (Workaround für Martin's fehlende RustFS-Endpoint-Konfiguration) | ✅ |
 | J4 | Martin live: Catalog mit 6 Sources, TileJSON 3.0.0 pro Layer, MVT-Tiles im Dresden-bbox bei z=5..10, 204 für out-of-bounds | ✅ |
 | J5 | OGC API – Features via TiPG + PostGIS-Promotion-Flow | ⏳ nächste Iteration |
-| J6 | Legacy-WMS-Shim (falls FüInfoSys es zwingt) | ⏳ Phase 3 |
+| J6 | Legacy-WMS-Shim (falls legacy GIS systems es zwingt) | ⏳ Phase 3 |
 
 PostGIS für Serving (`dashi-serving-db` Namespace, postgis:16-3.4-alpine, 3 Gi PVC, RO-Rolle `dashi_serving_ro`) ist deployed und wartet auf den Promotion-Flow + TiPG.
 
@@ -129,9 +129,9 @@ gantt
     L3 Lineage emitter     :l3, after l2, 2
 
     section K: Domain onboarding
-    K1-K5 Gelände & Umwelt :k1, 4, 2
-    K1-K5 Aufklärung & ISR :k2, after k1, 3
-    K1-K5 Missionsplanung  :k3, after k2, 3
+    K1-K5 terrain & environment :k1, 4, 2
+    K1-K5 Earth observation :k2, after k1, 3
+    K1-K5 operational planning :k3, after k2, 3
 ```
 
 Timebox: **~12 Wochen** für G + H + I (Kern-Hardening). J, K, L laufen parallel je nach Kapazität. Drei Domänen-Onboardings je ~3 Wochen (K1-K5).
@@ -140,7 +140,7 @@ Timebox: **~12 Wochen** für G + H + I (Kern-Hardening). J, K, L laufen parallel
 
 ## Gate-2-Abnahmekriterien (PoC-angepasst)
 
-Aus [§9 Phase 2](09-phases.md#abnahmekriterien--gate-2) auf den PoC-Kontext ohne militärischer Akkreditierung reduziert.
+Aus [§9 Phase 2](09-phases.md#abnahmekriterien--gate-2) auf den PoC-Kontext ohne regulierter Compliance-Audit reduziert.
 
 | Kriterium | Messung | Zielwert |
 |-----------|---------|----------|
@@ -150,18 +150,18 @@ Aus [§9 Phase 2](09-phases.md#abnahmekriterien--gate-2) auf den PoC-Kontext ohn
 | Pipeline-Stabilität | Fehlerrate über 30 Tage | < 5 % |
 | Monitoring-Dashboard | Alle Services exponieren Metriken, Grafana zeigt mindestens 5 Dashboards | Bestanden |
 | Alert-Regeln | Mindestens 4 Regeln definiert und getestet (mock-Fehler triggert) | Bestanden |
-| Zwei Domänen produktiv | Aktive Konsumenten in Gelände & Umwelt + einer zweiten Domäne | Bestanden |
+| Zwei Domänen produktiv | Aktive Konsumenten in terrain & environment + einer zweiten Domäne | Bestanden |
 | Feedback-Runde | Retrospektive mit Konsumenten-Team dokumentiert | Keine kritischen Blocker |
 
 ---
 
 ## Bewusst zurückgestellt auf Phase 3
 
-- Militärische Sicherheitsakkreditierung (R-12, NF-11)
+- Regulierte Compliance-Audit (R-12, NF-11)
 - Durchsatz- und Resilienz-Benchmarks (NF-02 bis NF-07)
 - KI/ML-Feature-Store
-- NATO STANAG-Interoperabilität (F-07 offene Frage)
-- OGC-Konsumenten-Integration in echte FüInfoSys (F-04 offen)
+- Standardisierte Schnittstellen-Interoperabilität (F-07 offene Frage)
+- OGC-Konsumenten-Integration in echte legacy GIS systems (F-04 offen)
 - High Availability: Multi-Replica für alle Stateful Services
 
 ---

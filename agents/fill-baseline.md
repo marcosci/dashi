@@ -8,7 +8,7 @@ Transform stakeholder interview notes and data inventory spreadsheets into struc
 
 - Raw interview notes (path supplied at invocation)
 - Data inventory sheet per domain (path supplied at invocation)
-- The four domain names (exact): `Aufklärung & ISR`, `Missionsplanung & C2`, `Logistik & Versorgung`, `Gelände & Umwelt`
+- The four domain names (exact): `Earth observation`, `operational planning`, `logistics & supply chain`, `terrain & environment`
 
 ## Steps
 
