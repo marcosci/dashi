@@ -14,15 +14,17 @@ IMAGE="${TIPPECANOE_IMAGE:-dashi/tippecanoe:dev}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Built-in demo set — derived from live STAC catalog, 2026-04-25.
+# Built-in demo set — derived from live STAC catalog, 2026-04-25
+# (post-rebrand redeploy). Source: query stac-fastapi for items with
+# dashi:source_name in {gis_osm_*.shp, QGIS_Military_grids*.gpkg}.
 # Format: layer_id <TAB> source_prefix <TAB> min_zoom <TAB> max_zoom
 read -r -d '' LAYERS_DATA <<'EOF' || true
-osm_roads	s3://processed/gelaende-umwelt/0e80204b11694337/vector	5	14
-osm_buildings	s3://processed/gelaende-umwelt/e697e674cbdbb8a0/vector	10	14
-osm_landuse	s3://processed/gelaende-umwelt/3e101071b6b86e32/vector	6	13
-osm_water	s3://processed/gelaende-umwelt/560d1c1d82d3d2bf/vector	5	13
-osm_railways	s3://processed/gelaende-umwelt/2cd235c1855841ba/vector	6	14
-mgrs_grids	s3://processed/gelaende-umwelt/28838a19ceacfdf3/vector	5	12
+osm_roads	s3://processed/gelaende-umwelt/74c7f7826a123b4f/vector	5	14
+osm_buildings	s3://processed/gelaende-umwelt/e9982e1e91ae58a9/vector	10	14
+osm_landuse	s3://processed/gelaende-umwelt/3414a4ac5cddc9ef/vector	6	13
+osm_water	s3://processed/gelaende-umwelt/1a6e0c66a195e8b0/vector	5	13
+osm_railways	s3://processed/gelaende-umwelt/5ea2cebf5743859f/vector	6	14
+mgrs_grids	s3://processed/gelaende-umwelt/0bf2de728df71530/vector	5	12
 EOF
 
 echo "→ spawning one K8s Job per layer in namespace $NS"
