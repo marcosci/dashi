@@ -288,7 +288,7 @@
 
         const layer = new PointCloudLayer({
           id: 'cloud',
-          coordinateSystem: 1,
+          coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
           data: {length: n, attributes: {
             getPosition: {value: out, size: 3},
             ...(colors ? {getColor: {value: colors, size: 4, normalized: true}} : {})
