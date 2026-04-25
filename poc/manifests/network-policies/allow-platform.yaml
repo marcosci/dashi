@@ -2,6 +2,7 @@
 #   - dashi-data (ingest writers + pipeline workers)
 #   - dashi-serving (read-only consumers)
 #   - dashi-monitoring (Prometheus scraper)
+#   - dashi-backup (CronJobs upload pg_dump output)
 # and from kubectl port-forward (api-server proxy — ingress from
 # kube-system). All other namespaces cannot reach RustFS.
 apiVersion: networking.k8s.io/v1
@@ -28,6 +29,9 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-backup
       ports:
         - protocol: TCP
           port: 9000

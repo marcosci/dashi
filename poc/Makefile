@@ -121,6 +121,12 @@ prefect-up:
 pointcloud-presign:
 	@bash scripts/pointcloud-presign.sh
 
+backup-deploy:
+	@bash scripts/backup-bootstrap.sh
+
+auth-bootstrap:
+	@bash scripts/auth-bootstrap.sh
+
 tipg-deploy:
 	@bash scripts/tipg-bootstrap.sh
 	@echo ""
@@ -150,6 +156,8 @@ smoke:
 	@bash smoke/martin.sh
 	@bash smoke/pointcloud.sh
 	@bash smoke/tipg.sh
+	@bash smoke/loki.sh
+	@bash smoke/backup.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

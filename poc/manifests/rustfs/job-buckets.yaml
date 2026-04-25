@@ -24,7 +24,7 @@ spec:
               until mc alias set dashi http://rustfs:9000 "$ACCESS_KEY" "$SECRET_KEY"; do
                 sleep 3
               done
-              for bucket in landing processed curated; do
+              for bucket in landing processed curated backups; do
                 mc mb --ignore-existing dashi/${bucket}
                 mc anonymous set none dashi/${bucket}
                 echo "ensured bucket: ${bucket}"

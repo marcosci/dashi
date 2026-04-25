@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authelia-data
+  namespace: dashi-auth
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authelia
+  namespace: dashi-auth
+  labels:
+    app.kubernetes.io/name: authelia
+    app.kubernetes.io/component: oidc-issuer
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: authelia
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: authelia
+        app.kubernetes.io/component: oidc-issuer
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: authelia
+          image: ghcr.io/authelia/authelia:4.38
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config=/config/configuration.yml"
+          ports:
+            - name: http
+              containerPort: 9091
+          env:
+            - name: AUTHELIA_JWT_SECRET_FILE
+              value: /secrets/jwt
+            - name: AUTHELIA_SESSION_SECRET_FILE
+              value: /secrets/session
+            - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
+              value: /secrets/storage
+            - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
+              value: /secrets/oidc-hmac
+            - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE
+              value: /secrets/oidc-key
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: data
+              mountPath: /data
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+          readinessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /api/health, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 30
+      volumes:
+        - name: config
+          configMap:
+            name: authelia-config
+        - name: data
+          persistentVolumeClaim:
+            claimName: authelia-data
+        - name: secrets
+          secret:
+            secretName: authelia-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authelia
+  namespace: dashi-auth
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: authelia
+  ports:
+    - name: http
+      port: 9091
+      targetPort: http

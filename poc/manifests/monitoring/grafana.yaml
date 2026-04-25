@@ -23,6 +23,15 @@ data:
         url: http://prometheus.dashi-monitoring.svc.cluster.local:9090
         isDefault: true
         editable: false
+      - name: Loki
+        type: loki
+        access: proxy
+        url: http://loki.dashi-monitoring.svc.cluster.local:3100
+        editable: false
+        jsonData:
+          httpHeaderName1: X-Scope-OrgID
+        secureJsonData:
+          httpHeaderValue1: dashi
 ---
 apiVersion: v1
 kind: ConfigMap

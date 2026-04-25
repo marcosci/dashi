@@ -1,0 +1,176 @@
+# Three CronJobs, one per Postgres in the cluster. Each:
+#   1. pg_dump --format=custom into a temp file
+#   2. mc cp to s3://backups/<db>/<utc-date>/<db>.dump
+#   3. mc rm older than 30 days under s3://backups/<db>/
+#
+# Restore drill: spin up a scratch postgres pod, mc cp the dump in, run
+# pg_restore. Documented in docs/OPERATIONS.md (post-launch).
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-pgstac
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: pgstac
+spec:
+  schedule: "0 2 * * *"          # 02:00 UTC daily
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: ghcr.io/stac-utils/pgstac:v0.9.5    # ships pg_dump 17
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/bash", "-eu", "-c"]
+              args:
+                - |
+                  set -o pipefail
+                  apt-get update >/dev/null && apt-get install -y --no-install-recommends curl >/dev/null
+                  curl -sLO https://dl.min.io/client/mc/release/linux-$(dpkg --print-architecture)/mc
+                  install -m 0755 ./mc /usr/local/bin/mc
+                  mc alias set dashi "$DASHI_S3_ENDPOINT" "$DASHI_S3_ACCESS_KEY" "$DASHI_S3_SECRET_KEY" >/dev/null
+                  STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+                  OUT="/tmp/pgstac-${STAMP}.dump"
+                  echo "→ pg_dump pgstac ($STAMP)"
+                  pg_dump --format=custom --compress=9 \
+                    "host=$PGHOST port=$PGPORT user=$PGUSER password=$PGPASSWORD dbname=$PGDATABASE" \
+                    > "$OUT"
+                  echo "→ uploading $(du -h "$OUT" | cut -f1)"
+                  mc cp "$OUT" "dashi/backups/pgstac/${STAMP}/pgstac.dump"
+                  echo "→ pruning >30d"
+                  mc rm --recursive --force --older-than 30d dashi/backups/pgstac/ || true
+                  echo "✓ pgstac backup complete"
+              env:
+                - { name: PGHOST,     value: pgstac.dashi-catalog.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: postgres }
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: pgstac-credentials, key: POSTGRES_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: pgstac-credentials, key: POSTGRES_PASSWORD } }
+                - name: DASHI_S3_ENDPOINT
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } }
+                - name: DASHI_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } }
+                - name: DASHI_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } }
+              resources:
+                requests: { cpu: 100m, memory: 256Mi }
+                limits:   { cpu: 500m, memory: 1Gi }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-prefect
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: prefect
+spec:
+  schedule: "10 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: postgres:16-alpine
+              command: ["/bin/sh", "-eu", "-c"]
+              args:
+                - |
+                  set -o pipefail
+                  apk add --no-cache curl >/dev/null
+                  curl -sLO https://dl.min.io/client/mc/release/linux-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/mc
+                  install -m 0755 ./mc /usr/local/bin/mc
+                  mc alias set dashi "$DASHI_S3_ENDPOINT" "$DASHI_S3_ACCESS_KEY" "$DASHI_S3_SECRET_KEY" >/dev/null
+                  STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+                  OUT="/tmp/prefect-${STAMP}.dump"
+                  PGPASSWORD="$PGPASSWORD" pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" --format=custom --compress=9 > "$OUT"
+                  mc cp "$OUT" "dashi/backups/prefect/${STAMP}/prefect.dump"
+                  mc rm --recursive --force --older-than 30d dashi/backups/prefect/ || true
+              env:
+                - { name: PGHOST,     value: prefect-db.dashi-data.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: prefect }
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: prefect-db, key: POSTGRES_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: prefect-db, key: POSTGRES_PASSWORD } }
+                - name: DASHI_S3_ENDPOINT
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } }
+                - name: DASHI_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } }
+                - name: DASHI_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { cpu: 500m, memory: 512Mi }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-serving-postgis
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: serving-postgis
+spec:
+  schedule: "20 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: postgis/postgis:16-3.4-alpine
+              command: ["/bin/sh", "-eu", "-c"]
+              args:
+                - |
+                  set -o pipefail
+                  apk add --no-cache curl >/dev/null
+                  curl -sLO https://dl.min.io/client/mc/release/linux-$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')/mc
+                  install -m 0755 ./mc /usr/local/bin/mc
+                  mc alias set dashi "$DASHI_S3_ENDPOINT" "$DASHI_S3_ACCESS_KEY" "$DASHI_S3_SECRET_KEY" >/dev/null
+                  STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+                  OUT="/tmp/serving-postgis-${STAMP}.dump"
+                  PGPASSWORD="$PGPASSWORD" pg_dump -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" --format=custom --compress=9 > "$OUT"
+                  mc cp "$OUT" "dashi/backups/serving-postgis/${STAMP}/serving-postgis.dump"
+                  mc rm --recursive --force --older-than 30d dashi/backups/serving-postgis/ || true
+              env:
+                - { name: PGHOST,     value: serving-postgis.dashi-serving-db.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: serving }
+                - name: PGUSER
+                  valueFrom: { secretKeyRef: { name: serving-postgis, key: POSTGRES_USER } }
+                - name: PGPASSWORD
+                  valueFrom: { secretKeyRef: { name: serving-postgis, key: POSTGRES_PASSWORD } }
+                - name: DASHI_S3_ENDPOINT
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } }
+                - name: DASHI_S3_ACCESS_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } }
+                - name: DASHI_S3_SECRET_KEY
+                  valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { cpu: 500m, memory: 512Mi }

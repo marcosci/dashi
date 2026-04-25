@@ -49,37 +49,80 @@ if [[ -z "$ITEM_ID" ]]; then
   exit 1
 fi
 
-KEY=$(echo "$ITEMS_JSON" | python3 -c "
+ASSETS=$(echo "$ITEMS_JSON" | python3 -c "
 import sys, json, re
 d = json.load(sys.stdin)
 for f in d['features']:
     if f['id'] == '$ITEM_ID':
-        href = f['assets'].get('viewer3d', f['assets'].get('data', {})).get('href','')
-        m = re.match(r'https?://[^/]+/(.+)', href)
-        print(m.group(1) if m else '')
+        a = f['assets']
+        out = {}
+        for k in ('viewer3d', 'data', 'tileset3d'):
+            href = a.get(k, {}).get('href', '')
+            m = re.match(r'https?://[^/]+/(.+)', href)
+            if m:
+                out[k] = m.group(1)
+        print(json.dumps(out))
         break
 ")
 
-if [[ -z "$KEY" ]]; then
-  echo "ERROR: item $ITEM_ID has no viewer3d/data asset href" >&2
+if [[ -z "$ASSETS" ]]; then
+  echo "ERROR: STAC item $ITEM_ID has no recognised assets" >&2
   exit 1
 fi
 
-SHARE=$(mc share download --expire="$EXPIRE" "dashi-pf/${KEY}" | grep -E '^Share' | awk '{print $2}')
+share_for() {
+  local key="$1"
+  mc share download --expire="$EXPIRE" "dashi-pf/${key}" 2>/dev/null \
+    | grep -E '^Share' | awk '{print $2}'
+}
 
-VIEWER="http://localhost:8000/viewer/pointcloud.html?url=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1], safe=''))" "$SHARE")"
+urlenc() {
+  python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1], safe=''))" "$1"
+}
+
+VIEWER_BASE="${VIEWER_BASE:-http://localhost:8000/viewer/pointcloud.html}"
+
+# Production tier — 3D Tiles tileset (preferred when present).
+TILESET3D_KEY=$(echo "$ASSETS" | python3 -c "import sys,json;print(json.load(sys.stdin).get('tileset3d',''))")
+TILESET3D_URL=""
+if [[ -n "$TILESET3D_KEY" ]]; then
+  TILESET3D_URL=$(share_for "$TILESET3D_KEY")
+fi
+
+# PoC tier — direct COPC.
+COPC_KEY=$(echo "$ASSETS" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('viewer3d') or d.get('data') or '')")
+COPC_URL=$(share_for "$COPC_KEY")
 
 echo ""
 echo "  Item:    $ITEM_ID"
-echo "  Key:     $KEY"
 echo "  Expires: $EXPIRE"
 echo ""
-echo "  Presigned URL (paste into viewer's input field):"
-echo "  $SHARE"
-echo ""
-echo "  One-click viewer URL (with the share URL already filled in):"
-echo "  $VIEWER"
-echo ""
+
+if [[ -n "$COPC_URL" ]]; then
+  echo "  ┌─────────────────────────────────────────────────────────────────┐"
+  echo "  │ COPC (recommended for the bundled dashi viewer)                 │"
+  echo "  │   maplibre-gl-lidar streams viewport-by-viewport via HTTP range │"
+  echo "  └─────────────────────────────────────────────────────────────────┘"
+  echo ""
+  echo "  Presigned URL:"
+  echo "  $COPC_URL"
+  echo ""
+  echo "  One-click viewer URL:"
+  echo "  ${VIEWER_BASE}?url=$(urlenc "$COPC_URL")"
+  echo ""
+fi
+
+if [[ -n "$TILESET3D_URL" ]]; then
+  echo "  ┌─────────────────────────────────────────────────────────────────┐"
+  echo "  │ 3D Tiles tileset — for CesiumJS / iTowns / deck.gl Tile3DLayer  │"
+  echo "  │   (not consumed by the bundled maplibre-gl-lidar viewer)        │"
+  echo "  └─────────────────────────────────────────────────────────────────┘"
+  echo ""
+  echo "  Presigned tileset.json:"
+  echo "  $TILESET3D_URL"
+  echo ""
+fi
+
 echo "  Tip: keep this terminal running — it is also holding the RustFS port-forward on :$PORT."
 echo "       Ctrl-C to release."
 sleep infinity

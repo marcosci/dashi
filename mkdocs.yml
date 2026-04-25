@@ -9,6 +9,12 @@ edit_uri: edit/main/docs/
 
 docs_dir: docs
 
+# Exclude generated viewer build artefacts so mkdocs strict mode does not
+# choke on third-party READMEs inside node_modules.
+exclude_docs: |
+  /viewer/node_modules/
+  /viewer/src/
+
 theme:
   name: material
   language: de
@@ -100,10 +106,14 @@ nav:
       - Gate-1 Acceptance (PoC): GATE-1-ACCEPTANCE.md
       - Phase-2-Roadmap: PHASE-2-ROADMAP.md
       - Feature-Ideas (Backlog): FEATURE-IDEAS.md
+      - Launch checklist: LAUNCH-CHECKLIST.md
+      - Launch post (template): LAUNCH-POST.md
   - Betrieb:
       - Operations Runbook: OPERATIONS.md
       - RBAC & Secret-Rotation: RBAC-RUNBOOK.md
       - Troubleshooting: TROUBLESHOOTING.md
+      - Domain onboarding: onboarding/domain-template.md
+      - Onboarded domains: onboarding/domains.md
   - Referenz:
       - ID-Referenz: id-reference.md
       - Glossar: GLOSSARY.md

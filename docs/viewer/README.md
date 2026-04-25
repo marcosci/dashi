@@ -33,5 +33,5 @@ http://localhost:8000/viewer/pointcloud.html?url=<presigned-url>
 
 For point clouds the serving story is fundamentally different from raster (TiTiler) and vector (Martin):
 
-- **PoC tier** (this page): browser pulls the whole LAZ in one shot. Fine up to ~10⁷ points / ~100 MB.
-- **Production tier**: a Prefect flow converts COPC → 3D Tiles tileset (`tileset.json` + `.pnts` chunks) so the same viewer streams just the chunks in view. Tracked under "Point cloud visualisation" in [FEATURE-IDEAS](../FEATURE-IDEAS.md).
+- **`maplibre-gl-lidar` (this page)** streams COPC LAZ viewport-by-viewport via HTTP-range requests. Full file never enters memory; only nodes intersecting the camera frustum are decoded.
+- A separate **3D Tiles tileset** (`tileset.json` + `.pnts` chunks) is also published to `s3://curated/3dtiles/<item_id>/` for non-COPC-aware consumers — CesiumJS, iTowns, deck.gl `Tile3DLayer`. The dashi viewer does not consume it directly because the COPC streaming path is already memory-bounded.

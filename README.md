@@ -7,9 +7,12 @@
 <p align="center"><strong>The essential base for spatial data.</strong></p>
 
 <p align="center">
-  <a href="https://marcosci.github.io/dashi/"><img alt="docs" src="https://img.shields.io/badge/docs-marcosci.github.io%2Fdashi-c8821f"></a>
+  <a href="https://github.com/marcosci/dashi/actions/workflows/ci.yml"><img alt="ci" src="https://github.com/marcosci/dashi/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/marcosci/dashi/actions/workflows/docs.yml"><img alt="docs" src="https://github.com/marcosci/dashi/actions/workflows/docs.yml/badge.svg"></a>
+  <a href="https://marcosci.github.io/dashi/"><img alt="site" src="https://img.shields.io/badge/site-marcosci.github.io%2Fdashi-c8821f"></a>
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache--2.0-blue"></a>
   <a href="CONTRIBUTING.md"><img alt="contributions welcome" src="https://img.shields.io/badge/contributions-welcome-3d5a3a"></a>
+  <a href="https://github.com/marcosci/dashi/discussions"><img alt="discussions" src="https://img.shields.io/badge/discussions-open-3d5a3a"></a>
 </p>
 
 > A cloud-native spatial data lake — layered, infused, re-usable. Ingests any OGR/GDAL-readable geodata (vector, raster, point cloud), standardises onto a common zone model (Landing → Processed → Curated → Enrichment → Serving), catalogs everything via STAC, and serves it through SQL, COG raster tiles, and OGC API — Tiles vector tiles. Use cases: Earth observation, environmental analysis, urban planning, logistics, research — anywhere durable spatial storage with reproducible pipelines is needed.
