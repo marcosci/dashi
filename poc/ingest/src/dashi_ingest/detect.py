@@ -28,7 +28,32 @@ VECTOR_EXTS: frozenset[str] = frozenset(
     {".shp", ".gpkg", ".geojson", ".json", ".kml", ".kmz", ".fgb", ".tab", ".mif", ".gdb"}
 )
 RASTER_EXTS: frozenset[str] = frozenset(
-    {".tif", ".tiff", ".cog", ".vrt", ".nc", ".jp2", ".img", ".hgt", ".asc", ".dem"}
+    {
+        ".tif",
+        ".tiff",
+        ".cog",
+        ".vrt",
+        ".jp2",
+        ".img",
+        ".hgt",
+        ".asc",
+        ".dem",
+        # Multi-dimensional / scientific raster formats. GDAL handles them via
+        # the netCDF / HDF5 drivers when built with the right options. The
+        # rasterio probe in _probe_raster returns the driver name; we accept
+        # any driver that opens. Zarr support is Phase-2 (it is a directory,
+        # not a file, and detect.discover treats it differently).
+        ".nc",
+        ".nc4",
+        ".cdf",  # NetCDF 3 / 4
+        ".h5",
+        ".hdf5",
+        ".he5",  # HDF5
+        ".hdf",  # HDF4 (when libhdf4 present)
+        ".grib",
+        ".grb",
+        ".grb2",  # GRIB1/2
+    }
 )
 POINTCLOUD_EXTS: frozenset[str] = frozenset({".las", ".laz", ".copc"})
 SIDECAR_EXTS: frozenset[str] = frozenset(

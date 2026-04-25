@@ -64,6 +64,17 @@ def ensure_collection(
     r.raise_for_status()
 
 
+def item_exists(item_id: str, collection_id: str, *, stac_url: str = DEFAULT_STAC_URL) -> bool:
+    """Return True if the given item already lives in the catalog. Used by the
+    incremental-ingest dedupe path: same content hash → same item id → skip."""
+    url = f"{stac_url.rstrip('/')}/collections/{collection_id}/items/{item_id}"
+    try:
+        r = requests.get(url, timeout=10)
+    except requests.RequestException:
+        return False
+    return r.status_code == 200
+
+
 def post_item(item: pystac.Item, *, stac_url: str = DEFAULT_STAC_URL) -> None:
     """POST or upsert a STAC Item via stac-fastapi transaction extension."""
     url = f"{stac_url.rstrip('/')}/collections/{item.collection_id}/items"

@@ -118,6 +118,22 @@ def ingest_one(
 
     # Per-layer datasets get their layer name hashed into the id
     dataset_id = _dataset_id(src, extra=(det.layer or "").encode())
+
+    # Incremental ingest: same source content + same target collection
+    # → same dataset_id → already in the catalog → skip.
+    if stac.item_exists(dataset_id, domain, stac_url=stac_url):
+        return IngestOutcome(
+            input_path=str(src),
+            kind=det.kind,
+            dataset_id=dataset_id,
+            status="skipped",
+            output_uri=None,
+            stac_item_id=dataset_id,
+            layer=det.layer,
+            reason="already ingested (matching dashi:source_hash)",
+            counts={},
+        )
+
     with tempfile.TemporaryDirectory(prefix="dashi-ingest-") as tmp:
         tmp_path = Path(tmp)
 

@@ -12,6 +12,19 @@ RUN npm run build
 
 FROM nginx:1.27-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
+# Re-serve the standalone point cloud viewer at /viewer/* — same origin
+# as the SPA so the iframe works without CORS. Build context is
+# poc/web/ingest/, so we cannot reach docs/viewer/ here directly; the
+# viewer assets are mounted at runtime via a ConfigMap in production
+# (manifests/ingest-web/). For the dev image we just serve a small
+# placeholder so the iframe doesn't 404.
+RUN mkdir -p /usr/share/nginx/html/viewer \
+ && printf '%s\n' '<!doctype html><meta charset=utf-8>' \
+    '<style>body{font-family:Inter,system-ui;background:#fff;color:#14110d;padding:2rem;font-size:14px}a{color:#8a5410}</style>' \
+    '<h1>Point cloud viewer</h1>' \
+    '<p>The standalone viewer lives under <code>docs/viewer/pointcloud.html</code> in the repo. Mount it into this nginx via a ConfigMap (or open it directly via the docs site).</p>' \
+    '<p><a href="https://github.com/marcosci/dashi/tree/main/docs/viewer">repo: docs/viewer</a></p>' \
+    > /usr/share/nginx/html/viewer/pointcloud.html
 # nginx:
 #  - serves /index.html for SPA fallback (client-side router)
 #  - reverse-proxies /api/* to the ingest-api Service (same namespace),

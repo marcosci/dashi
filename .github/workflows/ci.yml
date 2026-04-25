@@ -164,3 +164,56 @@ jobs:
           pip install ruff
           ruff check poc/services/ingest-api/src
           ruff format --check poc/services/ingest-api/src
+
+  e2e-cluster:
+    name: E2E (kind cluster + storage smoke)
+    runs-on: ubuntu-latest
+    # Heavy job — only run on the main branch + PRs labelled `e2e`. Set
+    # the label via `gh pr edit <n> --add-label e2e` to opt in. Saves CI
+    # minutes on every doc-only PR.
+    if: |
+      github.event_name == 'push' ||
+      contains(github.event.pull_request.labels.*.name, 'e2e')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Spin up kind cluster
+        uses: helm/kind-action@v1
+        with:
+          cluster_name: dashi-ci
+          kubectl_version: v1.31.0
+          wait: 120s
+
+      - name: Smoke check — cluster is reachable
+        run: |
+          kubectl version --short || kubectl version
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl get ns
+
+      - name: Apply RustFS storage manifests (single-replica, ephemeral)
+        run: |
+          # Substitute the placeholder root password before apply (CI only).
+          export DASHI_CI_PASS=$(openssl rand -hex 16)
+          sed "s/CHANGE_ME_ROOT_PASSWORD/${DASHI_CI_PASS}/g" \
+            poc/manifests/rustfs/secret.yaml > /tmp/rustfs-secret.yaml
+          kubectl apply -f poc/manifests/rustfs/namespace.yaml
+          kubectl apply -f /tmp/rustfs-secret.yaml
+          kubectl apply -f poc/manifests/rustfs/service.yaml
+          kubectl apply -f poc/manifests/rustfs/statefulset.yaml
+          kubectl apply -f poc/manifests/rustfs/job-buckets.yaml
+          kubectl -n dashi-platform rollout status statefulset/rustfs --timeout=240s
+          kubectl -n dashi-platform wait --for=condition=complete \
+            job/rustfs-create-buckets --timeout=240s
+
+      - name: Probe RustFS health endpoint
+        run: |
+          kubectl -n dashi-platform port-forward svc/rustfs 9000:9000 &
+          PF=$!
+          sleep 4
+          # RustFS responds 403 on unauthenticated GET / — proves the server
+          # is up and rejects anonymous reads. A real smoke would mint a
+          # presigned URL; this CI only verifies the manifest applies.
+          curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9000/ \
+            | grep -E '^(200|403)$'
+          kill $PF || true

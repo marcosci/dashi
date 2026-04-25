@@ -28,12 +28,7 @@ from prefect import flow, get_run_logger, task
 
 from dashi_ingest import storage
 
-DEFAULT_DOMAINS_DOC = (
-    Path(__file__).resolve().parents[3]
-    / "docs"
-    / "onboarding"
-    / "domains.md"
-)
+DEFAULT_DOMAINS_DOC = Path(__file__).resolve().parents[3] / "docs" / "onboarding" / "domains.md"
 RETENTION_RE = re.compile(r"^(\d+)\s*([dmyDMY])$")
 
 
@@ -177,10 +172,5 @@ def retention_flow(
 
     s3_cfg_dump = storage.S3Config.from_env().to_dict()
 
-    targets = (
-        [(domain, table.get(domain, "indefinite"))] if domain else list(table.items())
-    )
-    return [
-        prune_domain(d, r, stac_url=stac_url, s3_cfg_dump=s3_cfg_dump)
-        for d, r in targets
-    ]
+    targets = [(domain, table.get(domain, "indefinite"))] if domain else list(table.items())
+    return [prune_domain(d, r, stac_url=stac_url, s3_cfg_dump=s3_cfg_dump) for d, r in targets]

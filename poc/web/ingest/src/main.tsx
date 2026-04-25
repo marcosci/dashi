@@ -8,6 +8,7 @@ import {App} from "./App";
 import {Ingest} from "./routes/Ingest";
 import {Catalog} from "./routes/Catalog";
 import {Runs} from "./routes/Runs";
+import {Viewer} from "./routes/Viewer";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <Route index element={<Ingest />} />
             <Route path="catalog" element={<Catalog />} />
             <Route path="runs" element={<Runs />} />
+            <Route path="viewer" element={<Viewer />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

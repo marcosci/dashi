@@ -1,0 +1,45 @@
+# Run via `pre-commit run --all-files` or install with `pre-commit install`.
+# Mirrors the checks the CI workflow runs, so you catch them locally.
+default_language_version:
+  python: python3.12
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.svg$|\.wasm$|^docs/viewer/(viewer\.bundle\.js|laz.*\.wasm)$'
+      - id: end-of-file-fixer
+        exclude: '\.svg$|\.wasm$|^docs/viewer/(viewer\.bundle\.js|laz.*\.wasm)$'
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1500"]
+      - id: check-yaml
+        args: ["--allow-multiple-documents"]
+        exclude: '^poc/manifests/.*kustomization\.yaml$'   # kustomize uses non-strict yaml
+      - id: check-json
+      - id: detect-private-key
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: '^docs/viewer/(viewer\.bundle\.js|.*\.wasm)$|^poc/web/ingest/(viewer\.bundle\.js|tsconfig\.tsbuildinfo)$'
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+        files: '^poc/(ingest|services/ingest-api)/src/'
+      - id: ruff-format
+        files: '^poc/(ingest/src|services/ingest-api/src)/'
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.10.0
+    hooks:
+      - id: shellcheck
+        args: ["-e", "SC1091,SC2086,SC2155"]
+        files: '^poc/(scripts|smoke)/.*\.sh$'
+

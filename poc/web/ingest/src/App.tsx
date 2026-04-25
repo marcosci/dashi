@@ -5,6 +5,7 @@ const NAV: {to: string; label: string}[] = [
   {to: "/", label: "Ingest"},
   {to: "/catalog", label: "Catalog"},
   {to: "/runs", label: "Runs"},
+  {to: "/viewer", label: "Viewer"},
 ];
 
 export function App() {

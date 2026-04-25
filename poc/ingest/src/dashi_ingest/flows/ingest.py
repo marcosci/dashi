@@ -48,9 +48,7 @@ def _prefect_lineage() -> dict:
         out["dashi:prefect_flow_run_id"] = str(flow_run.id)
         out["dashi:prefect_flow_name"] = flow_run.name
         if ui_base:
-            out["dashi:prefect_flow_run_url"] = (
-                f"{ui_base}/runs/flow-run/{flow_run.id}"
-            )
+            out["dashi:prefect_flow_run_url"] = f"{ui_base}/runs/flow-run/{flow_run.id}"
     if task_run is not None:
         out["dashi:prefect_task_run_id"] = str(task_run.id)
     return out
@@ -122,7 +120,7 @@ def _fetch_s3_to_tmp(s3_uri: str, dest: Path) -> Path:
     local path that detect.discover() should be pointed at.
     """
     s3 = storage.s3_client(storage.S3Config.from_env())
-    rest = s3_uri[len("s3://"):]
+    rest = s3_uri[len("s3://") :]
     bucket, _, key = rest.partition("/")
     dest.mkdir(parents=True, exist_ok=True)
 
@@ -138,7 +136,7 @@ def _fetch_s3_to_tmp(s3_uri: str, dest: Path) -> Path:
     prefix = key.rstrip("/") + "/" if key else ""
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
         for obj in page.get("Contents", []) or []:
-            rel = obj["Key"][len(prefix):] if prefix else obj["Key"]
+            rel = obj["Key"][len(prefix) :] if prefix else obj["Key"]
             if not rel:
                 continue
             target = dest / rel
@@ -175,6 +173,7 @@ def ingest_flow(
 
     if source_path.startswith("s3://"):
         import tempfile
+
         tmp = Path(tempfile.mkdtemp(prefix="dashi-flow-"))
         logger.info("fetching %s → %s", source_path, tmp)
         src = _fetch_s3_to_tmp(source_path, tmp)
