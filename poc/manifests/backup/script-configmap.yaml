@@ -1,0 +1,76 @@
+# Shared backup script. The three CronJobs each mount this ConfigMap and
+# pass DB-specific env vars (DB_LABEL, PGHOST, …). The script:
+#   1. pg_dump --format=custom --compress=9 to a temp file
+#   2. mc cp to s3://backups/<DB_LABEL>/<utc-stamp>/<DB_LABEL>.dump (primary)
+#   3. (optional) mc mirror to a secondary S3 endpoint if DASHI_OFFSITE_* env
+#      vars are set — gives off-cluster DR.
+#   4. mc rm older than 30 days under primary.
+#
+# Required env on every Job:
+#   DB_LABEL   PGHOST  PGPORT  PGDATABASE  PGUSER  PGPASSWORD
+#   DASHI_S3_ENDPOINT  DASHI_S3_ACCESS_KEY  DASHI_S3_SECRET_KEY
+# Optional (off-cluster mirror, picked up if all four are set):
+#   DASHI_OFFSITE_ENDPOINT  DASHI_OFFSITE_BUCKET
+#   DASHI_OFFSITE_ACCESS_KEY  DASHI_OFFSITE_SECRET_KEY
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backup-script
+  namespace: dashi-backup
+data:
+  backup.sh: |
+    #!/bin/sh
+    set -eu
+
+    : "${DB_LABEL:?DB_LABEL must be set}"
+    : "${PGHOST:?}"
+    : "${PGPORT:?}"
+    : "${PGDATABASE:?}"
+    : "${PGUSER:?}"
+    : "${PGPASSWORD:?}"
+    : "${DASHI_S3_ENDPOINT:?}"
+    : "${DASHI_S3_ACCESS_KEY:?}"
+    : "${DASHI_S3_SECRET_KEY:?}"
+
+    # Install mc (the postgres alpine images don't ship it).
+    if ! command -v mc >/dev/null 2>&1; then
+      ARCH="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+      apk add --no-cache curl >/dev/null 2>&1 || \
+        (apt-get update >/dev/null && apt-get install -y --no-install-recommends curl >/dev/null)
+      curl -sLO "https://dl.min.io/client/mc/release/linux-${ARCH}/mc"
+      install -m 0755 ./mc /usr/local/bin/mc
+    fi
+
+    mc alias set dashi "$DASHI_S3_ENDPOINT" "$DASHI_S3_ACCESS_KEY" "$DASHI_S3_SECRET_KEY" >/dev/null
+
+    STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+    OUT="/tmp/${DB_LABEL}-${STAMP}.dump"
+
+    echo "→ pg_dump ${DB_LABEL} ($STAMP)"
+    PGPASSWORD="$PGPASSWORD" pg_dump \
+      -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" -d "$PGDATABASE" \
+      --format=custom --compress=9 > "$OUT"
+
+    SIZE=$(du -h "$OUT" | cut -f1)
+    echo "→ uploading $SIZE → primary  s3://backups/${DB_LABEL}/${STAMP}/"
+    mc cp "$OUT" "dashi/backups/${DB_LABEL}/${STAMP}/${DB_LABEL}.dump"
+
+    # Off-cluster mirror — disaster-recovery target. Skipped silently when
+    # the four offsite env vars are missing.
+    if [ -n "${DASHI_OFFSITE_ENDPOINT:-}" ] \
+       && [ -n "${DASHI_OFFSITE_BUCKET:-}" ] \
+       && [ -n "${DASHI_OFFSITE_ACCESS_KEY:-}" ] \
+       && [ -n "${DASHI_OFFSITE_SECRET_KEY:-}" ]; then
+      echo "→ mirroring to off-cluster $DASHI_OFFSITE_ENDPOINT/$DASHI_OFFSITE_BUCKET/${DB_LABEL}/${STAMP}/"
+      mc alias set offsite "$DASHI_OFFSITE_ENDPOINT" \
+        "$DASHI_OFFSITE_ACCESS_KEY" "$DASHI_OFFSITE_SECRET_KEY" >/dev/null
+      mc cp "$OUT" \
+        "offsite/${DASHI_OFFSITE_BUCKET}/${DB_LABEL}/${STAMP}/${DB_LABEL}.dump"
+    else
+      echo "  (offsite mirror env not set — primary copy only)"
+    fi
+
+    echo "→ pruning >30d on primary"
+    mc rm --recursive --force --older-than 30d "dashi/backups/${DB_LABEL}/" || true
+
+    echo "✓ ${DB_LABEL} backup complete"

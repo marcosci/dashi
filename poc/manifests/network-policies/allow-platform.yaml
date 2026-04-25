@@ -1,0 +1,44 @@
+# RustFS in dashi-platform accepts ingress only from:
+#   - dashi-data (ingest writers + pipeline workers)
+#   - dashi-serving (read-only consumers)
+#   - dashi-monitoring (Prometheus scraper)
+#   - dashi-backup (CronJobs upload pg_dump output)
+# and from kubectl port-forward (api-server proxy — ingress from
+# kube-system). All other namespaces cannot reach RustFS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-rustfs-clients
+  namespace: dashi-platform
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rustfs
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-data
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-serving
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-backup
+        # ingest-api in dashi-web mints presigned URLs and (via /scan)
+        # downloads landing-zone objects.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-web
+      ports:
+        - protocol: TCP
+          port: 9000
+        - protocol: TCP
+          port: 9001

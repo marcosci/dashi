@@ -1,0 +1,101 @@
+# Local Ollama for the LLM enrichment flow. CPU-only, ARM64-friendly,
+# small llama3.2:3b model (~2 GiB). PoC default; swap for a hosted
+# OpenAI-compatible endpoint via DASHI_LLM_ENDPOINT in production.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dashi-llm
+  labels:
+    app.kubernetes.io/part-of: dashi
+    dashi.dev/zone-owner: llm
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models
+  namespace: dashi-llm
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 8Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: dashi-llm
+  labels:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/component: llm
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+        app.kubernetes.io/component: llm
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: ollama
+          image: ollama/ollama:0.4.7
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 11434}
+          env:
+            - {name: OLLAMA_HOST, value: "0.0.0.0:11434"}
+            - {name: OLLAMA_KEEP_ALIVE, value: "1h"}
+          volumeMounts:
+            - {name: models, mountPath: /root/.ollama}
+          readinessProbe:
+            tcpSocket: {port: http}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests: {cpu: 500m, memory: 2Gi}
+            limits:   {cpu: "4",   memory: 6Gi}
+      volumes:
+        - {name: models, persistentVolumeClaim: {claimName: ollama-models}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: dashi-llm
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ollama
+  ports:
+    - {name: http, port: 11434, targetPort: http}
+---
+# One-shot Job to pull the default model on first deploy.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ollama-pull-default
+  namespace: dashi-llm
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: pull
+          image: curlimages/curl:8.10.1
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "→ pulling llama3.2:3b (≈2 GiB)"
+              curl -fsS -X POST \
+                -H 'Content-Type: application/json' \
+                -d '{"name":"llama3.2:3b","stream":false}' \
+                http://ollama.dashi-llm.svc.cluster.local:11434/api/pull
+              echo ""
+              echo "✓ done"

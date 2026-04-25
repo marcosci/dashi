@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-web
+  namespace: dashi-web
+  labels:
+    app.kubernetes.io/name: ingest-web
+    app.kubernetes.io/component: web-static
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingest-web
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ingest-web
+        app.kubernetes.io/component: web-static
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: nginx
+          image: dashi/ingest-web:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /, port: http}
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          resources:
+            requests: {cpu: 25m,  memory: 32Mi}
+            limits:   {cpu: 200m, memory: 128Mi}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-web
+  namespace: dashi-web
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: ingest-web
+  ports:
+    - {name: http, port: 8080, targetPort: http}

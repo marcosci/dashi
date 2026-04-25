@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>dashi · point cloud viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --ink: #1a1612;
+      --paper: #faf6ee;
+      --cream: #f4ede1;
+      --amber: #c8821f;
+      --amber-light: #e8a547;
+      --kombu: #3d5a3a;
+      --seal: #b8421f;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      overflow: hidden;
+    }
+    #map {
+      position: absolute;
+      inset: 0;
+    }
+    #panel {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 10;
+      background: rgba(26, 22, 18, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(244, 237, 225, 0.15);
+      border-radius: 8px;
+      padding: 14px 16px;
+      max-width: 380px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    #panel h1 {
+      margin: 0 0 4px 0;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--amber);
+    }
+    #panel p {
+      margin: 4px 0;
+      opacity: 0.85;
+    }
+    #panel input[type=text] {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      padding: 6px 8px;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      background: var(--paper);
+      color: var(--ink);
+      border: 1px solid rgba(244, 237, 225, 0.2);
+      border-radius: 4px;
+    }
+    #panel button {
+      margin-top: 8px;
+      padding: 6px 14px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--amber);
+      color: var(--ink);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #panel button:hover { background: var(--amber-light); }
+    #panel button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #status {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(244, 237, 225, 0.15);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 11px;
+      opacity: 0.85;
+      min-height: 1em;
+    }
+    #status.error { color: var(--seal); }
+    #status.ok    { color: var(--kombu); }
+    .maplibregl-ctrl-attrib { font-size: 10px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <div id="panel">
+    <h1>dashi point cloud viewer</h1>
+    <p>Powered by <a href="https://github.com/opengeos/maplibre-gl-lidar" target="_blank" style="color:var(--amber)">opengeos/maplibre-gl-lidar</a> over a MapLibre basemap. Paste a presigned URL to a COPC/LAZ file or a tileset URL.</p>
+    <input id="url-input" type="text" placeholder="http://localhost:19100/.../points.copc.laz?…">
+    <button id="load-btn">Load</button>
+    <div id="status"></div>
+  </div>
+
+  <script type="module">
+    'use strict';
+
+    const {
+      maplibregl, LidarControl, maplibreCss, lidarCss
+    } = await import('./viewer.bundle.js');
+
+    // Inject CSS bundled by esbuild as text.
+    const styleEl = document.createElement('style');
+    styleEl.textContent = maplibreCss + '\n' + lidarCss;
+    document.head.appendChild(styleEl);
+
+    const $url    = document.getElementById('url-input');
+    const $btn    = document.getElementById('load-btn');
+    const $status = document.getElementById('status');
+
+    function setStatus(msg, kind) {
+      $status.textContent = msg;
+      $status.className = kind || '';
+    }
+
+    const params = new URLSearchParams(location.search);
+    if (params.get('url')) $url.value = params.get('url');
+
+    // MapLibre basemap — CartoDB voyager (free, no API key, retina-ready).
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+      center: [0, 20],
+      zoom: 2,
+      pitch: 60,
+      maxPitch: 85,
+      attributionControl: {compact: true}
+    });
+
+    map.addControl(new maplibregl.NavigationControl({visualizePitch: true}), 'top-right');
+
+    // The lidar control runs the deck.gl PointCloudLayer under the hood,
+    // streams COPC via copc.js + laz-perf.wasm (which esbuild bundles into
+    // the viewer bundle automatically).
+    const lidarControl = new LidarControl({
+      title: 'Lidar Controls',
+      collapsed: true,
+      pointSize: 2,
+      colorScheme: 'elevation',
+      pickable: true
+    });
+    map.addControl(lidarControl, 'top-right');
+
+    lidarControl.on('load', (e) => {
+      const pc = e.pointCloud || e.detail?.pointCloud;
+      const n = pc?.pointCount ?? pc?.header?.pointCount ?? '?';
+      setStatus(`Loaded ${Number(n).toLocaleString()} points · click panel ▼ for color/legend/picking`, 'ok');
+      lidarControl.flyToPointCloud();
+      $btn.disabled = false;
+    });
+    lidarControl.on('error', (e) => {
+      const msg = e.error?.message || e.detail?.error?.message || 'load failed';
+      setStatus(`Error: ${msg}`, 'error');
+      $btn.disabled = false;
+    });
+
+    async function load(url) {
+      $btn.disabled = true;
+      setStatus(`Loading ${url.slice(0, 60)}…`);
+      try {
+        await lidarControl.loadPointCloud(url);
+      } catch (err) {
+        console.error(err);
+        setStatus(`Error: ${err.message}`, 'error');
+        $btn.disabled = false;
+      }
+    }
+
+    $btn.addEventListener('click', () => {
+      const url = $url.value.trim();
+      if (url) load(url);
+    });
+
+    map.on('load', () => {
+      setStatus('Ready. Paste a URL above.', 'ok');
+      if ($url.value) load($url.value);
+    });
+  </script>
+</body>
+</html>

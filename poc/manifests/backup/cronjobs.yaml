@@ -1,0 +1,149 @@
+# Three CronJobs, one per Postgres in the cluster. Body of each is the
+# shared backup-script ConfigMap; the only per-job difference is DB env.
+#
+# Off-cluster DR: if the optional dashi-offsite Secret exists in this
+# namespace (key shape mirrors dashi-rustfs-pipeline + an extra `bucket`
+# key + a different endpoint), the script also mirrors each dump to
+# that S3-compatible target. Without the secret, only the primary copy
+# in s3://backups/ is written.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-pgstac
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: pgstac
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: ghcr.io/stac-utils/pgstac:v0.9.5
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/bash", "/scripts/backup.sh"]
+              env:
+                - { name: DB_LABEL,   value: pgstac }
+                - { name: PGHOST,     value: pgstac.dashi-catalog.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: postgres }
+                - { name: PGUSER,     valueFrom: { secretKeyRef: { name: pgstac-credentials, key: POSTGRES_USER } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: pgstac-credentials, key: POSTGRES_PASSWORD } } }
+                - { name: DASHI_S3_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } } }
+                - { name: DASHI_S3_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } } }
+                - { name: DASHI_S3_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } } }
+                # Off-cluster mirror — silently no-op when the dashi-offsite
+                # Secret is absent (optional: false, but valueFrom guarded).
+                - { name: DASHI_OFFSITE_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-offsite, key: endpoint,   optional: true } } }
+                - { name: DASHI_OFFSITE_BUCKET,     valueFrom: { secretKeyRef: { name: dashi-offsite, key: bucket,     optional: true } } }
+                - { name: DASHI_OFFSITE_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: access-key, optional: true } } }
+                - { name: DASHI_OFFSITE_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: secret-key, optional: true } } }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts }
+              resources:
+                requests: { cpu: 100m, memory: 256Mi }
+                limits:   { cpu: 500m, memory: 1Gi }
+          volumes:
+            - { name: scripts, configMap: { name: backup-script, defaultMode: 0o755 } }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-prefect
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: prefect
+spec:
+  schedule: "10 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: postgres:16-alpine
+              command: ["/bin/sh", "/scripts/backup.sh"]
+              env:
+                - { name: DB_LABEL,   value: prefect }
+                - { name: PGHOST,     value: prefect-db.dashi-data.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: prefect }
+                - { name: PGUSER,     valueFrom: { secretKeyRef: { name: prefect-db, key: POSTGRES_USER } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: prefect-db, key: POSTGRES_PASSWORD } } }
+                - { name: DASHI_S3_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } } }
+                - { name: DASHI_S3_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } } }
+                - { name: DASHI_S3_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } } }
+                - { name: DASHI_OFFSITE_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-offsite, key: endpoint,   optional: true } } }
+                - { name: DASHI_OFFSITE_BUCKET,     valueFrom: { secretKeyRef: { name: dashi-offsite, key: bucket,     optional: true } } }
+                - { name: DASHI_OFFSITE_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: access-key, optional: true } } }
+                - { name: DASHI_OFFSITE_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: secret-key, optional: true } } }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { cpu: 500m, memory: 512Mi }
+          volumes:
+            - { name: scripts, configMap: { name: backup-script, defaultMode: 0o755 } }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-serving-postgis
+  namespace: dashi-backup
+  labels:
+    app.kubernetes.io/component: db-backup
+    dashi.dev/target-db: serving-postgis
+spec:
+  schedule: "20 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pgdump
+              image: postgis/postgis:16-3.4-alpine
+              command: ["/bin/sh", "/scripts/backup.sh"]
+              env:
+                - { name: DB_LABEL,   value: serving-postgis }
+                - { name: PGHOST,     value: serving-postgis.dashi-serving-db.svc.cluster.local }
+                - { name: PGPORT,     value: "5432" }
+                - { name: PGDATABASE, value: serving }
+                - { name: PGUSER,     valueFrom: { secretKeyRef: { name: serving-postgis, key: POSTGRES_USER } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: serving-postgis, key: POSTGRES_PASSWORD } } }
+                - { name: DASHI_S3_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: endpoint } } }
+                - { name: DASHI_S3_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: access-key } } }
+                - { name: DASHI_S3_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-rustfs-pipeline, key: secret-key } } }
+                - { name: DASHI_OFFSITE_ENDPOINT,   valueFrom: { secretKeyRef: { name: dashi-offsite, key: endpoint,   optional: true } } }
+                - { name: DASHI_OFFSITE_BUCKET,     valueFrom: { secretKeyRef: { name: dashi-offsite, key: bucket,     optional: true } } }
+                - { name: DASHI_OFFSITE_ACCESS_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: access-key, optional: true } } }
+                - { name: DASHI_OFFSITE_SECRET_KEY, valueFrom: { secretKeyRef: { name: dashi-offsite, key: secret-key, optional: true } } }
+              volumeMounts:
+                - { name: scripts, mountPath: /scripts }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits:   { cpu: 500m, memory: 512Mi }
+          volumes:
+            - { name: scripts, configMap: { name: backup-script, defaultMode: 0o755 } }

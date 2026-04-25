@@ -1,0 +1,137 @@
+/* Dashi brand tokens — mirror of dashi-v3-system.jsx V3 palette.
+   Typography pairing: Inter (body, wordmark), Fraunces Italic (accent headlines),
+   JetBrains Mono (code + labels). */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&display=swap');
+
+:root,
+[data-md-color-scheme="default"] {
+  --dashi-ink:        #1a1612;
+  --dashi-paper:      #faf6ee;
+  --dashi-cream:      #f4ede1;
+  --dashi-cream-deep: #ebe1cb;
+  --dashi-amber:      #c8821f;
+  --dashi-amber-light:#e8a547;
+  --dashi-amber-deep: #8a5410;
+  --dashi-kombu:      #3d5a3a;
+  --dashi-seal:       #b8421f;
+
+  /* MkDocs Material overrides — light scheme */
+  --md-primary-fg-color:        var(--dashi-ink);
+  --md-primary-fg-color--light: var(--dashi-kombu);
+  --md-primary-fg-color--dark:  var(--dashi-ink);
+  --md-primary-bg-color:        var(--dashi-cream);
+  --md-accent-fg-color:         var(--dashi-amber);
+  --md-accent-fg-color--transparent: rgba(200, 130, 31, 0.1);
+  --md-default-bg-color:        var(--dashi-cream);
+  --md-default-fg-color:        var(--dashi-ink);
+  --md-default-fg-color--light: rgba(26, 22, 18, 0.75);
+  --md-code-bg-color:           var(--dashi-cream-deep);
+  --md-code-fg-color:           var(--dashi-ink);
+  --md-typeset-a-color:         var(--dashi-amber-deep);
+}
+
+[data-md-color-scheme="slate"] {
+  /* Shadow the surface tokens for dark mode but keep the *light* cream
+     available for header text (--md-primary-bg-color). */
+  --dashi-paper:      #0f0d0b;
+  --dashi-cream:      #1a1612;
+  --dashi-cream-deep: #211c17;
+  --dashi-cream-light:#f4ede1;   /* used for header text + logo fg */
+
+  --md-primary-fg-color:        var(--dashi-cream);       /* nav background — dark */
+  --md-primary-fg-color--light: var(--dashi-amber);
+  --md-primary-fg-color--dark:  var(--dashi-paper);
+  --md-primary-bg-color:        var(--dashi-cream-light); /* nav foreground — light */
+  --md-primary-bg-color--light: rgba(244, 237, 225, 0.7);
+  --md-accent-fg-color:         var(--dashi-amber-light);
+  --md-accent-fg-color--transparent: rgba(232, 165, 71, 0.15);
+  --md-default-bg-color:        var(--dashi-paper);
+  --md-default-fg-color:        var(--dashi-cream-light);
+  --md-default-fg-color--light: rgba(244, 237, 225, 0.75);
+  --md-default-fg-color--lighter: rgba(244, 237, 225, 0.45);
+  --md-default-fg-color--lightest: rgba(244, 237, 225, 0.2);
+  --md-code-bg-color:            #211c17;
+  --md-code-fg-color:            #f4ede1;
+  --md-typeset-a-color:         var(--dashi-amber-light);
+}
+
+/* Header + search + tabs text — force the light cream in slate so
+   every header child inherits it even if Material doesn't use
+   --md-primary-bg-color for that element. */
+[data-md-color-scheme="slate"] .md-header,
+[data-md-color-scheme="slate"] .md-tabs,
+[data-md-color-scheme="slate"] .md-search__form {
+  color: var(--dashi-cream-light);
+}
+[data-md-color-scheme="slate"] .md-header__title,
+[data-md-color-scheme="slate"] .md-header__topic,
+[data-md-color-scheme="slate"] .md-header-nav__topic,
+[data-md-color-scheme="slate"] .md-tabs__link,
+[data-md-color-scheme="slate"] .md-search__input,
+[data-md-color-scheme="slate"] .md-search__input::placeholder,
+[data-md-color-scheme="slate"] .md-header__button {
+  color: var(--dashi-cream-light);
+}
+[data-md-color-scheme="slate"] .md-tabs__link--active,
+[data-md-color-scheme="slate"] .md-tabs__link:hover {
+  color: var(--dashi-amber-light);
+}
+
+/* Headlines picked up Fraunces Italic — editorial counterweight to Inter */
+.md-typeset h1 em,
+.md-typeset h2 em {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Wordmark on header — Inter 600 with -0.04em kerning, matches logo lockup */
+.md-header__topic .md-ellipsis,
+.md-header__title .md-ellipsis {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+
+/* Tag pills take the amber accent */
+.md-typeset .md-tag {
+  background-color: var(--dashi-cream-deep);
+  color: var(--dashi-amber-deep);
+  border: 1px solid rgba(200, 130, 31, 0.25);
+}
+
+/* Admonitions get warm tone on info */
+.md-typeset .admonition.info,
+.md-typeset details.info {
+  border-left-color: var(--dashi-amber);
+}
+.md-typeset .info > .admonition-title,
+.md-typeset .info > summary {
+  background-color: rgba(200, 130, 31, 0.08);
+}
+
+/* Logo area — breathing room */
+.md-header__button.md-logo {
+  padding: 0.2rem;
+}
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.6rem;
+  width: 1.6rem;
+}
+
+/* Grid cards on landing page read as stacked "shoyu dishes" */
+.md-typeset .grid.cards > :is(ul, ol) > li,
+.md-typeset .grid > .card,
+.md-typeset .grid > :is(ul, ol) > li,
+.md-typeset div.grid {
+  border-radius: 8px;
+  border: 1px solid rgba(26, 22, 18, 0.08);
+  background: var(--dashi-paper);
+}
+
+/* Keep the copyright in the brand tone */
+.md-footer-meta {
+  background-color: var(--dashi-ink);
+}

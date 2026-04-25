@@ -1,0 +1,56 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pgstac-migrate
+  namespace: dashi-catalog
+  labels:
+    app.kubernetes.io/part-of: dashi
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: pgstac-migrate
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: pypgstac
+          image: python:3.12-slim
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              echo "Installing pypgstac[psycopg]==0.9.5 ..."
+              pip install --quiet --no-cache-dir "pypgstac[psycopg]==0.9.5"
+              echo "Waiting for PostgreSQL ..."
+              for i in $(seq 1 60); do
+                if pypgstac pgready >/dev/null 2>&1; then
+                  echo "pg reachable"
+                  break
+                fi
+                sleep 2
+              done
+              echo "Applying pgstac migrations ..."
+              pypgstac migrate
+              pypgstac pgready
+              echo "pgstac schema ready."
+          env:
+            - name: PGHOST
+              value: pgstac
+            - name: PGPORT
+              value: "5432"
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: pgstac-credentials
+                  key: POSTGRES_USER
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgstac-credentials
+                  key: POSTGRES_PASSWORD
+            - name: PGDATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: pgstac-credentials
+                  key: POSTGRES_DB

@@ -1,0 +1,167 @@
+site_name: dashi
+site_description: "dashi — a spatial data lake (née CldGIS Geodatalake)."
+site_author: Marco Sciaini + Johannes Schlund
+site_url: https://marcosci.github.io/dashi/
+
+repo_url: https://github.com/marcosci/dashi
+repo_name: marcosci/dashi
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+# Exclude generated viewer build artefacts so mkdocs strict mode does not
+# choke on third-party READMEs inside node_modules.
+exclude_docs: |
+  /viewer/node_modules/
+  /viewer/src/
+  /poc/web/ingest/node_modules/
+  /poc/web/ingest/dist/
+  /poc/web/ingest/src/
+  /poc/web/ingest/index.html
+  /poc/services/ingest-api/src/
+
+theme:
+  name: material
+  language: de
+  logo: assets/dashi-logo.svg
+  favicon: assets/dashi-favicon.svg
+  font:
+    text: Inter
+    code: JetBrains Mono
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to auto
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+
+plugins:
+  - search:
+      lang:
+        - de
+        - en
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Start: index.md
+  - Spezifikation:
+      - 1. Zusammenfassung: 01-summary.md
+      - 2. Kontext & Motivation: 02-context.md
+      - 3. Ziele & Nicht-Ziele: 03-goals.md
+      - 4. Stakeholder & Rollen: 04-stakeholders.md
+      - 5. Anforderungen: 05-requirements.md
+      - 6. Ist-Zustand: 06-baseline.md
+      - 7. Logische Architektur: 07-logical-architecture.md
+      - 8. Technologieentscheidungen: 08-technology-decisions.md
+      - 9. Phasenplan: 09-phases.md
+      - 10. Offene Fragen & Risiken: 10-risks-open-questions.md
+  - Planung:
+      - Phase-0-Roadmap: PHASE-0-ROADMAP.md
+      - Gate-1 Acceptance (PoC): GATE-1-ACCEPTANCE.md
+      - Phase-2-Roadmap: PHASE-2-ROADMAP.md
+      - Feature-Ideas (Backlog): FEATURE-IDEAS.md
+      - Launch checklist: LAUNCH-CHECKLIST.md
+      - Launch post (template): LAUNCH-POST.md
+  - Betrieb:
+      - Operations Runbook: OPERATIONS.md
+      - RBAC & Secret-Rotation: RBAC-RUNBOOK.md
+      - Troubleshooting: TROUBLESHOOTING.md
+      - Domain onboarding: onboarding/domain-template.md
+      - Onboarded domains: onboarding/domains.md
+  - Referenz:
+      - ID-Referenz: id-reference.md
+      - Glossar: GLOSSARY.md
+      - Datenklassifizierung: classification.md
+  - ADRs:
+      - Übersicht: adrs.md
+      - ADR-001 Objektspeicher: adr/ADR-001-object-storage.md
+      - ADR-002 GeoParquet: adr/ADR-002-vector-format-geoparquet.md
+      - ADR-003 COG: adr/ADR-003-raster-format-cog.md
+      - ADR-004 COPC: adr/ADR-004-pointcloud-copc.md
+      - ADR-005 Tabellenformat: adr/ADR-005-table-format.md
+      - ADR-006 Datenkatalog: adr/ADR-006-data-catalog.md
+      - ADR-007 Verarbeitungs-Engine: adr/ADR-007-processing-engine.md
+      - ADR-008 H3-Partitionierung: adr/ADR-008-spatial-partitioning-h3.md
+      - ADR-009 Serving-Schicht: adr/ADR-009-serving-layer.md
+      - ADR-010 Prefect: adr/ADR-010-pipeline-orchestration.md
+      - ADR-011 k3s + GitHub: adr/ADR-011-infra-substrate.md
+  - PoC:
+      - Überblick: poc/README.md
+      - k3s Setup: poc/docs/k3s-setup.md
+      - Manifests:
+          - RustFS Objektspeicher: poc/manifests/rustfs/README.md
+          - pgstac + stac-fastapi: poc/manifests/pgstac/README.md
+          - TiTiler Serving: poc/manifests/titiler/README.md
+          - DuckDB SQL Endpoint: poc/manifests/duckdb-endpoint/README.md
+          - Prefect Orchestrierung: poc/manifests/prefect/README.md
+          - Observability (Prometheus + Grafana): poc/manifests/monitoring/README.md
+          - NetworkPolicies: poc/manifests/network-policies/README.md
+          - Martin (vector tiles): poc/manifests/martin/README.md
+      - Custom Images:
+          - titiler-endpoint (arm64 Rebuild): poc/titiler-endpoint/README.md
+          - duckdb-endpoint: poc/duckdb-endpoint/README.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/marcosci/dashi
+  generator: false
+
+extra_css:
+  - stylesheets/dashi.css
+
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
+
+copyright: "dashi · spatial data lake · Marco Sciaini + Johannes Schlund · independent project"

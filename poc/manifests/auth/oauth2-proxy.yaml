@@ -1,0 +1,67 @@
+# oauth2-proxy template — applied per-protected-namespace (dashi-monitoring,
+# dashi-data, …). The bootstrap script copies this Deployment into each
+# target ns and rewrites:
+#   - .metadata.namespace
+#   - .spec.template.spec.containers[].env (UPSTREAM, COOKIE_DOMAIN, OIDC_*)
+# so Grafana, Prefect, etc. each get their own oauth2-proxy sidecar.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  namespace: dashi-monitoring   # template default — bootstrap overrides
+  labels:
+    app.kubernetes.io/name: oauth2-proxy
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: oauth2-proxy
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--http-address=0.0.0.0:4180"
+            - "--provider=oidc"
+            - "--oidc-issuer-url=http://authelia.dashi-auth.svc.cluster.local:9091"
+            - "--client-id=grafana"
+            - "--upstream=http://grafana.dashi-monitoring.svc.cluster.local:3000"
+            - "--email-domain=*"
+            - "--cookie-secure=false"
+            - "--scope=openid profile email groups"
+            - "--code-challenge-method=S256"
+          env:
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy
+                  key: client-secret
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: oauth2-proxy
+                  key: cookie-secret
+          ports:
+            - name: http
+              containerPort: 4180
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+  namespace: dashi-monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: oauth2-proxy
+  ports:
+    - name: http
+      port: 4180
+      targetPort: http

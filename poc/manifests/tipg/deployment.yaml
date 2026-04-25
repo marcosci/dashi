@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tipg
+  namespace: dashi-serving
+  labels:
+    app.kubernetes.io/name: tipg
+    app.kubernetes.io/component: ogc-api-features
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tipg
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tipg
+        app.kubernetes.io/component: ogc-api-features
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: tipg
+          image: ghcr.io/developmentseed/tipg:1.3.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: PORT
+              value: "8081"
+            - name: HOST
+              value: "0.0.0.0"
+            - name: TIPG_ROOT_PATH
+              value: ""
+            - name: TIPG_DEBUG
+              value: "False"
+            - name: POSTGRES_HOST
+              value: serving-postgis.dashi-serving-db.svc.cluster.local
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DBNAME
+              value: serving
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tipg-db
+                  key: user
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: tipg-db
+                  key: password
+            # tipg looks at DATABASE_URL too; provide for compat.
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: tipg-db
+                  key: url
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 30

@@ -1,0 +1,90 @@
+# Iceberg REST Catalog (tabulario/iceberg-rest) backed by:
+#   - SQLite metadata (PVC) for the catalog itself — fine for PoC, replace
+#     with Postgres in production.
+#   - RustFS S3 (s3://curated/iceberg/) for the actual table data + metadata
+#     files.
+#
+# DuckDB endpoint connects via PyIceberg or the iceberg extension's
+# `iceberg_scan('s3://curated/iceberg/<table>/...')` pointer; the REST
+# catalog itself is consumed by writers (PyIceberg / Spark / Trino).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: iceberg-rest-data
+  namespace: dashi-iceberg
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iceberg-rest
+  namespace: dashi-iceberg
+  labels:
+    app.kubernetes.io/name: iceberg-rest
+    app.kubernetes.io/component: table-catalog
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: iceberg-rest
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: iceberg-rest
+        app.kubernetes.io/component: table-catalog
+        app.kubernetes.io/part-of: dashi
+    spec:
+      containers:
+        - name: rest
+          image: tabulario/iceberg-rest:1.6.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - {name: http, containerPort: 8181}
+          env:
+            # Catalog metadata store — SQLite on PVC for PoC.
+            - {name: CATALOG_URI, value: "jdbc:sqlite:/data/catalog.db"}
+            - {name: CATALOG_JDBC_USER, value: ""}
+            - {name: CATALOG_JDBC_PASSWORD, value: ""}
+            # Table data + metadata files in s3://curated/iceberg/<warehouse>
+            - {name: CATALOG_WAREHOUSE, value: "s3://curated/iceberg/"}
+            - {name: CATALOG_IO__IMPL, value: "org.apache.iceberg.aws.s3.S3FileIO"}
+            - {name: CATALOG_S3_ENDPOINT,
+               value: "http://rustfs.dashi-platform.svc.cluster.local:9000"}
+            - {name: CATALOG_S3_PATH__STYLE__ACCESS, value: "true"}
+            - {name: AWS_REGION, value: "us-east-1"}
+            - {name: AWS_ACCESS_KEY_ID,
+               valueFrom: {secretKeyRef: {name: dashi-rustfs-pipeline, key: access-key}}}
+            - {name: AWS_SECRET_ACCESS_KEY,
+               valueFrom: {secretKeyRef: {name: dashi-rustfs-pipeline, key: secret-key}}}
+          volumeMounts:
+            - {name: data, mountPath: /data}
+          readinessProbe:
+            httpGet: {path: /v1/config, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: {path: /v1/config, port: http}
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests: {cpu: 100m, memory: 256Mi}
+            limits:   {cpu: "1",  memory: 1Gi}
+      volumes:
+        - {name: data, persistentVolumeClaim: {claimName: iceberg-rest-data}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: iceberg-rest
+  namespace: dashi-iceberg
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: iceberg-rest
+  ports:
+    - {name: http, port: 8181, targetPort: http}

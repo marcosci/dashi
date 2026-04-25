@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="dashi">
+  <defs>
+    <radialGradient id="broth" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#c8821f" stop-opacity="0.32"/>
+      <stop offset="0.55" stop-color="#c8821f" stop-opacity="0.14"/>
+      <stop offset="0.9" stop-color="#c8821f" stop-opacity="0.02"/>
+      <stop offset="1" stop-color="#c8821f" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="rim">
+      <circle cx="100" cy="100" r="74"/>
+    </clipPath>
+  </defs>
+  <rect width="200" height="200" fill="#f4ede1"/>
+  <g transform="translate(100 100)">
+    <g clip-path="url(#rim)" transform="translate(-100 -100)">
+      <rect width="200" height="200" fill="url(#broth)"/>
+    </g>
+    <!-- outer rim -->
+    <circle r="72" fill="none" stroke="#1a1612" stroke-width="3"/>
+    <!-- amber surface ring -->
+    <circle r="54" fill="none" stroke="#c8821f" stroke-width="2"/>
+    <!-- first inner ripple -->
+    <circle r="38" fill="none" stroke="#1a1612" stroke-width="1.4" stroke-opacity="0.5"/>
+    <!-- second inner ripple -->
+    <circle r="24" fill="none" stroke="#1a1612" stroke-width="1.1" stroke-opacity="0.35"/>
+    <!-- drop -->
+    <circle r="10" fill="#c8821f"/>
+  </g>
+</svg>

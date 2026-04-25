@@ -1,0 +1,64 @@
+# stac-fastapi in dashi-catalog accepts ingress from dashi-data (flow runs
+# POST STAC items), dashi-serving (TiTiler reads collection metadata in
+# future), dashi-monitoring (scraper), and kube-system (port-forward).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-stac-fastapi-clients
+  namespace: dashi-catalog
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: stac-fastapi
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-data
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-serving
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        # ingest-api in dashi-web reads /collections.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-web
+      ports:
+        - protocol: TCP
+          port: 8080
+---
+# pgstac Postgres is only reachable from stac-fastapi (same namespace) and
+# from monitoring for a future postgres_exporter.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-pgstac-clients
+  namespace: dashi-catalog
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: pgstac
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: stac-fastapi
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-backup
+      ports:
+        - protocol: TCP
+          port: 5432

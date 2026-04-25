@@ -1,0 +1,88 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LandingZoneRead",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::landing",
+        "arn:aws:s3:::landing/*"
+      ]
+    },
+    {
+      "Sid": "LandingZoneWebUpload",
+      "Comment": "Web-UI presigned uploads land in landing/<domain>/incoming/. Phase-3 should split this off into a dedicated dashi-web-uploader user scoped to that prefix.",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": [
+        "arn:aws:s3:::landing/*/incoming/*"
+      ]
+    },
+    {
+      "Sid": "ProcessedZoneReadWrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:PutObjectTagging",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::processed",
+        "arn:aws:s3:::processed/*"
+      ]
+    },
+    {
+      "Sid": "CuratedZoneReadWrite",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:PutObjectTagging",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::curated",
+        "arn:aws:s3:::curated/*"
+      ]
+    },
+    {
+      "Sid": "BackupsBucketReadWrite",
+      "Comment": "pg_dump CronJobs (dashi-backup ns) write nightly dumps here.",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts",
+        "s3:ListBucket",
+        "s3:ListBucketMultipartUploads",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": [
+        "arn:aws:s3:::backups",
+        "arn:aws:s3:::backups/*"
+      ]
+    }
+  ]
+}

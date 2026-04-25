@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: duckdb-endpoint
+  namespace: dashi-serving
+  labels:
+    app.kubernetes.io/name: duckdb-endpoint
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: duckdb-endpoint
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

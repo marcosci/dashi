@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prefect-server
+  namespace: dashi-data
+  labels:
+    app.kubernetes.io/name: prefect-server
+    app.kubernetes.io/part-of: dashi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prefect-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prefect-server
+    spec:
+      containers:
+        - name: prefect
+          image: prefecthq/prefect:3.6.27-python3.12
+          imagePullPolicy: IfNotPresent
+          command: ["prefect", "server", "start", "--host", "0.0.0.0", "--port", "4200"]
+          ports:
+            - name: api
+              containerPort: 4200
+          env:
+            - name: PREFECT_API_URL
+              value: "http://localhost:4200/api"
+            - name: PREFECT_SERVER_API_HOST
+              value: "0.0.0.0"
+            - name: PREFECT_HOME
+              value: "/var/lib/prefect"
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_USER
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_PASSWORD
+            - name: PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: prefect-db
+                  key: POSTGRES_DB
+            - name: PREFECT_API_DATABASE_CONNECTION_URL
+              value: "postgresql+asyncpg://$(PG_USER):$(PG_PASSWORD)@prefect-db:5432/$(PG_DB)"
+          readinessProbe:
+            httpGet:
+              path: /api/ready
+              port: api
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            httpGet:
+              path: /api/ready
+              port: api
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/prefect
+      volumes:
+        - name: data
+          emptyDir: {}

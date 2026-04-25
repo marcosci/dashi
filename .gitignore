@@ -1,0 +1,53 @@
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+node_modules/
+.env
+.env.local
+
+# MkDocs build output
+site/
+public/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.venv-docs/
+venv/
+
+# Work-in-progress drafts — promote to docs/ when ready
+drafts/
+scratch/
+
+# PoC sample data — never commit source material
+poc/sample-data/*
+!poc/sample-data/.gitkeep
+
+# Ingest runtime artifacts
+poc/ingest/.venv/
+poc/ingest/*.egg-info/
+poc/ingest/.dashi-ingest-result.json
+.dashi-ingest-result.json
+
+# Large binary attachments shouldn't sit in the spec repo
+*.pdf
+*.xlsx
+*.pptx
+!docs/**/*.pdf
+!source/**/*.pdf
+.redeploy-logs/
+
+# Viewer build — node_modules already ignored above; lockfile is per-machine.
+docs/viewer/package-lock.json
+
+# Web ingest UI build artefacts
+poc/web/ingest/package-lock.json
+poc/web/ingest/dist/
+poc/web/ingest/tsconfig.tsbuildinfo
+
+# Off-cluster backup mirror credentials — keep out of git.
+poc/manifests/backup/offsite.env

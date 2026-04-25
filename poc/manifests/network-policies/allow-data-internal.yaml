@@ -1,0 +1,62 @@
+# Prefect in dashi-data:
+#   - server accepts connections from worker + flow-run Jobs + port-forward + monitoring
+#   - db accepts only prefect-server
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prefect-server
+  namespace: dashi-data
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prefect-server
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prefect-worker
+        # Flow-run Jobs are labelled by Prefect with prefect.io/flow-run-id
+        - podSelector:
+            matchExpressions:
+              - key: prefect.io/flow-run-id
+                operator: Exists
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-monitoring
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        # ingest-api in dashi-web triggers flow runs via the REST API.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-web
+      ports:
+        - protocol: TCP
+          port: 4200
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-prefect-db
+  namespace: dashi-data
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: prefect-db
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prefect-server
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-monitoring
+        # Backup CronJobs run pg_dump from dashi-backup.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-backup
+      ports:
+        - protocol: TCP
+          port: 5432

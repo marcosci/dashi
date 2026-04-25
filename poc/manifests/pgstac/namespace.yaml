@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dashi-catalog
+  labels:
+    app.kubernetes.io/part-of: dashi
+    dashi.dev/zone-owner: platform
