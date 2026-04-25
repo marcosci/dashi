@@ -128,6 +128,17 @@ web-ingest-deploy:
 backup-deploy:
 	@bash scripts/backup-bootstrap.sh
 
+iceberg-deploy:
+	@bash scripts/iceberg-bootstrap.sh
+
+llm-deploy:
+	@kubectl apply -k manifests/llm
+	@kubectl -n dashi-llm rollout status deployment/ollama --timeout=180s
+	@echo ""
+	@echo "→ pulling default model (llama3.2:3b ~2 GiB) — may take a few minutes"
+	@kubectl -n dashi-llm wait --for=condition=complete job/ollama-pull-default --timeout=900s || true
+	@echo "✓ Ollama live in dashi-llm."
+
 auth-bootstrap:
 	@bash scripts/auth-bootstrap.sh
 
@@ -164,6 +175,8 @@ smoke:
 	@bash smoke/backup.sh
 	@bash smoke/auth.sh
 	@bash smoke/web-ingest.sh
+	@bash smoke/iceberg.sh
+	@bash smoke/llm.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

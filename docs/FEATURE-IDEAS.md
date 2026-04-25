@@ -46,7 +46,11 @@ Lightweight backlog. No promise to ship. Capture, sort later. Promotion path: id
 
 ## Catalog & Metadata
 
-### Metadata extraction with LLMs
+### Metadata extraction with LLMs (scaffolded)
+
+> 🚀 **Scaffolded** — `poc/manifests/llm/` (Ollama, llama3.2:3b),
+> `dashi_ingest.enrich`, `dashi_ingest.flows.enrich`, `make llm-deploy`,
+> `poc/smoke/llm.sh`. Classification-gated (`pub` / `int` only by default).
 
 - **Why:** STAC item title/description fields stay empty in the PoC because the human-readable summary doesn't fit any deterministic field on a GeoTIFF. LLM can produce a useful one-paragraph summary from filename + EXIF + first-band stats + (optionally) low-res thumbnail.
 - **Sketch:**

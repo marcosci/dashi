@@ -1,6 +1,6 @@
 # ADR-005 — Tabellenformat für Zeitreihen & Transaktionen: Apache Iceberg
 
-**Status:** ✅ Entschieden — 2026-04-25
+**Status:** ✅ Entschieden — 2026-04-25 · 🚀 deployed (REST catalog + promote flow)
 
 **Fälligkeit:** Ende Phase 1
 
