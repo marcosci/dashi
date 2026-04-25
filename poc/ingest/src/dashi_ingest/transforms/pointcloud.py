@@ -5,7 +5,16 @@ spatially-indexed COPC LAZ files that can be range-queried from object storage
 without downloading the whole dataset (ADR-004).
 
 Input: LAS / LAZ (any CRS).
-Output: `<stem>.copc.laz` reprojected to EPSG:4326 with COPC layout.
+Output: `<stem>.copc.laz` in the **source CRS** (no reprojection).
+
+Why no reprojection: COPC stores a single voxel-cube bounding box that has to
+be in the same units across X, Y, Z. Reprojecting only X/Y to WGS84 leaves Z
+in metres, producing a mixed-unit cube that overflows ±180° longitude and
+breaks every COPC reader. Browser-side viewers (e.g. maplibre-gl-lidar) do
+the reprojection on read, so we keep the source projected CRS intact.
+
+For STAC we still need a WGS84 bbox — computed via pyproj from the source
+bbox at write time.
 
 PDAL must be on PATH. On macOS: `brew install pdal`. On Linux (Debian/Ubuntu):
 `apt install pdal`. Falls back to a clear error if PDAL is missing.
@@ -20,8 +29,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import laspy
+from pyproj import CRS, Transformer
 
-TARGET_CRS_EPSG = 4326
+TARGET_CRS_EPSG = 4326  # used only for the STAC bbox; COPC stays in source CRS
 
 
 class PdalNotAvailable(RuntimeError):
@@ -49,30 +59,24 @@ def transform(src: Path, out_dir: Path) -> PointcloudTransformResult:
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"{src.stem}.copc.laz"
 
-    # Inspect source to determine whether reprojection is required
+    # Inspect source CRS + bounds via laspy (no reprojection)
     with laspy.open(src) as reader:
         header = reader.header
         source_crs = header.parse_crs()
         point_count = int(header.point_count)
+        src_mins = header.mins
+        src_maxs = header.maxs
 
-    needs_reproject = source_crs is not None and int(source_crs.to_epsg() or 0) != TARGET_CRS_EPSG
-
-    # Build PDAL pipeline (reader → [reprojection] → writers.copc)
-    stages: list[dict | str] = [str(src)]
-    if needs_reproject:
-        stages.append(
+    # Build PDAL pipeline (reader → writers.copc) — keep source CRS intact.
+    pipeline = {
+        "pipeline": [
+            str(src),
             {
-                "type": "filters.reprojection",
-                "out_srs": f"EPSG:{TARGET_CRS_EPSG}",
-            }
-        )
-    stages.append(
-        {
-            "type": "writers.copc",
-            "filename": str(out_path),
-        }
-    )
-    pipeline = {"pipeline": stages}
+                "type": "writers.copc",
+                "filename": str(out_path),
+            },
+        ]
+    }
 
     # Run `pdal pipeline`
     proc = subprocess.run(
@@ -87,25 +91,48 @@ def transform(src: Path, out_dir: Path) -> PointcloudTransformResult:
             f"pdal pipeline failed (rc={proc.returncode}):\nstdout: {proc.stdout}\nstderr: {proc.stderr}"
         )
 
-    # Probe output bounds via laspy (bounds in target CRS)
-    with laspy.open(out_path) as reader:
-        header = reader.header
-        if header.mins is not None and header.maxs is not None:
-            bounds = (
-                float(header.mins[0]),
-                float(header.mins[1]),
-                float(header.maxs[0]),
-                float(header.maxs[1]),
-            )
-        else:
+    # Compute STAC bbox in WGS84 from the source-CRS corners.
+    bounds: tuple[float, float, float, float] | None = None
+    if source_crs is not None and src_mins is not None and src_maxs is not None:
+        try:
+            src_crs = CRS.from_user_input(source_crs)
+            tgt_crs = CRS.from_epsg(TARGET_CRS_EPSG)
+            if src_crs.equals(tgt_crs):
+                bounds = (
+                    float(src_mins[0]),
+                    float(src_mins[1]),
+                    float(src_maxs[0]),
+                    float(src_maxs[1]),
+                )
+            else:
+                t = Transformer.from_crs(src_crs, tgt_crs, always_xy=True)
+                xs = [src_mins[0], src_maxs[0], src_mins[0], src_maxs[0]]
+                ys = [src_mins[1], src_mins[1], src_maxs[1], src_maxs[1]]
+                lons, lats = t.transform(xs, ys)
+                bounds = (
+                    float(min(lons)),
+                    float(min(lats)),
+                    float(max(lons)),
+                    float(max(lats)),
+                )
+        except Exception:
             bounds = None
+    elif src_mins is not None and src_maxs is not None:
+        # No source CRS: report raw bounds so the caller can still write STAC,
+        # but without a guarantee they are WGS84.
+        bounds = (
+            float(src_mins[0]),
+            float(src_mins[1]),
+            float(src_maxs[0]),
+            float(src_maxs[1]),
+        )
 
     return PointcloudTransformResult(
         input_path=src,
         output_path=out_path,
         point_count=point_count,
         source_crs=str(source_crs) if source_crs else None,
-        target_crs=f"EPSG:{TARGET_CRS_EPSG}",
+        target_crs=str(source_crs) if source_crs else "unknown",
         bounds=bounds,
-        reprojected=needs_reproject,
+        reprojected=False,
     )
