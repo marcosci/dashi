@@ -20,10 +20,40 @@ import os
 from pathlib import Path
 
 from prefect import flow, get_run_logger, task
+from prefect.context import get_run_context
 from prefect.tasks import task_input_hash
 
 from dashi_ingest import detect, storage
 from dashi_ingest.runner import IngestOutcome, ingest_one
+
+
+def _prefect_lineage() -> dict:
+    """Return STAC properties that link an ingest output back to the Prefect
+    flow + task run that produced it. Returns an empty dict when called
+    outside a Prefect context (e.g. from the CLI).
+    """
+    try:
+        ctx = get_run_context()
+    except Exception:  # noqa: BLE001
+        return {}
+
+    flow_run = getattr(ctx, "flow_run", None)
+    task_run = getattr(ctx, "task_run", None)
+
+    api_url = os.environ.get("PREFECT_API_URL", "")
+    ui_base = api_url.rsplit("/api", 1)[0] if api_url.endswith("/api") else api_url
+
+    out: dict = {}
+    if flow_run is not None:
+        out["dashi:prefect_flow_run_id"] = str(flow_run.id)
+        out["dashi:prefect_flow_name"] = flow_run.name
+        if ui_base:
+            out["dashi:prefect_flow_run_url"] = (
+                f"{ui_base}/runs/flow-run/{flow_run.id}"
+            )
+    if task_run is not None:
+        out["dashi:prefect_task_run_id"] = str(task_run.id)
+    return out
 
 
 @task(
@@ -56,6 +86,10 @@ def ingest_one_task(
     )
     s3_cfg = storage.S3Config.from_env()
 
+    # Lineage: pull the live Prefect run context so the STAC item carries
+    # a deterministic link back to the run that produced it.
+    lineage = _prefect_lineage()
+
     # Uploads are already gated by boto3 TransferConfig (8MB chunks, 2 threads).
     # Add a Prefect concurrency slot in Phase 2 once the deployment creates it
     # via `prefect concurrency-limit create dashi-ingest-uploads 4` during bootstrap.
@@ -67,6 +101,7 @@ def ingest_one_task(
         collection_description=collection_description,
         s3_cfg=s3_cfg,
         h3_resolution=h3_resolution,
+        lineage=lineage,
     )
 
     logger.info(

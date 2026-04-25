@@ -88,7 +88,7 @@ Details: [§5.3](05-requirements.md#53-workload-katalog)
 
 | ID | Kurz | Bereich | Status | Benötigt bis |
 |----|------|---------|:------:|--------------|
-| F-01 | Datenklassifizierung + Zonentrennung | Sicherheit | 🔴 | Ende Phase 1 |
+| F-01 | Datenklassifizierung + Zonentrennung — geklärt via [classification.md](classification.md) | Sicherheit | 🟢 | Phase 2 |
 | F-02 | Infrastruktur (Cloud/on-prem/hybrid) — geklärt via ADR-011 | Infrastruktur | 🟢 | Monat 1 |
 | F-03 | Echtzeit-Anforderungen Operations | Operations | 🟡 | Ende Phase 1 |
 | F-04 | Externe Systeme / Partnerorganisationen | Interoperabilität | 🟡 | Phase 2 Start |

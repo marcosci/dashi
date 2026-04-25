@@ -28,8 +28,24 @@ mirror_secret dashi-serving-db serving-postgis
 echo "→ Mirroring S3 pipeline credentials into $NS"
 mirror_secret dashi-data       dashi-rustfs-pipeline
 
-echo "→ Applying CronJobs"
-kubectl apply -f "$REPO_ROOT/manifests/backup/cronjobs.yaml"
+echo "→ Applying script ConfigMap + CronJobs"
+kubectl apply -k "$REPO_ROOT/manifests/backup"
+
+# Off-cluster mirror credentials (optional). Drop a file at
+# poc/manifests/backup/offsite.env with these four keys to enable:
+#   endpoint=https://s3.us-east-1.amazonaws.com
+#   bucket=my-dashi-dr-backups
+#   access-key=AKIA...
+#   secret-key=...
+OFFSITE_ENV="$REPO_ROOT/manifests/backup/offsite.env"
+if [ -f "$OFFSITE_ENV" ]; then
+  echo "→ Applying off-cluster mirror Secret from $OFFSITE_ENV"
+  kubectl -n "$NS" create secret generic dashi-offsite \
+    --from-env-file="$OFFSITE_ENV" \
+    --dry-run=client -o yaml | kubectl apply -f -
+else
+  echo "  (off-cluster mirror disabled — drop manifests/backup/offsite.env to enable)"
+fi
 
 echo ""
 echo "✓ pg_dump CronJobs scheduled in $NS:"

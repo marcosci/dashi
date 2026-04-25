@@ -117,6 +117,7 @@ nav:
   - Referenz:
       - ID-Referenz: id-reference.md
       - Glossar: GLOSSARY.md
+      - Datenklassifizierung: classification.md
   - ADRs:
       - Übersicht: adrs.md
       - ADR-001 Objektspeicher: adr/ADR-001-object-storage.md

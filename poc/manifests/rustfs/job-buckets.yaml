@@ -25,7 +25,19 @@ spec:
                 sleep 3
               done
               for bucket in landing processed curated backups; do
-                mc mb --ignore-existing dashi/${bucket}
+                # Landing zone is the immutable source-of-truth (F-07).
+                # Create with --with-lock so we can later attach a default
+                # retention policy. Other zones don't need lock.
+                if [ "$bucket" = "landing" ]; then
+                  mc mb --with-lock --ignore-existing dashi/${bucket} || \
+                    mc mb --ignore-existing dashi/${bucket}
+                  mc retention set --default COMPLIANCE 30d dashi/${bucket} 2>/dev/null \
+                    && echo "  ↳ landing: COMPLIANCE 30d retention set" \
+                    || echo "  ↳ landing: object lock unsupported (cluster pre-existed); enabling versioning instead"
+                  mc version enable dashi/${bucket} >/dev/null 2>&1 || true
+                else
+                  mc mb --ignore-existing dashi/${bucket}
+                fi
                 mc anonymous set none dashi/${bucket}
                 echo "ensured bucket: ${bucket}"
               done

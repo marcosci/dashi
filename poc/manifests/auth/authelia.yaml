@@ -30,26 +30,41 @@ spec:
         app.kubernetes.io/component: oidc-issuer
         app.kubernetes.io/part-of: dashi
     spec:
+      # K8s auto-injects AUTHELIA_PORT_*, AUTHELIA_SERVICE_HOST, etc. env
+      # vars (because the matching Service is named `authelia`). Authelia
+      # interprets `AUTHELIA_*` as config and chokes on these. Disable.
+      enableServiceLinks: false
+      # Authelia chowns /config at startup. The ConfigMap mount is read-only
+      # so it can't chown there. Initcontainer copies it into an emptyDir
+      # which the main container then owns.
+      initContainers:
+        - name: copy-config
+          image: busybox:1.37
+          command: ["/bin/sh","-c","cp /config-src/* /config/ && chown -R 1000:1000 /config"]
+          volumeMounts:
+            - { name: config-src, mountPath: /config-src }
+            - { name: config,     mountPath: /config }
       containers:
         - name: authelia
           image: ghcr.io/authelia/authelia:4.38
           imagePullPolicy: IfNotPresent
-          args:
-            - "--config=/config/configuration.yml"
           ports:
             - name: http
               containerPort: 9091
           env:
-            - name: AUTHELIA_JWT_SECRET_FILE
+            - name: X_AUTHELIA_CONFIG
+              value: /config/configuration.yml
+            - name: AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET_FILE
               value: /secrets/jwt
             - name: AUTHELIA_SESSION_SECRET_FILE
               value: /secrets/session
             - name: AUTHELIA_STORAGE_ENCRYPTION_KEY_FILE
               value: /secrets/storage
-            - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
-              value: /secrets/oidc-hmac
-            - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY_FILE
-              value: /secrets/oidc-key
+            # OIDC HMAC secret: NOT set here. Setting it forces Authelia
+            # to validate the OIDC issuer block, which we leave OFF until
+            # auth-protect.sh registers a real RP. The script appends:
+            #   - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_HMAC_SECRET_FILE
+            #     value: /secrets/oidc-hmac
           volumeMounts:
             - name: config
               mountPath: /config
@@ -67,9 +82,11 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 30
       volumes:
-        - name: config
+        - name: config-src
           configMap:
             name: authelia-config
+        - name: config
+          emptyDir: {}
         - name: data
           persistentVolumeClaim:
             claimName: authelia-data

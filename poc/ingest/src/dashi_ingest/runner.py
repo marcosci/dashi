@@ -53,6 +53,7 @@ def ingest_one(
     collection_description: str,
     s3_cfg: storage.S3Config,
     h3_resolution: int = 7,
+    lineage: dict | None = None,
 ) -> IngestOutcome:
     """Ingest a single detection (file + optional layer). Uploads + catalogs."""
     src = det.path
@@ -233,6 +234,11 @@ def ingest_one(
                 "dashi:source_layer": det.layer,
                 "dashi:source_crs": counts.get("source_crs"),
                 "dashi:object_count": n_objects,
+                # Lineage: link the STAC item to the Prefect run that
+                # produced it. Caller (the Prefect flow) supplies the
+                # lineage dict; the CLI passes None and these keys are
+                # simply absent.
+                **({k: v for k, v in (lineage or {}).items() if v is not None}),
             },
             assets=assets,
         )

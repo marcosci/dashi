@@ -43,3 +43,6 @@ poc/ingest/.dashi-ingest-result.json
 
 # Viewer build — node_modules already ignored above; lockfile is per-machine.
 docs/viewer/package-lock.json
+
+# Off-cluster backup mirror credentials — keep out of git.
+poc/manifests/backup/offsite.env

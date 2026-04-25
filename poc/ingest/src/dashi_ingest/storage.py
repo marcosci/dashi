@@ -34,6 +34,37 @@ class S3Config:
             secret_key=os.environ["DASHI_S3_SECRET_KEY"],
         )
 
+    def to_dict(self) -> dict:
+        return {
+            "endpoint": self.endpoint,
+            "region": self.region,
+            "access_key": self.access_key,
+            "secret_key": self.secret_key,
+        }
+
+
+def delete_prefix(bucket: str, key_or_prefix: str, cfg: S3Config | None = None) -> int:
+    """Delete every object under the given key_or_prefix. Returns count.
+
+    Used by the retention flow: STAC asset hrefs point at a single object,
+    but the dashi-ingest tree under that object's parent prefix may contain
+    multiple files (e.g. vector partitions + _metadata.json sidecar). Treat
+    the parent prefix as the unit of deletion.
+    """
+    s3 = s3_client(cfg)
+    prefix = key_or_prefix
+    if "/" in key_or_prefix:
+        prefix = key_or_prefix.rsplit("/", 1)[0] + "/"
+    deleted = 0
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        keys = [{"Key": o["Key"]} for o in page.get("Contents", []) or []]
+        if not keys:
+            continue
+        s3.delete_objects(Bucket=bucket, Delete={"Objects": keys, "Quiet": True})
+        deleted += len(keys)
+    return deleted
+
 
 _TRANSFER_CFG = TransferConfig(
     multipart_threshold=8 * 1024 * 1024,

@@ -16,21 +16,19 @@ kubectl apply -k "$REPO_ROOT/manifests/auth"
 
 # --- Generate the per-deployment secrets if they don't exist yet ---
 if ! kubectl -n "$NS_AUTH" get secret authelia-secrets >/dev/null 2>&1; then
-  echo "→ Generating authelia-secrets (jwt + session + storage + oidc-hmac + oidc-key)"
+  echo "→ Generating authelia-secrets (jwt + session + storage + oidc-hmac)"
   TMP="$(mktemp -d)"
   trap 'rm -rf "$TMP"' EXIT
   openssl rand -hex 64 > "$TMP/jwt"
   openssl rand -hex 64 > "$TMP/session"
   openssl rand -hex 32 > "$TMP/storage"
   openssl rand -hex 64 > "$TMP/oidc-hmac"
-  openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:4096 -out "$TMP/oidc-key" 2>/dev/null
 
   kubectl -n "$NS_AUTH" create secret generic authelia-secrets \
     --from-file=jwt="$TMP/jwt" \
     --from-file=session="$TMP/session" \
     --from-file=storage="$TMP/storage" \
     --from-file=oidc-hmac="$TMP/oidc-hmac" \
-    --from-file=oidc-key="$TMP/oidc-key" \
     --dry-run=client -o yaml | kubectl apply -f -
 fi
 
