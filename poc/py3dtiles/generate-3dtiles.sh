@@ -57,11 +57,19 @@ print(f"  ↓ download s3://{bucket}/{key}")
 s3.download_file(bucket, key, os.environ["SRC_LOCAL"])
 PYEOF
 
+# Stage 1 — PDAL: decompress COPC LAZ → plain LAS. py3dtiles' bundled
+# lazrs decoder fails on COPC point-data with `failed to fill whole buffer`,
+# so we hand off decompression to PDAL (rock-solid laszip backend).
+SRC_LAS="${WORK_DIR}/source.las"
+echo "→ pdal translate (COPC LAZ → plain LAS for py3dtiles)"
+pdal translate "$SRC_LOCAL" "$SRC_LAS" --writers.las.compression=false
+
+# Stage 2 — py3dtiles: LAS → 3D Tiles tileset
 echo "→ py3dtiles convert"
 py3dtiles convert \
   --out "$OUT_DIR" \
   --overwrite \
-  "$SRC_LOCAL"
+  "$SRC_LAS"
 
 echo "→ uploading tileset to s3://${CURATED_BUCKET}/${TILESET_PREFIX}/"
 WORK_DIR="$WORK_DIR" OUT_DIR="$OUT_DIR" \
@@ -102,3 +110,61 @@ print(f"  ✓ uploaded {count} files")
 PYEOF
 
 echo "✓ tileset published: s3://${CURATED_BUCKET}/${TILESET_PREFIX}/tileset.json"
+
+# PATCH the STAC item so the viewer can discover the tileset deterministically.
+# stac-fastapi exposes JSON-Patch via PUT /collections/<c>/items/<id> (full
+# item replace). We fetch, mutate, and put back.
+if [[ -n "${STAC_URL:-}" && -n "${STAC_COLLECTION:-}" ]]; then
+  echo "→ PATCH STAC item ${STAC_COLLECTION}/${ITEM_ID} with assets.tileset3d"
+  STAC_URL="$STAC_URL" STAC_COLLECTION="$STAC_COLLECTION" \
+  CURATED_BUCKET="$CURATED_BUCKET" TILESET_PREFIX="$TILESET_PREFIX" \
+  ITEM_ID="$ITEM_ID" python3 - <<'PYEOF'
+import json
+import os
+import urllib.request
+import urllib.error
+
+stac = os.environ["STAC_URL"].rstrip("/")
+coll = os.environ["STAC_COLLECTION"]
+item_id = os.environ["ITEM_ID"]
+bucket = os.environ["CURATED_BUCKET"]
+prefix = os.environ["TILESET_PREFIX"].rstrip("/")
+
+# stac-fastapi internally exposes RustFS via http://rustfs.<ns>.svc:9000.
+# Mirror what dashi_ingest.storage.s3_url does — same scheme is reachable
+# from any pod in the cluster.
+endpoint = os.environ.get("DASHI_S3_ENDPOINT", "http://rustfs.dashi-platform.svc.cluster.local:9000")
+tileset_href = f"{endpoint.rstrip('/')}/{bucket}/{prefix}/tileset.json"
+
+url = f"{stac}/collections/{coll}/items/{item_id}"
+try:
+    with urllib.request.urlopen(url, timeout=20) as r:
+        item = json.load(r)
+except urllib.error.HTTPError as e:
+    print(f"  ✗ STAC GET failed ({e.code}); skipping asset patch")
+    raise SystemExit(0)
+
+item.setdefault("assets", {})["tileset3d"] = {
+    "href":       tileset_href,
+    "type":       "application/json",
+    "title":      "3D Tiles tileset (py3dtiles)",
+    "roles":      ["visualization", "3d-tiles"],
+    "dashi:source_kind": "pointcloud",
+}
+
+req = urllib.request.Request(
+    url,
+    data=json.dumps(item).encode(),
+    method="PUT",
+    headers={"Content-Type": "application/json"},
+)
+try:
+    with urllib.request.urlopen(req, timeout=20) as r:
+        print(f"  ✓ STAC item updated (HTTP {r.status})")
+except urllib.error.HTTPError as e:
+    print(f"  ✗ STAC PUT failed (HTTP {e.code}): {e.read().decode()[:200]}")
+    # Non-fatal — tileset is on disk regardless.
+PYEOF
+else
+  echo "  (STAC_URL or STAC_COLLECTION unset — skipping asset patch)"
+fi

@@ -10,7 +10,7 @@
 #   ITEMS=item1,item2 bash 3dtiles-generate.sh    # restrict to specific items
 #
 # Writes Job specs into namespace dashi-data using the same
-# rustfs-pipeline secret as the PMTiles flow.
+# dashi-rustfs-pipeline secret as the PMTiles flow.
 
 set -euo pipefail
 
@@ -105,20 +105,24 @@ spec:
               value: $item_id
             - name: SOURCE_URI
               value: $s3_uri
+            - name: STAC_URL
+              value: "$STAC_URL"
+            - name: STAC_COLLECTION
+              value: "$COLLECTION"
             - name: DASHI_S3_ENDPOINT
               valueFrom:
                 secretKeyRef:
-                  name: rustfs-pipeline
+                  name: dashi-rustfs-pipeline
                   key: endpoint
             - name: DASHI_S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rustfs-pipeline
+                  name: dashi-rustfs-pipeline
                   key: access-key
             - name: DASHI_S3_SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rustfs-pipeline
+                  name: dashi-rustfs-pipeline
                   key: secret-key
           resources:
             requests:
@@ -133,10 +137,11 @@ done
 echo ""
 echo "→ waiting for all p3dt-* Jobs to complete (up to 20 min)"
 for j in $(kubectl -n "$NS" get jobs -l app.kubernetes.io/component=3dtiles-generator -o name); do
+  short="${j#job.batch/}"
   if ! kubectl -n "$NS" wait --for=condition=complete --timeout=1200s "$j" 2>/dev/null; then
-    echo "  ✗ ${j#job.batch/}"
-    kubectl -n "$NS" logs "${j/job./jobs/}" --tail=30 || true
+    echo "  ✗ $short"
+    kubectl -n "$NS" logs "job/$short" --tail=30 || true
   else
-    echo "  ✓ ${j#job.batch/}"
+    echo "  ✓ $short"
   fi
 done

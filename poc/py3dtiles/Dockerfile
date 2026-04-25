@@ -4,32 +4,24 @@
 # py3dtiles convert reads .las/.laz (incl. COPC) and emits a tileset.json
 # + .pnts chunks suitable for streaming to deck.gl Tile3DLayer or CesiumJS.
 
-FROM debian:12-slim
+FROM pdal/pdal:latest
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
-RUN apt-get update \
- && apt-get install -y --no-install-recommends \
-      bash \
-      ca-certificates \
-      curl \
-      libgdal32 \
-      python3 \
-      python3-pip \
-      python3-venv \
- && rm -rf /var/lib/apt/lists/*
+# pdal/pdal image is conda-based and has pdal binary on PATH already.
+# Just install py3dtiles via the bundled conda Python.
 
 # Install py3dtiles + boto3 in a venv to dodge PEP 668.
-RUN python3 -m venv /opt/p3dt \
- && /opt/p3dt/bin/pip install --upgrade pip \
- && /opt/p3dt/bin/pip install \
+# pdal/pdal image ships a base conda env at /opt/conda (python 3.13) plus a
+# secondary `pdal` env. Install py3dtiles + boto3 explicitly into the base
+# python so `python3 -m pip` and the PATH-resolved `python` both find them.
+RUN /opt/conda/bin/python -m pip install --no-cache-dir \
       'py3dtiles>=9.0' \
-      'laspy[lazrs]>=2.5' \
-      'boto3>=1.35'
-
-ENV PATH=/opt/p3dt/bin:$PATH
+      'laspy>=2.5' \
+      'boto3>=1.35' \
+ && /opt/conda/bin/python -c 'import boto3, py3dtiles, laspy'
 
 COPY generate-3dtiles.sh /usr/local/bin/generate-3dtiles.sh
 RUN chmod +x /usr/local/bin/generate-3dtiles.sh
