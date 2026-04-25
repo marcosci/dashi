@@ -9,3 +9,6 @@ export {Tile3DLayer}                        from '@deck.gl/geo-layers';
 export {load}                               from '@loaders.gl/core';
 export {LASLoader}                          from '@loaders.gl/las';
 export {Tiles3DLoader}                      from '@loaders.gl/3d-tiles';
+// copc.js handles LAS 1.4 / COPC chunked range reads — loaders.gl/las
+// still pins to a laz-perf build that caps at LAS 1.3.
+export {Copc, Getter, Hierarchy, Las}       from 'copc';

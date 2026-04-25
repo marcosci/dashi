@@ -13,7 +13,8 @@
     "@deck.gl/geo-layers": "^9.0.32",
     "@loaders.gl/core":    "^4.3.2",
     "@loaders.gl/las":     "^4.3.2",
-    "@loaders.gl/3d-tiles":"^4.3.2"
+    "@loaders.gl/3d-tiles":"^4.3.2",
+    "copc":                "^0.0.8"
   },
   "devDependencies": {
     "esbuild": "^0.24.0"

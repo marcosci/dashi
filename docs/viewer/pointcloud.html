@@ -135,7 +135,8 @@
     const {
       Deck, OrbitView, COORDINATE_SYSTEM,
       PointCloudLayer, Tile3DLayer,
-      load, LASLoader, Tiles3DLoader
+      load, LASLoader, Tiles3DLoader,
+      Copc, Hierarchy
     } = await import('./viewer.bundle.js');
 
     const $url    = document.getElementById('url-input');
@@ -209,16 +210,55 @@
           return;
         }
 
-        const data = await load(url, LASLoader, {
-          worker: false,
-          las: {skip: 1, fp64: false}
+        // Browser-side COPC reader (HTTP range). loaders.gl/las is capped
+        // at LAS 1.3; PDAL writers.copc emits LAS 1.4 → 'copc' lib handles
+        // both. Caps total points to keep memory under control.
+        const POINT_BUDGET = 5_000_000;
+        async function fetchRange(begin, end) {
+          const r = await fetch(url, {headers: {Range: `bytes=${begin}-${end - 1}`}});
+          if (!r.ok && r.status !== 206) throw new Error(`range fetch ${r.status}`);
+          return new Uint8Array(await r.arrayBuffer());
+        }
+        const copc = await Copc.create(fetchRange);
+        setStatus(`COPC header read · ${copc.header.pointCount.toLocaleString()} pts total · sampling first ${POINT_BUDGET.toLocaleString()}…`);
+
+        const rootPage = await Copc.loadHierarchyPage(fetchRange, copc.info.rootHierarchyPage);
+        // Sort nodes shallow→deep so we get a representative thinned cloud first.
+        const nodeKeys = Object.keys(rootPage.nodes).sort((a, b) => {
+          const da = parseInt(a.split('-')[0], 10);
+          const db = parseInt(b.split('-')[0], 10);
+          return da - db;
         });
 
-        const positions = data.attributes.POSITION.value;
-        const colors    = data.attributes.COLOR_0?.value;
-        const n         = positions.length / 3;
+        const flatPositions = [];
+        const flatColors = [];
+        let hasColor = false;
+        let collected = 0;
 
+        for (const key of nodeKeys) {
+          if (collected >= POINT_BUDGET) break;
+          const node = rootPage.nodes[key];
+          const view = await Copc.loadPointDataView(fetchRange, copc, node);
+          const getX = view.getter('X');
+          const getY = view.getter('Y');
+          const getZ = view.getter('Z');
+          const getR = view.dimensions.Red   ? view.getter('Red')   : null;
+          const getG = view.dimensions.Green ? view.getter('Green') : null;
+          const getB = view.dimensions.Blue  ? view.getter('Blue')  : null;
+          if (getR && getG && getB) hasColor = true;
+          const n = view.pointCount;
+          for (let i = 0; i < n; i++) {
+            flatPositions.push(getX(i), getY(i), getZ(i));
+            if (hasColor) flatColors.push(getR(i) >> 8, getG(i) >> 8, getB(i) >> 8, 255);
+          }
+          collected += n;
+          setStatus(`Loading node ${key}… ${collected.toLocaleString()} / ${POINT_BUDGET.toLocaleString()} pts`);
+        }
+
+        const n = flatPositions.length / 3;
         if (n === 0) throw new Error('no points decoded');
+        const positions = Float64Array.from(flatPositions);
+        const colors    = hasColor ? Uint8Array.from(flatColors) : null;
 
         // Centre + scale so the cloud fits a 1000-unit cube.
         let cx=0, cy=0, cz=0;
