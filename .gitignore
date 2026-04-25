@@ -39,3 +39,4 @@ poc/ingest/.dashi-ingest-result.json
 *.pptx
 !docs/**/*.pdf
 !source/**/*.pdf
+.redeploy-logs/
