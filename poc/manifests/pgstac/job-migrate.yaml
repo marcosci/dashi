@@ -2,9 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: pgstac-migrate
-  namespace: miso-catalog
+  namespace: dashi-catalog
   labels:
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   backoffLimit: 6
   template:

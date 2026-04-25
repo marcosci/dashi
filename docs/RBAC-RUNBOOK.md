@@ -6,10 +6,10 @@
 
 | RustFS user | Policy | Lives in K8s Secret | Consumer(s) |
 |-------------|--------|---------------------|-------------|
-| `dashi-ingest` | `landing/*` read+write | `miso-data/dashi-rustfs-ingest` | Future external producers uploading into the landing zone |
-| `dashi-pipeline` | `landing/*` RO + `processed/*` + `curated/*` RW | `miso-data/dashi-rustfs-pipeline` | Prefect `miso-ingest` flow-run Jobs (via work-pool base job template `valueFrom`) |
-| `dashi-serving-reader` | `processed/*` + `curated/*` RO | `miso-serving/dashi-rustfs-serving` | TiTiler, DuckDB endpoint |
-| `rustfs-root` | `consoleAdmin` (everything) | `miso-platform/rustfs-root` | Cluster operator, `rbac-bootstrap.sh`, console login. **Must not be mounted into application pods.** |
+| `dashi-ingest` | `landing/*` read+write | `dashi-data/dashi-rustfs-ingest` | Future external producers uploading into the landing zone |
+| `dashi-pipeline` | `landing/*` RO + `processed/*` + `curated/*` RW | `dashi-data/dashi-rustfs-pipeline` | Prefect `dashi-ingest` flow-run Jobs (via work-pool base job template `valueFrom`) |
+| `dashi-serving-reader` | `processed/*` + `curated/*` RO | `dashi-serving/dashi-rustfs-serving` | TiTiler, DuckDB endpoint |
+| `rustfs-root` | `consoleAdmin` (everything) | `dashi-platform/rustfs-root` | Cluster operator, `rbac-bootstrap.sh`, console login. **Must not be mounted into application pods.** |
 
 Each per-zone Secret contains three keys:
 
@@ -17,7 +17,7 @@ Each per-zone Secret contains three keys:
 data:
   access-key: <user name>
   secret-key: <40-char random>
-  endpoint:   http://rustfs.miso-platform.svc.cluster.local:9000
+  endpoint:   http://rustfs.dashi-platform.svc.cluster.local:9000
 ```
 
 ## Bootstrap (new cluster / factory reset)
@@ -46,7 +46,7 @@ cd poc
 make rbac-bootstrap                             # rotates all three at once; or edit the script for selective rotation
 
 # Restart consumers so they pick up the new Secret
-kubectl -n miso-serving rollout restart deployment/titiler deployment/duckdb-endpoint
+kubectl -n dashi-serving rollout restart deployment/titiler deployment/duckdb-endpoint
 # Prefect flow runs pick the new Secret automatically on the next pod (valueFrom is resolved at pod admission)
 ```
 
@@ -60,14 +60,14 @@ High blast radius — this key can mutate every bucket and every IAM user.
 # 1. Generate new root key and apply it
 cd poc
 ROOT_NEW=$(openssl rand -base64 40)
-kubectl -n miso-platform patch secret rustfs-root \
+kubectl -n dashi-platform patch secret rustfs-root \
   --type='json' -p='[{"op":"replace","path":"/data/secret-key","value":"'"$(echo -n "$ROOT_NEW" | base64)"'"}]'
 
 # 2. Re-bootstrap so per-zone users are re-created with the new root key in control
 make rbac-bootstrap
 
 # 3. Restart RustFS to pick up the new root (this is a full-downtime step)
-kubectl -n miso-platform rollout restart statefulset/rustfs
+kubectl -n dashi-platform rollout restart statefulset/rustfs
 
 # 4. Validate
 make smoke
@@ -82,15 +82,15 @@ The base job template is stored in the Prefect DB (not in git). If the DB is los
 ```bash
 make prefect-up          # re-creates the DB
 make prefect-patch-pool  # re-installs the envFrom.secretKeyRef injection
-bash scripts/prefect-register.sh   # re-registers the miso-ingest deployment
+bash scripts/prefect-register.sh   # re-registers the dashi-ingest deployment
 ```
 
 Inspect the live template:
 
 ```bash
 export PREFECT_API_URL=http://localhost:4200/api
-kubectl -n miso-data port-forward svc/prefect-server 4200:4200 &
-ingest/.venv/bin/prefect work-pool inspect miso-default | yq '.base_job_template'
+kubectl -n dashi-data port-forward svc/prefect-server 4200:4200 &
+ingest/.venv/bin/prefect work-pool inspect dashi-default | yq '.base_job_template'
 ```
 
 ## NetworkPolicies
@@ -103,13 +103,13 @@ ingest/.venv/bin/prefect work-pool inspect miso-default | yq '.base_job_template
 
 ```bash
 # List all RustFS users + their policy
-mc admin user list miso-root
+mc admin user list dashi-root
 
 # Inspect a single user's policy JSON
-mc admin policy info miso-root dashi-pipeline
+mc admin policy info dashi-root dashi-pipeline
 
 # Who is bound to a K8s Secret? (workloads that mount it)
-for ns in miso-data miso-serving miso-platform; do
+for ns in dashi-data dashi-serving dashi-platform; do
   echo "=== $ns ==="
   kubectl -n "$ns" get deploy,statefulset -o json \
     | jq -r '.items[] | {name:.metadata.name, secrets:[.spec.template.spec.containers[].env[]? | select(.valueFrom.secretKeyRef) | .valueFrom.secretKeyRef.name]}' \

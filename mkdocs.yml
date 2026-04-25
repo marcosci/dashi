@@ -99,6 +99,7 @@ nav:
       - Phase-0-Roadmap: PHASE-0-ROADMAP.md
       - Gate-1 Acceptance (PoC): GATE-1-ACCEPTANCE.md
       - Phase-2-Roadmap: PHASE-2-ROADMAP.md
+      - Feature-Ideas (Backlog): FEATURE-IDEAS.md
   - Betrieb:
       - Operations Runbook: OPERATIONS.md
       - RBAC & Secret-Rotation: RBAC-RUNBOOK.md

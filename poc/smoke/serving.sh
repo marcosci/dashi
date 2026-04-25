@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-NS_SERVING="${NS_SERVING:-miso-serving}"
-NS_CATALOG="${NS_CATALOG:-miso-catalog}"
+NS_SERVING="${NS_SERVING:-dashi-serving}"
+NS_CATALOG="${NS_CATALOG:-dashi-catalog}"
 TITILER_PORT="${TITILER_PORT:-18090}"
 DUCKDB_PORT="${DUCKDB_PORT:-18091}"
 STAC_PORT="${STAC_PORT:-18080}"
@@ -33,7 +33,7 @@ fail() { echo "✗ $1" >&2; exit 1; }
 RASTER_URL=$(curl -sf "http://localhost:${STAC_PORT}/search?limit=50" | python3 -c "
 import sys,json
 for f in json.load(sys.stdin).get('features',[]):
-    if f['properties'].get('miso:kind') == 'raster':
+    if f['properties'].get('dashi:kind') == 'raster':
         a = f['assets'].get('data')
         if a and a.get('href','').endswith('.tif'):
             print(a['href']); break
@@ -43,12 +43,12 @@ for f in json.load(sys.stdin).get('features',[]):
 INTERNAL_URL=$(echo "$RASTER_URL" | sed -E 's|https?://[^/]+/||; s|^|s3://|')
 ok "raster asset: $INTERNAL_URL"
 
-INFO_HTTP=$(curl -s -o /tmp/miso-smoke-info.json -w '%{http_code}' "http://localhost:${TITILER_PORT}/cog/info?url=${INTERNAL_URL}")
-[[ "$INFO_HTTP" == "200" ]] || { cat /tmp/miso-smoke-info.json; fail "titiler /cog/info returned $INFO_HTTP"; }
+INFO_HTTP=$(curl -s -o /tmp/dashi-smoke-info.json -w '%{http_code}' "http://localhost:${TITILER_PORT}/cog/info?url=${INTERNAL_URL}")
+[[ "$INFO_HTTP" == "200" ]] || { cat /tmp/dashi-smoke-info.json; fail "titiler /cog/info returned $INFO_HTTP"; }
 ok "titiler /cog/info returned 200"
 
 # 3. DuckDB SELECT
-HTTP=$(curl -s -o /tmp/miso-smoke-q.json -w '%{http_code}' -X POST "http://localhost:${DUCKDB_PORT}/query" -H 'Content-Type: application/json' -d '{"sql":"SELECT 1 AS one"}')
+HTTP=$(curl -s -o /tmp/dashi-smoke-q.json -w '%{http_code}' -X POST "http://localhost:${DUCKDB_PORT}/query" -H 'Content-Type: application/json' -d '{"sql":"SELECT 1 AS one"}')
 [[ "$HTTP" == "200" ]] || fail "duckdb /query returned $HTTP"
 ok "duckdb SELECT 1"
 

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: grafana-admin
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 type: Opaque
 stringData:
   GF_SECURITY_ADMIN_USER: admin
@@ -12,7 +12,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-datasources
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 data:
   datasources.yaml: |
     apiVersion: 1
@@ -20,7 +20,7 @@ data:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus.miso-monitoring.svc.cluster.local:9090
+        url: http://prometheus.dashi-monitoring.svc.cluster.local:9090
         isDefault: true
         editable: false
 ---
@@ -28,7 +28,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-dashboard-provider
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 data:
   provider.yaml: |
     apiVersion: 1
@@ -46,7 +46,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-dashboards
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 data:
   dashi-platform.json: |
     {
@@ -60,14 +60,14 @@ data:
           "type": "stat",
           "title": "Pods Running",
           "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(kube_pod_status_phase{namespace=~\"miso-.*\", phase=\"Running\"})", "refId": "A"}],
+          "targets": [{"expr": "sum(kube_pod_status_phase{namespace=~\"dashi-.*\", phase=\"Running\"})", "refId": "A"}],
           "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#c8821f"}, "unit": "short"}}
         },
         {
           "type": "stat",
           "title": "Pods CrashLooping",
           "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
-          "targets": [{"expr": "sum(kube_pod_container_status_waiting_reason{namespace=~\"miso-.*\", reason=\"CrashLoopBackOff\"})", "refId": "A"}],
+          "targets": [{"expr": "sum(kube_pod_container_status_waiting_reason{namespace=~\"dashi-.*\", reason=\"CrashLoopBackOff\"})", "refId": "A"}],
           "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#b8421f"}, "unit": "short"}}
         },
         {
@@ -79,28 +79,28 @@ data:
         },
         {
           "type": "stat",
-          "title": "Namespaces (miso-*)",
+          "title": "Namespaces (dashi-*)",
           "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
-          "targets": [{"expr": "count(count by (namespace) (kube_namespace_created{namespace=~\"miso-.*\"}))", "refId": "A"}],
+          "targets": [{"expr": "count(count by (namespace) (kube_namespace_created{namespace=~\"dashi-.*\"}))", "refId": "A"}],
           "fieldConfig": {"defaults": {"color": {"mode": "fixed", "fixedColor": "#3d5a3a"}, "unit": "short"}}
         },
         {
           "type": "timeseries",
           "title": "Pod restarts (last hour)",
           "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
-          "targets": [{"expr": "sum by (namespace) (increase(kube_pod_container_status_restarts_total{namespace=~\"miso-.*\"}[1h]))", "refId": "A", "legendFormat": "{{namespace}}"}]
+          "targets": [{"expr": "sum by (namespace) (increase(kube_pod_container_status_restarts_total{namespace=~\"dashi-.*\"}[1h]))", "refId": "A", "legendFormat": "{{namespace}}"}]
         },
         {
           "type": "timeseries",
           "title": "Container CPU (by namespace)",
           "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
-          "targets": [{"expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"miso-.*\",container!=\"\"}[5m]))", "refId": "A", "legendFormat": "{{namespace}}"}]
+          "targets": [{"expr": "sum by (namespace) (rate(container_cpu_usage_seconds_total{namespace=~\"dashi-.*\",container!=\"\"}[5m]))", "refId": "A", "legendFormat": "{{namespace}}"}]
         },
         {
           "type": "timeseries",
           "title": "Container memory RSS (by namespace)",
           "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
-          "targets": [{"expr": "sum by (namespace) (container_memory_working_set_bytes{namespace=~\"miso-.*\",container!=\"\"})", "refId": "A", "legendFormat": "{{namespace}}"}],
+          "targets": [{"expr": "sum by (namespace) (container_memory_working_set_bytes{namespace=~\"dashi-.*\",container!=\"\"})", "refId": "A", "legendFormat": "{{namespace}}"}],
           "fieldConfig": {"defaults": {"unit": "bytes"}}
         }
       ]
@@ -110,10 +110,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: grafana
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
   labels:
     app.kubernetes.io/name: grafana
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   replicas: 1
   selector:
@@ -187,7 +187,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: grafana
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 spec:
   type: ClusterIP
   selector:

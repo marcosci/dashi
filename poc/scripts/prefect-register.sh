@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Register the miso-ingest flow as a Prefect deployment pointing at the
+# Register the dashi-ingest flow as a Prefect deployment pointing at the
 # in-cluster Kubernetes work pool. Idempotent. Uses prefect CLI.
 #
 # Prereqs:
 #   - PREFECT_API_URL exported, pointing at http://localhost:4200/api
 #     (port-forward svc/prefect-server first)
-#   - miso/miso-ingest:dev image imported into k3d
-#   - Work pool 'miso-default' exists (created automatically when the worker
+#   - dashi/dashi-ingest:dev image imported into k3d
+#   - Work pool 'dashi-default' exists (created automatically when the worker
 #     first connects)
 
 set -euo pipefail
 
-POOL="${MISO_PREFECT_WORK_POOL:-miso-default}"
-IMAGE="${MISO_INGEST_IMAGE:-miso/miso-ingest:dev}"
-SAMPLE_PATH="${MISO_SAMPLE_PATH:-/work/sample-data}"
+POOL="${DASHI_PREFECT_WORK_POOL:-dashi-default}"
+IMAGE="${DASHI_INGEST_IMAGE:-dashi/dashi-ingest:dev}"
+SAMPLE_PATH="${DASHI_SAMPLE_PATH:-/work/sample-data}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -22,14 +22,14 @@ if [[ -z "${PREFECT_API_URL:-}" ]]; then
   exit 1
 fi
 
-echo "→ registering flow miso-ingest/main against work pool '$POOL' with image '$IMAGE'"
+echo "→ registering flow dashi-ingest/main against work pool '$POOL' with image '$IMAGE'"
 
 cd "$REPO_ROOT/ingest"   # so Prefect records a relative entrypoint that
                          # resolves inside the image (WORKDIR /app)
 
 "$REPO_ROOT/ingest/.venv/bin/python" - <<PYEOF
 import os
-from miso_ingest.flows.ingest import ingest_flow
+from dashi_ingest.flows.ingest import ingest_flow
 
 image = "$IMAGE"
 pool = "$POOL"
@@ -42,7 +42,7 @@ sample_path = "$SAMPLE_PATH"
 job_variables = {
     "image": image,
     "image_pull_policy": "IfNotPresent",
-    "namespace": "miso-data",
+    "namespace": "dashi-data",
     "service_account_name": "prefect-worker",
 }
 
@@ -58,18 +58,18 @@ deployment_id = ingest_flow.deploy(
     parameters={
         "source_path": sample_path,
         "domain": "gelaende-umwelt",
-        "stac_url": "http://stac-fastapi.miso-catalog.svc.cluster.local:8080",
+        "stac_url": "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080",
     },
     schedules=[
         # Hourly sweep of the landing zone — adjust for production cadence
         CronSchedule(cron="0 * * * *", timezone="UTC"),
     ],
-    description="Format-agnostic MISO ingest run over a mounted sample path. Scheduled hourly.",
-    tags=["miso", "ingest", "scheduled"],
+    description="Format-agnostic dashi ingest run over a mounted sample path. Scheduled hourly.",
+    tags=["dashi", "ingest", "scheduled"],
 )
 print(f"deployment-id: {deployment_id}")
 PYEOF
 
 echo ""
 echo "✓ Registered. Trigger a flow run with:"
-echo "    prefect deployment run 'miso-ingest/main'"
+echo "    prefect deployment run 'dashi-ingest/main'"

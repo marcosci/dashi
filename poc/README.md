@@ -47,25 +47,25 @@ make smoke           # Run Gate-1 acceptance checks
 
 ## Current State
 
-- **Strang B (cluster + storage):** ✅ RustFS live in `miso-platform`, buckets `landing/processed/curated`
-- **Strang D (catalog):** ✅ pgstac + stac-fastapi live in `miso-catalog`
-- **Strang C (ingestion):** ✅ `miso-ingest` CLI format-agnostic (vector, raster, point cloud). End-to-end proven:
+- **Strang B (cluster + storage):** ✅ RustFS live in `dashi-platform`, buckets `landing/processed/curated`
+- **Strang D (catalog):** ✅ pgstac + stac-fastapi live in `dashi-catalog`
+- **Strang C (ingestion):** ✅ `dashi-ingest` CLI format-agnostic (vector, raster, point cloud). End-to-end proven:
     - 29 Dresden OSM shapefiles → 366k features → 3709 H3-7 partitions → 28 STAC items (1 legitimate rejection, empty coastline)
     - 1 GeoTIFF (EPSG:32631) → reprojected COG with overviews
     - 1 GeoPackage with 4 usable layers → 4 separate STAC items
     - 1 LAZ (NZGD2000 NZTM2000, 28.8M points, 118 MB) → 97 MB COPC reprojected to EPSG:4326 via PDAL
-- **Strang E (serving):** ✅ TiTiler + DuckDB SQL endpoint live in `miso-serving`
+- **Strang E (serving):** ✅ TiTiler + DuckDB SQL endpoint live in `dashi-serving`
     - `GET /cog/info` + `/cog/tiles/{z}/{x}/{y}.png` on COGs in RustFS (custom arm64 image — upstream TiTiler is amd64-only)
     - `POST /query` on DuckDB with SELECT-only allowlist, spatial extension, httpfs pointed at RustFS. `ST_Intersects` over the 367k-feature Dresden dataset returns in <2 s (BBox around Frauenkirche matched 10490 features)
-- **Strang F (Prefect orchestration):** ✅ Prefect 3 server live in `miso-data`; `flows/ingest.py` wraps `miso_ingest.runner.ingest_one` as a `@task` with 2× retries + `task_input_hash` cache. Smoke verified end-to-end: flow registered, run `COMPLETED`, STAC item written.
+- **Strang F (Prefect orchestration):** ✅ Prefect 3 server live in `dashi-data`; `flows/ingest.py` wraps `dashi_ingest.runner.ingest_one` as a `@task` with 2× retries + `task_input_hash` cache. Smoke verified end-to-end: flow registered, run `COMPLETED`, STAC item written.
 - **Gate-1 acceptance:** ✅ All 8 PoC-scope criteria passed — see `docs/GATE-1-ACCEPTANCE.md` at the repo root
 
 ## Ingestion package
 
 ```
 poc/ingest/
-└── src/miso_ingest/
-    ├── cli.py          # `miso-ingest scan | ingest`
+└── src/dashi_ingest/
+    ├── cli.py          # `dashi-ingest scan | ingest`
     ├── detect.py       # format classification (vector / raster / unknown)
     ├── validators.py   # CRS present, geometries valid, non-empty
     ├── partition.py    # H3 cell assignment (centroid-based)
@@ -108,10 +108,10 @@ python3 -m venv .venv && .venv/bin/pip install -e .
 cd poc
 make ingest-sample              # uses poc/sample-data/ and live cluster
 # or:
-export MISO_S3_ENDPOINT=http://localhost:9000
-export MISO_S3_ACCESS_KEY=...
-export MISO_S3_SECRET_KEY=...
-.venv/bin/miso-ingest ingest /path/to/data --domain my-collection
+export DASHI_S3_ENDPOINT=http://localhost:9000
+export DASHI_S3_ACCESS_KEY=...
+export DASHI_S3_SECRET_KEY=...
+.venv/bin/dashi-ingest ingest /path/to/data --domain my-collection
 ```
 
 ## Related Spec

@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-NS="${NS:-miso-monitoring}"
+NS="${NS:-dashi-monitoring}"
 PROM_PORT="${PROM_PORT:-19090}"
 GRAF_PORT="${GRAF_PORT:-13030}"
 
@@ -35,9 +35,9 @@ KSM_UP=$(curl -sf "http://localhost:${PROM_PORT}/api/v1/query?query=up%7Bjob%3D%
 RULES=$(curl -sf "http://localhost:${PROM_PORT}/api/v1/rules" | python3 -c 'import sys,json;g=json.load(sys.stdin)["data"]["groups"];print(sum(len(grp["rules"]) for grp in g))')
 [[ "$RULES" -ge 4 ]] && ok "$RULES alert/recording rules loaded" || fail "expected >=4 rules, got $RULES"
 
-# 5. kube-state-metrics produces a miso-* pod series
-POD_COUNT=$(curl -sf "http://localhost:${PROM_PORT}/api/v1/query?query=count%28kube_pod_info%7Bnamespace%3D~%22miso-.%2A%22%7D%29" | python3 -c 'import sys,json;d=json.load(sys.stdin).get("data",{}).get("result",[]);print(int(float(d[0]["value"][1])) if d else 0)')
-[[ "$POD_COUNT" -ge 3 ]] && ok "kube_pod_info sees $POD_COUNT pods in miso-* namespaces" || fail "expected >=3 miso-* pods, got $POD_COUNT"
+# 5. kube-state-metrics produces a dashi-* pod series
+POD_COUNT=$(curl -sf "http://localhost:${PROM_PORT}/api/v1/query?query=count%28kube_pod_info%7Bnamespace%3D~%22dashi-.%2A%22%7D%29" | python3 -c 'import sys,json;d=json.load(sys.stdin).get("data",{}).get("result",[]);print(int(float(d[0]["value"][1])) if d else 0)')
+[[ "$POD_COUNT" -ge 3 ]] && ok "kube_pod_info sees $POD_COUNT pods in dashi-* namespaces" || fail "expected >=3 dashi-* pods, got $POD_COUNT"
 
 # 6. Grafana health
 GRAF_HEALTH=$(curl -sf "http://localhost:${GRAF_PORT}/api/health" | python3 -c 'import sys,json;print(json.load(sys.stdin)["database"])')

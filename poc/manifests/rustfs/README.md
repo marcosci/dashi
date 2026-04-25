@@ -6,7 +6,7 @@ S3-compatible object storage for the dashi PoC. Primary backend for all zones (`
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-platform` namespace |
+| `namespace.yaml` | `dashi-platform` namespace |
 | `secret.yaml` | Root credentials (template — replace before apply) |
 | `statefulset.yaml` | RustFS server, single replica for PoC, persistent volume |
 | `service.yaml` | ClusterIP `rustfs` port 9000 (S3 API) + 9001 (console) |
@@ -26,16 +26,16 @@ kubectl apply -k .
 Verify:
 
 ```bash
-kubectl -n miso-platform get pods -w
-kubectl -n miso-platform logs job/rustfs-create-buckets
+kubectl -n dashi-platform get pods -w
+kubectl -n dashi-platform logs job/rustfs-create-buckets
 ```
 
 Port-forward for local access:
 
 ```bash
-kubectl -n miso-platform port-forward svc/rustfs 9000:9000 9001:9001
-# mc alias set miso-local http://localhost:9000 rustfs-admin "${RUSTFS_ROOT_PASSWORD}"
-# mc ls miso-local
+kubectl -n dashi-platform port-forward svc/rustfs 9000:9000 9001:9001
+# mc alias set dashi-local http://localhost:9000 rustfs-admin "${RUSTFS_ROOT_PASSWORD}"
+# mc ls dashi-local
 ```
 
 ## Production hardening deferred

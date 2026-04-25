@@ -1,4 +1,4 @@
-"""MISO COG tile endpoint — minimal FastAPI + rio-tiler.
+"""dashi COG tile endpoint — minimal FastAPI + rio-tiler.
 
 Compatible subset of TiTiler endpoints: info, tilejson, tiles.
 Built as an arm64-native image because the upstream titiler image only
@@ -18,13 +18,13 @@ from rio_tiler.errors import TileOutsideBounds
 from rio_tiler.io import Reader
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
-log = logging.getLogger("miso-titiler")
+log = logging.getLogger("dashi-titiler")
 
 # GDAL env for S3 is read from process env (set by the K8s deployment)
 # AWS_S3_ENDPOINT, AWS_VIRTUAL_HOSTING, AWS_HTTPS, AWS_ACCESS_KEY_ID,
 # AWS_SECRET_ACCESS_KEY, AWS_REGION, GDAL_DISABLE_READDIR_ON_OPEN
 
-app = FastAPI(title="MISO COG tile endpoint", version="0.1.0")
+app = FastAPI(title="dashi COG tile endpoint", version="0.1.0")
 
 
 def _open(url: str) -> Reader:

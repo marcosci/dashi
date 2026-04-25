@@ -18,11 +18,11 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 
 | Schritt | Output | Stand |
 |---------|--------|:-----:|
-| G1 | miso-ingest Docker-Image (conda-forge + GDAL + PDAL + laspy + prefect) gebaut, per `k3d image import` ins Cluster | ✅ |
+| G1 | dashi-ingest Docker-Image (conda-forge + GDAL + PDAL + laspy + prefect) gebaut, per `k3d image import` ins Cluster | ✅ |
 | G2 | Prefect Backend von SQLite-on-emptyDir auf PostgreSQL StatefulSet `prefect-db` umgestellt — durable über Pod-Neustart | ✅ |
-| G3 | Kubernetes Work Pool `miso-default` aktiv (auto-created beim ersten Worker-Connect) | ✅ |
-| G4 | Prefect Worker-Deployment in `miso-data` mit eigenem ServiceAccount, Role + ClusterRole für kopf-Pod-Watch | ✅ |
-| G5 | `miso-ingest/main` Deployment registriert, Flow-Runs laufen als K8s Jobs (`prefect.io/flow-run-id` label), Pod-Status `Completed` verifiziert | ✅ |
+| G3 | Kubernetes Work Pool `dashi-default` aktiv (auto-created beim ersten Worker-Connect) | ✅ |
+| G4 | Prefect Worker-Deployment in `dashi-data` mit eigenem ServiceAccount, Role + ClusterRole für kopf-Pod-Watch | ✅ |
+| G5 | `dashi-ingest/main` Deployment registriert, Flow-Runs laufen als K8s Jobs (`prefect.io/flow-run-id` label), Pod-Status `Completed` verifiziert | ✅ |
 | G6 | Cron-Schedule `0 * * * *` am Deployment angehängt — stündlicher Landing-Zone-Sweep | ✅ |
 
 ### Strang H — Rollenbasierte Zugriffskontrolle (F-23) ✅
@@ -33,8 +33,8 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 |---------|--------|:-----:|
 | H1 | Drei RustFS IAM-Users mit bucket-scoped Policies: `dashi-ingest` (RW landing/), `dashi-pipeline` (R landing/ + RW processed/+curated/), `dashi-serving-reader` (R processed/+curated/) — bootstrap via [`scripts/rbac-bootstrap.sh`](https://github.com/marcosci/dashi/blob/main/poc/scripts/rbac-bootstrap.sh) | ✅ |
 | H2 | Per-zone Policy-JSON unter `poc/manifests/rustfs/policies/` versioniert; Least-Privilege im Smoke nachgewiesen (serving-reader kann nicht nach `processed/` schreiben) | ✅ |
-| H3 | Prefect `miso-default` Work-Pool Base-Job-Template patched: RustFS-Credentials via `valueFrom.secretKeyRef` statt plain env — Creds verlassen K8s nicht mehr (`scripts/prefect-patch-pool.sh`) | ✅ |
-| H4 | NetworkPolicies: 12 Regeln — default-deny pro Namespace + explizite allow-lists (rustfs accessible nur aus `miso-data` / `miso-serving` / `miso-monitoring`, pgstac nur aus stac-fastapi, prefect-db nur aus prefect-server). _CNI-Enforcement erfordert Cilium/Calico — k3d Flannel rendert die Regeln als dokumentierte Absicht_ | ✅ |
+| H3 | Prefect `dashi-default` Work-Pool Base-Job-Template patched: RustFS-Credentials via `valueFrom.secretKeyRef` statt plain env — Creds verlassen K8s nicht mehr (`scripts/prefect-patch-pool.sh`) | ✅ |
+| H4 | NetworkPolicies: 12 Regeln — default-deny pro Namespace + explizite allow-lists (rustfs accessible nur aus `dashi-data` / `dashi-serving` / `dashi-monitoring`, pgstac nur aus stac-fastapi, prefect-db nur aus prefect-server). _CNI-Enforcement erfordert Cilium/Calico — k3d Flannel rendert die Regeln als dokumentierte Absicht_ | ✅ |
 | H5 | Rotation-Runbook mit Eskalation für Per-Zone-Keys + RustFS-Root + Prefect-DB-Wiederherstellung | ✅ |
 
 ### Strang I — Beobachtbarkeit ✅ (Grundplattform)
@@ -43,13 +43,13 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 
 | Schritt | Output | Stand |
 |---------|--------|:-----:|
-| I1 | Prometheus (operator-free, 7-Tage-Retention) + kube-state-metrics + Grafana im Namespace `miso-monitoring` | ✅ |
+| I1 | Prometheus (operator-free, 7-Tage-Retention) + kube-state-metrics + Grafana im Namespace `dashi-monitoring` | ✅ |
 | I2 | Scrape-Discovery via Pod-Annotations `prometheus.io/scrape: true` — Anwendungs-Exporter (postgres_exporter, RustFS Prometheus endpoint, Request-Metriken auf duckdb-endpoint / titiler-endpoint) sind Phase-2-Erweiterungen | ⏳ teilweise |
 | I3 | Grafana-Dashboard `dashi · Platform Overview` pre-provisioniert: Pods Running/Crash, PVC-Fill, Namespace-Count, Restart-Trend, CPU + Memory je Namespace | ✅ |
 | I4 | PrometheusRules: `PodCrashLoop`, `DashiPodDown`, `PVCFull`, `DashiIngestFlowFailure` | ✅ |
 | I5 | Audit-Log-Sammlung (Loki / Vector) | ⏳ Phase 3 |
 
-Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `miso-*` Namespaces via `kube_pod_info` sichtbar, 4 Alert-Rules geladen.
+Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `dashi-*` Namespaces via `kube_pod_info` sichtbar, 4 Alert-Rules geladen.
 
 ### Strang J — OGC-Dienste (F-21, F-22) ✅ (Tiles + MVT) · ⏳ (Features)
 
@@ -64,7 +64,7 @@ Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `miso-*` 
 | J5 | OGC API – Features via TiPG + PostGIS-Promotion-Flow | ⏳ nächste Iteration |
 | J6 | Legacy-WMS-Shim (falls FüInfoSys es zwingt) | ⏳ Phase 3 |
 
-PostGIS für Serving (`miso-serving-db` Namespace, postgis:16-3.4-alpine, 3 Gi PVC, RO-Rolle `dashi_serving_ro`) ist deployed und wartet auf den Promotion-Flow + TiPG.
+PostGIS für Serving (`dashi-serving-db` Namespace, postgis:16-3.4-alpine, 3 Gi PVC, RO-Rolle `dashi_serving_ro`) ist deployed und wartet auf den Promotion-Flow + TiPG.
 
 ### Strang K — Domänen-Onboarding pro Produktionsdomäne
 
@@ -83,8 +83,8 @@ Anwendungsmuster pro neuer Domäne — nach Phase-2-Gate eskalierbar.
 | Schritt | Output | ADR |
 |---------|--------|-----|
 | L1 | Produkt-Wahl (Apache Atlas vs. OpenMetadata vs. DataHub) dokumentiert, [ADR-006](adrs.md) aktualisiert | ADR-006 |
-| L2 | Deployment in neuem `miso-metadata` Namespace | ADR-006, F-15 |
-| L3 | Lineage-Emitter in `miso-ingest` — Pipeline-Lineage wird mit jedem Flow-Lauf geschrieben | F-15 |
+| L2 | Deployment in neuem `dashi-metadata` Namespace | ADR-006, F-15 |
+| L3 | Lineage-Emitter in `dashi-ingest` — Pipeline-Lineage wird mit jedem Flow-Lauf geschrieben | F-15 |
 
 ---
 
@@ -97,7 +97,7 @@ gantt
     axisFormat Woche %s
 
     section G: Prefect in-cluster
-    G1 miso-ingest image   :g1, 1, 1
+    G1 dashi-ingest image   :g1, 1, 1
     G2 Prefect on Postgres :g2, after g1, 1
     G3 Work Pool           :g3, after g2, 1
     G4 Worker Deployment   :g4, after g3, 1
@@ -144,7 +144,7 @@ Aus [§9 Phase 2](09-phases.md#abnahmekriterien--gate-2) auf den PoC-Kontext ohn
 
 | Kriterium | Messung | Zielwert |
 |-----------|---------|----------|
-| Prefect-Flows laufen in-cluster | `prefect deployment run miso-ingest` ohne lokales venv | Bestanden |
+| Prefect-Flows laufen in-cluster | `prefect deployment run dashi-ingest` ohne lokales venv | Bestanden |
 | Scheduled Trigger aktiv | Flow lief mindestens einmal via Cron-Schedule | Bestanden |
 | Rollenbasierte Zugriffskontrolle | Mindestens 3 distinkte RustFS Service-Accounts, NetworkPolicies blockieren Cross-Namespace-Ingress | Bestanden |
 | Pipeline-Stabilität | Fehlerrate über 30 Tage | < 5 % |
@@ -168,7 +168,7 @@ Aus [§9 Phase 2](09-phases.md#abnahmekriterien--gate-2) auf den PoC-Kontext ohn
 
 ## Sofortige nächste Aktion
 
-1. **G1** — miso-ingest Docker-Image bauen und importieren
+1. **G1** — dashi-ingest Docker-Image bauen und importieren
 2. **G2** — Postgres als Prefect-Backend einrichten (möglicherweise zweite Instanz neben pgstac)
 3. **G3 + G4 + G5** — Work Pool + Worker + Deployment registrieren
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Bring up a local k3s-equivalent cluster for MISO PoC.
+# Bring up a local k3s-equivalent cluster for dashi PoC.
 # macOS + Windows: uses k3d (k3s in Docker).
 # Linux: uses native k3s.
 
 set -euo pipefail
 
-CLUSTER_NAME="${1:-miso}"
+CLUSTER_NAME="${1:-dashi}"
 
 case "$(uname -s)" in
   Darwin|MINGW*|MSYS*|CYGWIN*)

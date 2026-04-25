@@ -1,11 +1,11 @@
-"""MISO DuckDB SQL endpoint — read-only analytical queries against s3 parquet.
+"""dashi DuckDB SQL endpoint — read-only analytical queries against s3 parquet.
 
 Accepts JSON POST /query with `{"sql": "..."}`. Enforces a SELECT-only allowlist
 at first-token check so the endpoint can never mutate state (F-23 — rollenbasiert
 wird in Phase 2 geschärft; hier: harte Read-Only-Policy).
 
 Env:
-  RUSTFS_ENDPOINT   http://rustfs.miso-platform.svc.cluster.local:9000
+  RUSTFS_ENDPOINT   http://rustfs.dashi-platform.svc.cluster.local:9000
   RUSTFS_ACCESS_KEY access key
   RUSTFS_SECRET_KEY secret key
   RUSTFS_REGION     default us-east-1
@@ -25,10 +25,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
-log = logging.getLogger("miso-duckdb")
+log = logging.getLogger("dashi-duckdb")
 
 RUSTFS_ENDPOINT = os.environ.get(
-    "RUSTFS_ENDPOINT", "http://rustfs.miso-platform.svc.cluster.local:9000"
+    "RUSTFS_ENDPOINT", "http://rustfs.dashi-platform.svc.cluster.local:9000"
 )
 RUSTFS_ACCESS_KEY = os.environ["RUSTFS_ACCESS_KEY"]
 RUSTFS_SECRET_KEY = os.environ["RUSTFS_SECRET_KEY"]
@@ -55,7 +55,7 @@ def _build_connection() -> duckdb.DuckDBPyConnection:
     return conn
 
 
-app = FastAPI(title="MISO DuckDB SQL Endpoint", version="0.1.0")
+app = FastAPI(title="dashi DuckDB SQL Endpoint", version="0.1.0")
 
 
 class QueryRequest(BaseModel):

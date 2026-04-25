@@ -35,12 +35,12 @@ See the [manifest README](../manifests/duckdb-endpoint/README.md) — same rules
 ## Build + run
 
 ```bash
-docker build -t miso/duckdb-endpoint:dev .
+docker build -t dashi/duckdb-endpoint:dev .
 docker run --rm -p 8080:8080 \
   -e RUSTFS_ENDPOINT=http://host.docker.internal:9000 \
   -e RUSTFS_ACCESS_KEY=… \
   -e RUSTFS_SECRET_KEY=… \
-  miso/duckdb-endpoint:dev
+  dashi/duckdb-endpoint:dev
 ```
 
 Under k3d, `poc/scripts/serving-deploy.sh` handles build + import + deploy.

@@ -9,8 +9,8 @@
 
 set -euo pipefail
 
-NS="${NS:-miso-data}"
-IMAGE="${TIPPECANOE_IMAGE:-miso/tippecanoe:dev}"
+NS="${NS:-dashi-data}"
+IMAGE="${TIPPECANOE_IMAGE:-dashi/tippecanoe:dev}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -44,7 +44,7 @@ metadata:
   name: ${JOB_NAME}
   labels:
     app.kubernetes.io/name: pmtiles-generator
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   backoffLimit: 2
   ttlSecondsAfterFinished: 7200
@@ -68,17 +68,17 @@ spec:
               value: "${minz}"
             - name: MAX_ZOOM
               value: "${maxz}"
-            - name: MISO_S3_ENDPOINT
+            - name: DASHI_S3_ENDPOINT
               valueFrom:
                 secretKeyRef:
                   name: dashi-rustfs-pipeline
                   key: endpoint
-            - name: MISO_S3_ACCESS_KEY
+            - name: DASHI_S3_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: dashi-rustfs-pipeline
                   key: access-key
-            - name: MISO_S3_SECRET_KEY
+            - name: DASHI_S3_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: dashi-rustfs-pipeline

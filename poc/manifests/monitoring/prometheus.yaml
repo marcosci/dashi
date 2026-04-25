@@ -2,14 +2,14 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
       external_labels:
-        cluster: miso
+        cluster: dashi
         platform: dashi
 
     rule_files:
@@ -107,13 +107,13 @@ data:
       # Kube-state-metrics
       - job_name: kube-state-metrics
         static_configs:
-          - targets: ['kube-state-metrics.miso-monitoring.svc.cluster.local:8080']
+          - targets: ['kube-state-metrics.dashi-monitoring.svc.cluster.local:8080']
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-rules
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 data:
   dashi-alerts.yaml: |
     groups:
@@ -131,7 +131,7 @@ data:
               description: "{{ $labels.pod }} in {{ $labels.namespace }} has > 3 restarts in 5 minutes."
 
           - alert: DashiPodDown
-            expr: kube_pod_status_phase{namespace=~"miso-.*", phase=~"Failed|Unknown"} > 0
+            expr: kube_pod_status_phase{namespace=~"dashi-.*", phase=~"Failed|Unknown"} > 0
             for: 5m
             labels:
               severity: critical
@@ -165,10 +165,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
   labels:
     app.kubernetes.io/name: prometheus
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   replicas: 1
   selector:
@@ -234,7 +234,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 spec:
   type: ClusterIP
   selector:

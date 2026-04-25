@@ -1,10 +1,10 @@
 """S3-compatible storage helpers wired to RustFS (or any S3 endpoint).
 
 Env:
-  MISO_S3_ENDPOINT       http(s) URL of the S3 API (default: http://localhost:9000)
-  MISO_S3_REGION         region name (default: us-east-1 — RustFS default)
-  MISO_S3_ACCESS_KEY     access key
-  MISO_S3_SECRET_KEY     secret key
+  DASHI_S3_ENDPOINT       http(s) URL of the S3 API (default: http://localhost:9000)
+  DASHI_S3_REGION         region name (default: us-east-1 — RustFS default)
+  DASHI_S3_ACCESS_KEY     access key
+  DASHI_S3_SECRET_KEY     secret key
 """
 
 from __future__ import annotations
@@ -28,10 +28,10 @@ class S3Config:
     @classmethod
     def from_env(cls) -> "S3Config":
         return cls(
-            endpoint=os.environ.get("MISO_S3_ENDPOINT", "http://localhost:9000"),
-            region=os.environ.get("MISO_S3_REGION", "us-east-1"),
-            access_key=os.environ["MISO_S3_ACCESS_KEY"],
-            secret_key=os.environ["MISO_S3_SECRET_KEY"],
+            endpoint=os.environ.get("DASHI_S3_ENDPOINT", "http://localhost:9000"),
+            region=os.environ.get("DASHI_S3_REGION", "us-east-1"),
+            access_key=os.environ["DASHI_S3_ACCESS_KEY"],
+            secret_key=os.environ["DASHI_S3_SECRET_KEY"],
         )
 
 

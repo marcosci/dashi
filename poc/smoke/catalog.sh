@@ -5,7 +5,7 @@
 
 set -euo pipefail
 
-NS="${NS:-miso-catalog}"
+NS="${NS:-dashi-catalog}"
 SVC="${SVC:-stac-fastapi}"
 PORT_LOCAL="${PORT_LOCAL:-18080}"
 PORT_SVC="${PORT_SVC:-8080}"
@@ -63,12 +63,12 @@ PAYLOAD=$(cat <<EOF
 }
 EOF
 )
-HTTP=$(curl -s -o /tmp/miso-smoke-coll.json -w '%{http_code}' -X POST "$API/collections" -H 'Content-Type: application/json' -d "$PAYLOAD")
+HTTP=$(curl -s -o /tmp/dashi-smoke-coll.json -w '%{http_code}' -X POST "$API/collections" -H 'Content-Type: application/json' -d "$PAYLOAD")
 if [[ "$HTTP" == "200" || "$HTTP" == "201" || "$HTTP" == "409" ]]; then
   ok "collection POST returned $HTTP"
 else
   echo "--- response body ---"
-  cat /tmp/miso-smoke-coll.json
+  cat /tmp/dashi-smoke-coll.json
   fail "collection POST failed (HTTP $HTTP)"
 fi
 

@@ -26,7 +26,7 @@ Re-Evaluierung mit Phase-2-Übergang an ein produktives Betriebsteam — falls b
 ## Konsequenzen
 
 - Flows werden als Python-Module unter `poc/flows/` versioniert
-- Prefect-Server läuft als k3s-Deployment im Namespace `miso-data` (siehe [k3s setup](../poc/docs/k3s-setup.md))
+- Prefect-Server läuft als k3s-Deployment im Namespace `dashi-data` (siehe [k3s setup](../poc/docs/k3s-setup.md))
 - Worker nutzen denselben Cluster — keine Remote-Runner im PoC
 - Blob-Storage-Zugriff über `boto3` gegen RustFS, Credentials via K8s Secret
 - Alerts initial nur via Prefect-UI; Monitoring-Dashboard-Anbindung (NF-16) in Phase 2

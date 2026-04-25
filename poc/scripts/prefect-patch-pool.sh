@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Strang H3 — customise the Prefect `miso-default` Kubernetes work pool
+# Strang H3 — customise the Prefect `dashi-default` Kubernetes work pool
 # base job template so every flow-run pod injects RustFS credentials
 # via valueFrom.secretKeyRef instead of plain env values. Secrets stay
 # K8s-side; the Prefect DB never stores them.
 
 set -euo pipefail
 
-POOL="${MISO_PREFECT_WORK_POOL:-miso-default}"
+POOL="${DASHI_PREFECT_WORK_POOL:-dashi-default}"
 
 if [[ -z "${PREFECT_API_URL:-}" ]]; then
   echo "ERROR: set PREFECT_API_URL first (port-forward svc/prefect-server)"
@@ -29,10 +29,10 @@ POOL = "$POOL"
 # every flow-run pod inherits them, regardless of what the flow
 # deployment's job_variables.env field contains.
 INJECTED = [
-    {"name": "MISO_S3_ACCESS_KEY", "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "access-key"}}},
-    {"name": "MISO_S3_SECRET_KEY", "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "secret-key"}}},
-    {"name": "MISO_S3_ENDPOINT",   "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "endpoint"}}},
-    {"name": "MISO_STAC_URL",      "value": "http://stac-fastapi.miso-catalog.svc.cluster.local:8080"},
+    {"name": "DASHI_S3_ACCESS_KEY", "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "access-key"}}},
+    {"name": "DASHI_S3_SECRET_KEY", "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "secret-key"}}},
+    {"name": "DASHI_S3_ENDPOINT",   "valueFrom": {"secretKeyRef": {"name": "dashi-rustfs-pipeline", "key": "endpoint"}}},
+    {"name": "DASHI_STAC_URL",      "value": "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080"},
 ]
 
 async def main():

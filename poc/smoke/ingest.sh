@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # End-to-end smoke — ingestion pipeline.
-# Creates a tiny synthetic GeoJSON, runs miso-ingest against it, verifies
+# Creates a tiny synthetic GeoJSON, runs dashi-ingest against it, verifies
 # the STAC item came back from the catalog and the parquet partition exists
 # on RustFS. Exits non-zero on any failure.
 
 set -euo pipefail
 
-NS_RUSTFS="${NS_RUSTFS:-miso-platform}"
-NS_CATALOG="${NS_CATALOG:-miso-catalog}"
+NS_RUSTFS="${NS_RUSTFS:-dashi-platform}"
+NS_CATALOG="${NS_CATALOG:-dashi-catalog}"
 S3_LOCAL_PORT="${S3_LOCAL_PORT:-19000}"
 STAC_LOCAL_PORT="${STAC_LOCAL_PORT:-19080}"
 
@@ -27,9 +27,9 @@ PFPIDS="$PFPIDS $!"
 sleep 3
 
 echo "→ fetch RustFS credentials"
-export MISO_S3_ACCESS_KEY=$(kubectl -n "$NS_RUSTFS" get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-export MISO_S3_SECRET_KEY=$(kubectl -n "$NS_RUSTFS" get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-export MISO_S3_ENDPOINT="http://localhost:${S3_LOCAL_PORT}"
+export DASHI_S3_ACCESS_KEY=$(kubectl -n "$NS_RUSTFS" get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
+export DASHI_S3_SECRET_KEY=$(kubectl -n "$NS_RUSTFS" get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
+export DASHI_S3_ENDPOINT="http://localhost:${S3_LOCAL_PORT}"
 
 STAC_URL="http://localhost:${STAC_LOCAL_PORT}"
 COLL="smoke-ingest"
@@ -46,17 +46,17 @@ cat > "$TMP_DIR/point.geojson" <<'EOF'
 }
 EOF
 
-echo "→ miso-ingest scan"
-"$INGEST_DIR/.venv/bin/miso-ingest" scan "$TMP_DIR" >/dev/null
+echo "→ dashi-ingest scan"
+"$INGEST_DIR/.venv/bin/dashi-ingest" scan "$TMP_DIR" >/dev/null
 
-echo "→ miso-ingest ingest"
-"$INGEST_DIR/.venv/bin/miso-ingest" ingest "$TMP_DIR" \
+echo "→ dashi-ingest ingest"
+"$INGEST_DIR/.venv/bin/dashi-ingest" ingest "$TMP_DIR" \
   --domain "$COLL" \
   --stac-url "$STAC_URL" \
   --collection-description "smoke ingest" >/dev/null
 
 echo "→ verify collection exists"
-HTTP=$(curl -s -o /tmp/miso-smoke-coll.json -w '%{http_code}' "$STAC_URL/collections/$COLL")
+HTTP=$(curl -s -o /tmp/dashi-smoke-coll.json -w '%{http_code}' "$STAC_URL/collections/$COLL")
 [[ "$HTTP" == "200" ]] || { echo "✗ collection not found (HTTP $HTTP)"; exit 1; }
 echo "  ✓ collection $COLL"
 

@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-NS="${NS:-miso-serving}"
+NS="${NS:-dashi-serving}"
 PORT="${PORT:-19130}"
 
 cleanup() { for pid in ${PFPIDS:-}; do kill "$pid" 2>/dev/null || true; done; }

@@ -9,7 +9,7 @@ import geopandas as gpd
 from pyproj import CRS
 from shapely.validation import make_valid
 
-from miso_ingest.partition import assign_cell
+from dashi_ingest.partition import assign_cell
 
 TARGET_CRS = "EPSG:4326"
 

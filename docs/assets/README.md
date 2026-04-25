@@ -9,7 +9,7 @@ Static assets referenced by the MkDocs Material site.
 | `dashi-logo.svg` | Primary site logo + index hero. Concentric rings with amber accent on cream. Source spec: `dashi-v3-system.jsx` (72/54/38/24/10 ring radii, 3/2/1.4/1.1 stroke weights). |
 | `dashi-logo-mono.svg` | Monochrome fallback — no accent, no broth haze. For on-dark use or single-colour print. |
 | `dashi-favicon.svg` | Favicon with rounded corners, higher-contrast amber, scaled for 64×64 and smaller. |
-| `legacy-miso-logo.png` | First-draft ramen-bowl logo from the MISO era. Retained for historical reference; not used on the live site. |
+| `legacy-miso-logo.png` | First-draft ramen-bowl logo from the pre-rebrand MISO era. Filename retained verbatim for historical traceability; not used on the live site. |
 
 ## Brand tokens (mirror of `docs/stylesheets/dashi.css`)
 

@@ -4,7 +4,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
-  namespace: miso-platform
+  namespace: dashi-platform
 spec:
   podSelector: {}
   policyTypes: [Ingress]
@@ -13,7 +13,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
-  namespace: miso-catalog
+  namespace: dashi-catalog
 spec:
   podSelector: {}
   policyTypes: [Ingress]
@@ -22,7 +22,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
-  namespace: miso-data
+  namespace: dashi-data
 spec:
   podSelector: {}
   policyTypes: [Ingress]
@@ -31,7 +31,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
-  namespace: miso-serving
+  namespace: dashi-serving
 spec:
   podSelector: {}
   policyTypes: [Ingress]
@@ -40,7 +40,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-ingress
-  namespace: miso-monitoring
+  namespace: dashi-monitoring
 spec:
   podSelector: {}
   policyTypes: [Ingress]

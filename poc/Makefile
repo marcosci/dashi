@@ -27,7 +27,7 @@ help:
 	@echo "  Housekeeping"
 	@echo "    teardown        Remove all deployments (keeps cluster)"
 
-CLUSTER_NAME ?= miso
+CLUSTER_NAME ?= dashi
 
 k3s-up:
 	@bash scripts/k3s-up.sh $(CLUSTER_NAME)
@@ -39,28 +39,28 @@ storage-deploy:
 	@bash scripts/apply-with-secret.sh manifests/rustfs secret.yaml CHANGE_ME_ROOT_PASSWORD
 	@echo ""
 	@echo "→ Waiting for RustFS to be Ready"
-	kubectl -n miso-platform rollout status statefulset/rustfs --timeout=180s
+	kubectl -n dashi-platform rollout status statefulset/rustfs --timeout=180s
 	@echo ""
 	@echo "→ Waiting for bucket-init Job"
-	kubectl -n miso-platform wait --for=condition=complete job/rustfs-create-buckets --timeout=120s
+	kubectl -n dashi-platform wait --for=condition=complete job/rustfs-create-buckets --timeout=120s
 	@echo ""
 	@echo "✓ RustFS ready. Buckets: landing / processed / curated"
-	@echo "  Port-forward with: kubectl -n miso-platform port-forward svc/rustfs 9000:9000 9001:9001"
+	@echo "  Port-forward with: kubectl -n dashi-platform port-forward svc/rustfs 9000:9000 9001:9001"
 
 catalog-deploy:
 	@bash scripts/apply-with-secret.sh manifests/pgstac secret.yaml CHANGE_ME_PG_PASSWORD
 	@echo ""
 	@echo "→ Waiting for Postgres (pgstac) StatefulSet"
-	kubectl -n miso-catalog rollout status statefulset/pgstac --timeout=180s
+	kubectl -n dashi-catalog rollout status statefulset/pgstac --timeout=180s
 	@echo ""
 	@echo "→ Waiting for pgstac migration Job"
-	kubectl -n miso-catalog wait --for=condition=complete job/pgstac-migrate --timeout=180s
+	kubectl -n dashi-catalog wait --for=condition=complete job/pgstac-migrate --timeout=180s
 	@echo ""
 	@echo "→ Waiting for stac-fastapi Deployment"
-	kubectl -n miso-catalog rollout status deployment/stac-fastapi --timeout=180s
+	kubectl -n dashi-catalog rollout status deployment/stac-fastapi --timeout=180s
 	@echo ""
-	@echo "✓ Catalog ready. stac-fastapi on svc/stac-fastapi:8080 in miso-catalog"
-	@echo "  Port-forward: kubectl -n miso-catalog port-forward svc/stac-fastapi 8080:8080"
+	@echo "✓ Catalog ready. stac-fastapi on svc/stac-fastapi:8080 in dashi-catalog"
+	@echo "  Port-forward: kubectl -n dashi-catalog port-forward svc/stac-fastapi 8080:8080"
 
 serving-deploy:
 	@bash scripts/serving-deploy.sh
@@ -78,43 +78,43 @@ prefect-patch-pool:
 
 ogc-deploy:
 	@bash scripts/apply-with-secret.sh manifests/serving-db statefulset.yaml CHANGE_ME_SERVING_POSTGIS
-	kubectl -n miso-serving-db rollout status statefulset/serving-postgis --timeout=180s
+	kubectl -n dashi-serving-db rollout status statefulset/serving-postgis --timeout=180s
 	kubectl apply -k manifests/martin
 	@echo ""
 	@echo "→ Generating PMTiles (one Job per layer; replace pmtiles-generate.sh's"
 	@echo "  layer list to add/remove sources)"
 	@bash scripts/pmtiles-generate.sh
-	kubectl -n miso-serving rollout restart deployment/martin
-	kubectl -n miso-serving rollout status deployment/martin --timeout=180s
+	kubectl -n dashi-serving rollout restart deployment/martin
+	kubectl -n dashi-serving rollout status deployment/martin --timeout=180s
 	@echo ""
-	@echo "✓ Martin live. Port-forward: kubectl -n miso-serving port-forward svc/martin 3000:3000"
+	@echo "✓ Martin live. Port-forward: kubectl -n dashi-serving port-forward svc/martin 3000:3000"
 
 monitoring-up:
 	@bash scripts/apply-with-secret.sh manifests/monitoring grafana.yaml CHANGE_ME_GRAFANA_ADMIN
 	@echo ""
 	@echo "→ Waiting for Prometheus"
-	kubectl -n miso-monitoring rollout status deployment/prometheus --timeout=180s
+	kubectl -n dashi-monitoring rollout status deployment/prometheus --timeout=180s
 	@echo "→ Waiting for kube-state-metrics"
-	kubectl -n miso-monitoring rollout status deployment/kube-state-metrics --timeout=120s
+	kubectl -n dashi-monitoring rollout status deployment/kube-state-metrics --timeout=120s
 	@echo "→ Waiting for Grafana"
-	kubectl -n miso-monitoring rollout status deployment/grafana --timeout=180s
+	kubectl -n dashi-monitoring rollout status deployment/grafana --timeout=180s
 	@echo ""
 	@echo "✓ Monitoring up. Port-forwards:"
-	@echo "  kubectl -n miso-monitoring port-forward svc/prometheus 9090:9090"
-	@echo "  kubectl -n miso-monitoring port-forward svc/grafana    3000:3000"
+	@echo "  kubectl -n dashi-monitoring port-forward svc/prometheus 9090:9090"
+	@echo "  kubectl -n dashi-monitoring port-forward svc/grafana    3000:3000"
 
 prefect-up:
 	@bash scripts/apply-with-secret.sh manifests/prefect statefulset-postgres.yaml CHANGE_ME_PREFECT_DB
 	@echo ""
 	@echo "→ Waiting for Prefect DB"
-	kubectl -n miso-data rollout status statefulset/prefect-db --timeout=180s
+	kubectl -n dashi-data rollout status statefulset/prefect-db --timeout=180s
 	@echo "→ Waiting for Prefect server"
-	kubectl -n miso-data rollout status deployment/prefect-server --timeout=240s
+	kubectl -n dashi-data rollout status deployment/prefect-server --timeout=240s
 	@echo "→ Waiting for Prefect worker"
-	kubectl -n miso-data rollout status deployment/prefect-worker --timeout=180s
+	kubectl -n dashi-data rollout status deployment/prefect-worker --timeout=180s
 	@echo ""
 	@echo "✓ Prefect up. Port-forward with:"
-	@echo "  kubectl -n miso-data port-forward svc/prefect-server 4200:4200"
+	@echo "  kubectl -n dashi-data port-forward svc/prefect-server 4200:4200"
 	@echo "  then visit http://localhost:4200/  (UI) and set PREFECT_API_URL=http://localhost:4200/api"
 
 ingest-sample:

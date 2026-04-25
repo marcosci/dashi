@@ -42,7 +42,7 @@ make serving-deploy        # TiTiler + DuckDB SQL endpoint ~3 min
 
 # 4. Drop sample data into poc/sample-data/ (gitignored)
 #    then run the pipeline:
-make ingest-sample         # runs miso-ingest against whatever is in sample-data/
+make ingest-sample         # runs dashi-ingest against whatever is in sample-data/
 
 # 5. Smoke tests — catalog + ingest + serving
 make smoke
@@ -56,32 +56,32 @@ Nothing has an Ingress in PoC. Use port-forwards:
 
 ```bash
 # RustFS S3 API + console
-kubectl -n miso-platform  port-forward svc/rustfs          9000:9000 9001:9001
+kubectl -n dashi-platform  port-forward svc/rustfs          9000:9000 9001:9001
 
 # stac-fastapi
-kubectl -n miso-catalog   port-forward svc/stac-fastapi    18080:8080
+kubectl -n dashi-catalog   port-forward svc/stac-fastapi    18080:8080
 
 # TiTiler + DuckDB endpoint
-kubectl -n miso-serving   port-forward svc/titiler         18090:8080
-kubectl -n miso-serving   port-forward svc/duckdb-endpoint 18091:8080
+kubectl -n dashi-serving   port-forward svc/titiler         18090:8080
+kubectl -n dashi-serving   port-forward svc/duckdb-endpoint 18091:8080
 ```
 
 ## Credential flow
 
 ```
-rustfs-root           (miso-platform)      root credentials created at RustFS deploy
+rustfs-root           (dashi-platform)      root credentials created at RustFS deploy
    │
-   └──► rustfs-client (miso-serving)       mirrored by scripts/serving-deploy.sh
+   └──► rustfs-client (dashi-serving)       mirrored by scripts/serving-deploy.sh
                                            so TiTiler + DuckDB endpoint can read
                                            s3://processed/… without a direct
                                            cross-namespace read
-pgstac-credentials    (miso-catalog)       Postgres user/password used by pgstac
+pgstac-credentials    (dashi-catalog)       Postgres user/password used by pgstac
                                            + stac-fastapi + pypgstac migrate Job
 ```
 
 All secrets live in K8s only. The YAML templates in `poc/manifests/*/secret.yaml` carry a placeholder string; `poc/scripts/apply-with-secret.sh` generates a random password, applies, then restores the template. Real credentials never land in git.
 
-## Running miso-ingest against arbitrary data
+## Running dashi-ingest against arbitrary data
 
 ```bash
 # one-time: install the CLI in a venv
@@ -90,12 +90,12 @@ python3 -m venv .venv
 .venv/bin/pip install -e .
 
 # every run: give it credentials + stac URL, point at any path
-export MISO_S3_ACCESS_KEY=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-export MISO_S3_SECRET_KEY=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-export MISO_S3_ENDPOINT=http://localhost:9000
+export DASHI_S3_ACCESS_KEY=$(kubectl -n dashi-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
+export DASHI_S3_SECRET_KEY=$(kubectl -n dashi-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
+export DASHI_S3_ENDPOINT=http://localhost:9000
 
-.venv/bin/miso-ingest scan   /path/to/data                  # dry run — shows detected kind/driver/layer
-.venv/bin/miso-ingest ingest /path/to/data --domain my-col  # real run
+.venv/bin/dashi-ingest scan   /path/to/data                  # dry run — shows detected kind/driver/layer
+.venv/bin/dashi-ingest ingest /path/to/data --domain my-col  # real run
 ```
 
 Supported input formats (auto-detected, no config): Shapefile · GeoPackage (multi-layer) · KML · GeoJSON · FlatGeobuf · MapInfo TAB/MIF · FileGDB · GeoTIFF (incl. already-COG) · NetCDF · JP2 · VRT · IMG · HGT · ASC · DEM · LAS · LAZ.
@@ -103,10 +103,10 @@ Supported input formats (auto-detected, no config): Shapefile · GeoPackage (mul
 ## Observing the stack
 
 ```bash
-kubectl get pods -A | grep miso-
-kubectl -n miso-platform get events --sort-by=.lastTimestamp | tail -20
-kubectl -n miso-catalog  logs deploy/stac-fastapi --tail=50
-kubectl -n miso-serving  logs deploy/duckdb-endpoint --tail=50
+kubectl get pods -A | grep dashi-
+kubectl -n dashi-platform get events --sort-by=.lastTimestamp | tail -20
+kubectl -n dashi-catalog  logs deploy/stac-fastapi --tail=50
+kubectl -n dashi-serving  logs deploy/duckdb-endpoint --tail=50
 ```
 
 Catalog self-service:

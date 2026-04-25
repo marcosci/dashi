@@ -56,7 +56,7 @@ Or step-by-step:
 ```bash
 bash scripts/pmtiles-generate.sh        # spawns one K8s Job per layer
 kubectl apply -k manifests/martin
-kubectl -n miso-serving rollout restart deployment/martin
+kubectl -n dashi-serving rollout restart deployment/martin
 ```
 
 ## Smoke

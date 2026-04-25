@@ -6,7 +6,7 @@ Spatial-temporal catalog (Strang D). Backs F-12, F-13, F-14, F-15. See [ADR-006]
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-catalog` namespace |
+| `namespace.yaml` | `dashi-catalog` namespace |
 | `secret.yaml` | Postgres credentials (template — replace before apply) |
 | `statefulset-postgres.yaml` | Postgres + PostGIS + pgstac (image `ghcr.io/stac-utils/pgstac:v0.9.5`), 5Gi PVC |
 | `service-postgres.yaml` | ClusterIP `pgstac:5432` + headless |
@@ -33,15 +33,15 @@ mv secret.yaml.bak secret.yaml
 Wait for readiness:
 
 ```bash
-kubectl -n miso-catalog rollout status statefulset/pgstac --timeout=180s
-kubectl -n miso-catalog wait --for=condition=complete job/pgstac-migrate --timeout=120s
-kubectl -n miso-catalog rollout status deployment/stac-fastapi --timeout=120s
+kubectl -n dashi-catalog rollout status statefulset/pgstac --timeout=180s
+kubectl -n dashi-catalog wait --for=condition=complete job/pgstac-migrate --timeout=120s
+kubectl -n dashi-catalog rollout status deployment/stac-fastapi --timeout=120s
 ```
 
 ## Smoke test
 
 ```bash
-kubectl -n miso-catalog port-forward svc/stac-fastapi 8080:8080 &
+kubectl -n dashi-catalog port-forward svc/stac-fastapi 8080:8080 &
 curl -s http://localhost:8080/_mgmt/ping
 curl -s http://localhost:8080/ | jq '.title, .type'
 curl -s 'http://localhost:8080/collections' | jq '.collections | length'

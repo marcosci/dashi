@@ -13,10 +13,10 @@ from pathlib import Path
 import pystac
 import rasterio
 
-from miso_ingest import detect, stac, storage, validators
-from miso_ingest.transforms import pointcloud as pointcloud_transform
-from miso_ingest.transforms import raster as raster_transform
-from miso_ingest.transforms import vector as vector_transform
+from dashi_ingest import detect, stac, storage, validators
+from dashi_ingest.transforms import pointcloud as pointcloud_transform
+from dashi_ingest.transforms import raster as raster_transform
+from dashi_ingest.transforms import vector as vector_transform
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def ingest_one(
 
     # Per-layer datasets get their layer name hashed into the id
     dataset_id = _dataset_id(src, extra=(det.layer or "").encode())
-    with tempfile.TemporaryDirectory(prefix="miso-ingest-") as tmp:
+    with tempfile.TemporaryDirectory(prefix="dashi-ingest-") as tmp:
         tmp_path = Path(tmp)
 
         if det.kind == "vector":
@@ -229,12 +229,12 @@ def ingest_one(
             geometry=None,
             datetime_=datetime.now(UTC),
             properties={
-                "miso:kind": det.kind,
-                "miso:driver": det.driver,
-                "miso:source_name": src.name,
-                "miso:source_layer": det.layer,
-                "miso:source_crs": counts.get("source_crs"),
-                "miso:object_count": n_objects,
+                "dashi:kind": det.kind,
+                "dashi:driver": det.driver,
+                "dashi:source_name": src.name,
+                "dashi:source_layer": det.layer,
+                "dashi:source_crs": counts.get("source_crs"),
+                "dashi:object_count": n_objects,
             },
             assets=assets,
         )

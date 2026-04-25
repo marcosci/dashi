@@ -1,4 +1,4 @@
-"""miso-ingest CLI — format-agnostic."""
+"""dashi-ingest CLI — format-agnostic."""
 
 from __future__ import annotations
 
@@ -10,10 +10,10 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from miso_ingest import detect, storage
-from miso_ingest.runner import ingest_one
+from dashi_ingest import detect, storage
+from dashi_ingest.runner import ingest_one
 
-app = typer.Typer(add_completion=False, help="MISO ingestion pipeline — landing → processed + catalog.")
+app = typer.Typer(add_completion=False, help="dashi ingestion pipeline — landing → processed + catalog.")
 console = Console()
 
 
@@ -34,7 +34,7 @@ def ingest(
     processed_bucket: str = typer.Option("processed", "--bucket", help="Target S3 bucket for processed data"),
     stac_url: str = typer.Option("http://localhost:18080", "--stac-url"),
     collection_description: str = typer.Option(
-        "Domain data processed via MISO ingestion pipeline", "--collection-description"
+        "Domain data processed via dashi ingestion pipeline", "--collection-description"
     ),
     h3_resolution: int = typer.Option(7, "--h3-resolution"),
     log_level: str = typer.Option("INFO", "--log-level"),
@@ -75,7 +75,7 @@ def ingest(
     console.print()
     console.print(f"[bold]Summary:[/] {summary}")
     # machine-readable result
-    result_path = Path(".miso-ingest-result.json")
+    result_path = Path(".dashi-ingest-result.json")
     result_path.write_text(
         json.dumps([o.__dict__ for o in outcomes], indent=2, default=str)
     )

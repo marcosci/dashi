@@ -1,14 +1,14 @@
-# RustFS in miso-platform accepts ingress only from:
-#   - miso-data (ingest writers + pipeline workers)
-#   - miso-serving (read-only consumers)
-#   - miso-monitoring (Prometheus scraper)
+# RustFS in dashi-platform accepts ingress only from:
+#   - dashi-data (ingest writers + pipeline workers)
+#   - dashi-serving (read-only consumers)
+#   - dashi-monitoring (Prometheus scraper)
 # and from kubectl port-forward (api-server proxy — ingress from
 # kube-system). All other namespaces cannot reach RustFS.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-rustfs-clients
-  namespace: miso-platform
+  namespace: dashi-platform
 spec:
   podSelector:
     matchLabels:
@@ -18,13 +18,13 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: miso-data
+              kubernetes.io/metadata.name: dashi-data
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: miso-serving
+              kubernetes.io/metadata.name: dashi-serving
         - namespaceSelector:
             matchLabels:
-              kubernetes.io/metadata.name: miso-monitoring
+              kubernetes.io/metadata.name: dashi-monitoring
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Tear down the local MISO PoC cluster.
+# Tear down the local dashi PoC cluster.
 
 set -euo pipefail
 
-CLUSTER_NAME="${1:-miso}"
+CLUSTER_NAME="${1:-dashi}"
 
 case "$(uname -s)" in
   Darwin|MINGW*|MSYS*|CYGWIN*)

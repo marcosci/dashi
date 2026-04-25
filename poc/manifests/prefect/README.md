@@ -1,6 +1,6 @@
 # Prefect (Strang F — Pipeline Orchestrierung)
 
-Minimal Prefect 3 server deployed in the `miso-data` namespace. Backs [ADR-010](../../../adr/ADR-010-pipeline-orchestration.md).
+Minimal Prefect 3 server deployed in the `dashi-data` namespace. Backs [ADR-010](../../../adr/ADR-010-pipeline-orchestration.md).
 
 ## PoC scope
 
@@ -12,7 +12,7 @@ Minimal Prefect 3 server deployed in the `miso-data` namespace. Backs [ADR-010](
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-data` namespace |
+| `namespace.yaml` | `dashi-data` namespace |
 | `deployment-server.yaml` | Prefect 3.1.15 server on Python 3.12, port 4200, `emptyDir` volume |
 | `service.yaml` | ClusterIP `prefect-server:4200` |
 | `kustomization.yaml` | Apply with `kubectl apply -k .` |
@@ -22,27 +22,27 @@ Minimal Prefect 3 server deployed in the `miso-data` namespace. Backs [ADR-010](
 ```bash
 cd poc
 make prefect-up
-kubectl -n miso-data rollout status deployment/prefect-server --timeout=180s
+kubectl -n dashi-data rollout status deployment/prefect-server --timeout=180s
 ```
 
 ## Use
 
 ```bash
 # port-forward the API (also serves the UI on the same host:port)
-kubectl -n miso-data port-forward svc/prefect-server 4200:4200 &
+kubectl -n dashi-data port-forward svc/prefect-server 4200:4200 &
 
 # tell the Prefect client which API to talk to
 export PREFECT_API_URL=http://localhost:4200/api
 
-# run the miso-ingest flow locally against the server
+# run the dashi-ingest flow locally against the server
 cd poc/ingest
 .venv/bin/pip install "prefect>=3.1,<4"
 
 cd ../..
-# point miso-ingest at its creds
-export MISO_S3_ACCESS_KEY=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-export MISO_S3_SECRET_KEY=$(kubectl -n miso-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-export MISO_S3_ENDPOINT=http://localhost:9000
+# point dashi-ingest at its creds
+export DASHI_S3_ACCESS_KEY=$(kubectl -n dashi-platform get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
+export DASHI_S3_SECRET_KEY=$(kubectl -n dashi-platform get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
+export DASHI_S3_ENDPOINT=http://localhost:9000
 
 # run a one-shot flow
 cd poc
@@ -59,7 +59,7 @@ You'll see the flow run, the per-layer task graph, timing, logs, retries.
 
 ## Production hardening deferred
 
-- Durable Postgres backend (replace `emptyDir` + SQLite with Postgres from `miso-catalog` or a dedicated instance)
+- Durable Postgres backend (replace `emptyDir` + SQLite with Postgres from `dashi-catalog` or a dedicated instance)
 - K8s work pool + worker Deployment so flows run as isolated Jobs
 - AuthN/Z: Prefect server is currently open on the cluster network
 - Persistent flow storage (`prefect.yaml` committed to git, pulled by a runtime image)

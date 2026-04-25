@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: pgstac
-  namespace: miso-catalog
+  namespace: dashi-catalog
   labels:
     app.kubernetes.io/name: pgstac
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   serviceName: pgstac-headless
   replicas: 1

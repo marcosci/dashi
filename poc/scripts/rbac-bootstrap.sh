@@ -8,16 +8,16 @@
 #
 # | RustFS user          | Policy                                | K8s namespace(s) |
 # |----------------------|---------------------------------------|------------------|
-# | dashi-ingest         | landing/* read+write                  | miso-data (external producers — PoC: nobody yet) |
-# | dashi-pipeline       | landing/* RO + processed/* + curated/* RW | miso-data (Prefect flow jobs)            |
-# | dashi-serving-reader | processed/* + curated/* read-only     | miso-serving (TiTiler, DuckDB endpoint) |
+# | dashi-ingest         | landing/* read+write                  | dashi-data (external producers — PoC: nobody yet) |
+# | dashi-pipeline       | landing/* RO + processed/* + curated/* RW | dashi-data (Prefect flow jobs)            |
+# | dashi-serving-reader | processed/* + curated/* read-only     | dashi-serving (TiTiler, DuckDB endpoint) |
 #
 # Idempotent. Safe to rerun — re-creating a user rotates its keys and
 # refreshes the downstream Secret.
 
 set -euo pipefail
 
-NS_PLATFORM="${NS_PLATFORM:-miso-platform}"
+NS_PLATFORM="${NS_PLATFORM:-dashi-platform}"
 S3_PORT="${S3_PORT:-19300}"
 POLICY_DIR="${POLICY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../manifests/rustfs/policies" && pwd)}"
 
@@ -68,9 +68,9 @@ create_user_and_secret() {
     --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 }
 
-create_user_and_secret dashi-pipeline       dashi-pipeline       miso-data    dashi-rustfs-pipeline
-create_user_and_secret dashi-serving-reader dashi-serving-reader miso-serving dashi-rustfs-serving
-create_user_and_secret dashi-ingest         dashi-ingest         miso-data    dashi-rustfs-ingest
+create_user_and_secret dashi-pipeline       dashi-pipeline       dashi-data    dashi-rustfs-pipeline
+create_user_and_secret dashi-serving-reader dashi-serving-reader dashi-serving dashi-rustfs-serving
+create_user_and_secret dashi-ingest         dashi-ingest         dashi-data    dashi-rustfs-ingest
 
 echo ""
 echo "✓ per-zone RustFS identity bootstrap complete"

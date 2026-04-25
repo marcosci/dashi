@@ -30,4 +30,4 @@ ENV PYTHONUNBUFFERED=1 \
 
 # No ENTRYPOINT — Prefect flow-run Jobs override with
 # `prefect flow-run execute`. For direct CLI use run:
-#   docker run --rm miso/miso-ingest:dev miso-ingest --help
+#   docker run --rm dashi/dashi-ingest:dev dashi-ingest --help

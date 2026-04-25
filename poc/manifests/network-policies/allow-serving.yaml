@@ -1,11 +1,11 @@
-# TiTiler + DuckDB endpoint in miso-serving accept ingress from any
+# TiTiler + DuckDB endpoint in dashi-serving accept ingress from any
 # namespace (public consumer surface). Tighten in Phase 3 once we enforce
 # authN/Z at the ingress layer.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-serving-public
-  namespace: miso-serving
+  namespace: dashi-serving
 spec:
   podSelector:
     matchExpressions:

@@ -1,6 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: miso-monitoring
+namespace: dashi-monitoring
 resources:
   - namespace.yaml
   - rbac.yaml
@@ -9,5 +9,5 @@ resources:
   - grafana.yaml
 labels:
   - pairs:
-      app.kubernetes.io/part-of: miso
+      app.kubernetes.io/part-of: dashi
     includeSelectors: false

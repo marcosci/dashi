@@ -38,18 +38,18 @@ make k3s-up
 
 What this does:
 
-- **macOS / Windows:** creates a k3d cluster named `miso` with 1 server + 2 agents. Ports `8080→80` and `8443→443` are published on the host. Built-in Traefik is disabled (we control ingress ourselves).
+- **macOS / Windows:** creates a k3d cluster named `dashi` with 1 server + 2 agents. Ports `8080→80` and `8443→443` are published on the host. Built-in Traefik is disabled (we control ingress ourselves).
 - **Linux:** installs k3s natively via the upstream installer, then copies kubeconfig to `~/.kube/config` with correct permissions.
 
 Expected output tail:
 
 ```
 NAME                       STATUS   ROLES                  AGE   VERSION
-k3d-miso-server-0          Ready    control-plane,master   1m    v1.28.x+k3s1
-k3d-miso-agent-0           Ready    <none>                 55s   v1.28.x+k3s1
-k3d-miso-agent-1           Ready    <none>                 55s   v1.28.x+k3s1
+k3d-dashi-server-0          Ready    control-plane,master   1m    v1.28.x+k3s1
+k3d-dashi-agent-0           Ready    <none>                 55s   v1.28.x+k3s1
+k3d-dashi-agent-1           Ready    <none>                 55s   v1.28.x+k3s1
 
-✓ Cluster 'miso' ready.
+✓ Cluster 'dashi' ready.
 ```
 
 ---
@@ -59,7 +59,7 @@ k3d-miso-agent-1           Ready    <none>                 55s   v1.28.x+k3s1
 ```bash
 kubectl get nodes
 kubectl get pods -A
-kubectl config current-context    # should be k3d-miso or default
+kubectl config current-context    # should be k3d-dashi or default
 ```
 
 If `kubectl` cannot find the cluster, inspect `~/.kube/config`. On Linux, the k3s installer writes to `/etc/rancher/k3s/k3s.yaml` — the setup script copies it to `~/.kube/config`. On macOS/Windows, k3d writes directly.
@@ -69,20 +69,20 @@ If `kubectl` cannot find the cluster, inspect `~/.kube/config`. On Linux, the k3
 ## 3. Namespaces
 
 ```bash
-kubectl create namespace miso-platform
-kubectl create namespace miso-catalog
-kubectl create namespace miso-serving
-kubectl create namespace miso-data
+kubectl create namespace dashi-platform
+kubectl create namespace dashi-catalog
+kubectl create namespace dashi-serving
+kubectl create namespace dashi-data
 ```
 
 Convention:
 
 | Namespace | Contents |
 |-----------|----------|
-| `miso-platform` | RustFS, monitoring, shared platform services |
-| `miso-catalog` | stac-fastapi + its PostgreSQL backend |
-| `miso-serving` | TiTiler, DuckDB-query endpoint |
-| `miso-data` | Prefect server + workers, pipeline-scoped secrets |
+| `dashi-platform` | RustFS, monitoring, shared platform services |
+| `dashi-catalog` | stac-fastapi + its PostgreSQL backend |
+| `dashi-serving` | TiTiler, DuckDB-query endpoint |
+| `dashi-data` | Prefect server + workers, pipeline-scoped secrets |
 
 ---
 
@@ -115,7 +115,7 @@ On macOS/Windows this deletes the k3d cluster (data wiped). On Linux it runs the
 |---------|--------------|-----|
 | `docker: command not found` | Docker not installed on macOS/Windows | Install Docker Desktop or OrbStack |
 | k3d cluster stuck creating | Low Docker resource limits | Docker Desktop → Settings → Resources → 4+ CPU, 8+ GB RAM |
-| `kubectl` connects to wrong cluster | Multiple contexts | `kubectl config use-context k3d-miso` |
+| `kubectl` connects to wrong cluster | Multiple contexts | `kubectl config use-context k3d-dashi` |
 | Pods stuck `ImagePullBackOff` | Corporate proxy / offline | Configure Docker daemon `registry-mirrors` or pre-import images with `k3d image import` |
 | Ingress on `localhost:8080` 404 | Traefik disabled (by design) | Deploy an ingress controller (later step) or use `kubectl port-forward` |
 | Linux k3s pods unable to pull | `systemd-resolved` DNS quirks | `sudo systemctl restart k3s` |

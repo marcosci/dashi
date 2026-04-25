@@ -1,6 +1,6 @@
 # titiler-endpoint — custom arm64 tile server
 
-Minimal FastAPI + `rio-tiler` shim that implements the subset of TiTiler endpoints MISO needs, built natively for arm64 (k3d on Apple Silicon) because upstream `ghcr.io/developmentseed/titiler` only ships amd64 manifests as of April 2026.
+Minimal FastAPI + `rio-tiler` shim that implements the subset of TiTiler endpoints dashi needs, built natively for arm64 (k3d on Apple Silicon) because upstream `ghcr.io/developmentseed/titiler` only ships amd64 manifests as of April 2026.
 
 ## Why not the upstream image
 
@@ -22,17 +22,17 @@ PNG / JPEG / WEBP rendering. Out-of-bounds tiles return a transparent 256×256 P
 ## Build + run
 
 ```bash
-docker build -t miso/titiler-endpoint:dev .
+docker build -t dashi/titiler-endpoint:dev .
 docker run --rm -p 8080:8080 \
   -e AWS_S3_ENDPOINT=http://host.docker.internal:9000 \
   -e AWS_ACCESS_KEY_ID=… \
   -e AWS_SECRET_ACCESS_KEY=… \
   -e AWS_VIRTUAL_HOSTING=FALSE \
   -e AWS_HTTPS=NO \
-  miso/titiler-endpoint:dev
+  dashi/titiler-endpoint:dev
 ```
 
-Under k3d, `poc/scripts/serving-deploy.sh` builds and `k3d image import`s it into the `miso` cluster, then applies `poc/manifests/titiler/`.
+Under k3d, `poc/scripts/serving-deploy.sh` builds and `k3d image import`s it into the `dashi` cluster, then applies `poc/manifests/titiler/`.
 
 ## Files
 

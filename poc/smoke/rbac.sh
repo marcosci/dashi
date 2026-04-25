@@ -4,9 +4,9 @@
 
 set -euo pipefail
 
-NS_PLATFORM="${NS_PLATFORM:-miso-platform}"
-NS_DATA="${NS_DATA:-miso-data}"
-NS_SERVING="${NS_SERVING:-miso-serving}"
+NS_PLATFORM="${NS_PLATFORM:-dashi-platform}"
+NS_DATA="${NS_DATA:-dashi-data}"
+NS_SERVING="${NS_SERVING:-dashi-serving}"
 S3_PORT="${S3_PORT:-19400}"
 PREFECT_PORT="${PREFECT_PORT:-19442}"
 
@@ -33,9 +33,9 @@ ok "3 per-zone Secrets present (dashi-rustfs-pipeline, -ingest, -serving)"
 
 # 2. Old shared secret removed
 if kubectl -n "$NS_SERVING" get secret rustfs-client >/dev/null 2>&1; then
-  fail "legacy shared secret miso-serving/rustfs-client still exists"
+  fail "legacy shared secret dashi-serving/rustfs-client still exists"
 fi
-ok "legacy rustfs-client secret removed from miso-serving"
+ok "legacy rustfs-client secret removed from dashi-serving"
 
 # 3. Per-zone IAM users exist and have their policies attached
 ROOT_ACCESS=$(kubectl -n "$NS_PLATFORM" get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
@@ -64,15 +64,15 @@ fi
 ok "dashi-serving-reader can list processed/"
 
 # 6. Prefect base job template was patched (valueFrom.secretKeyRef present)
-HAS_VALUEFROM=$(curl -sf "http://localhost:${PREFECT_PORT}/api/work_pools/miso-default" \
+HAS_VALUEFROM=$(curl -sf "http://localhost:${PREFECT_PORT}/api/work_pools/dashi-default" \
   | python3 -c 'import sys,json; tpl=json.load(sys.stdin)["base_job_template"]; c=tpl["job_configuration"]["job_manifest"]["spec"]["template"]["spec"]["containers"][0]; env=c.get("env",[]); print("dashi-rustfs-pipeline" if any(e.get("valueFrom",{}).get("secretKeyRef",{}).get("name")=="dashi-rustfs-pipeline" for e in (env if isinstance(env,list) else [])) else "MISSING")')
 [[ "$HAS_VALUEFROM" == "dashi-rustfs-pipeline" ]] || fail "work pool base job template does not envFrom dashi-rustfs-pipeline (got: $HAS_VALUEFROM)"
 ok "Prefect work pool injects dashi-rustfs-pipeline via valueFrom"
 
 # 7. NetworkPolicy objects exist (enforcement depends on CNI; applied === documented intent)
-POLICY_COUNT=$(kubectl get networkpolicies -A --no-headers 2>/dev/null | grep -c miso- || true)
-[[ "$POLICY_COUNT" -ge 10 ]] || fail "expected >=10 NetworkPolicies in miso-* namespaces, got $POLICY_COUNT"
-ok "$POLICY_COUNT NetworkPolicies applied across miso-* namespaces"
+POLICY_COUNT=$(kubectl get networkpolicies -A --no-headers 2>/dev/null | grep -c dashi- || true)
+[[ "$POLICY_COUNT" -ge 10 ]] || fail "expected >=10 NetworkPolicies in dashi-* namespaces, got $POLICY_COUNT"
+ok "$POLICY_COUNT NetworkPolicies applied across dashi-* namespaces"
 
 # 8. Existing smoke tests still pass (catalog + serving regressions check)
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

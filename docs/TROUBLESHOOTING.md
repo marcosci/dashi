@@ -20,16 +20,16 @@ Every PoC-blocker we hit, with root cause and fix. Newest first.
 Endpoints: <none>
 ```
 
-Job retries `mc alias set miso http://rustfs:9000 …` forever.
+Job retries `mc alias set dashi http://rustfs:9000 …` forever.
 
-**Root cause.** `kustomization.yaml` used the deprecated `commonLabels`, which adds `app.kubernetes.io/part-of: miso` to **both** the Service selector and the Pod template. If the Service was applied via `kubectl apply -f` separately later (without the kustomize pass), selector and pod labels desynchronise; selector still has `part-of=miso` but the pod labels do not.
+**Root cause.** `kustomization.yaml` used the deprecated `commonLabels`, which adds `app.kubernetes.io/part-of: dashi` to **both** the Service selector and the Pod template. If the Service was applied via `kubectl apply -f` separately later (without the kustomize pass), selector and pod labels desynchronise; selector still has `part-of=dashi` but the pod labels do not.
 
 **Fix.** Replace `commonLabels:` with:
 
 ```yaml
 labels:
   - pairs:
-      app.kubernetes.io/part-of: miso
+      app.kubernetes.io/part-of: dashi
     includeSelectors: false
 ```
 
@@ -68,7 +68,7 @@ Adds ~30 s to first apply. Acceptable trade against maintaining our own pypgstac
 **Symptom.** Raster ingest on already-COG input crashes with:
 
 ```
-CPLE_AppDefinedError: File /tmp/miso-ingest-.../sample.tif has C(loud) O(ptimized) G(eoTIFF) layout.
+CPLE_AppDefinedError: File /tmp/dashi-ingest-.../sample.tif has C(loud) O(ptimized) G(eoTIFF) layout.
 Updating it will generally result in losing part of the optimizations …
 ```
 
@@ -120,7 +120,7 @@ UserWarning: More than one layer found in 'QGIS_Military_grids_LzS3XF7.gpkg': 'M
 
 ## LAS/LAZ detected as `unknown`
 
-**Symptom.** Point clouds skipped silently during ingest; `miso-ingest scan` reported `unknown`.
+**Symptom.** Point clouds skipped silently during ingest; `dashi-ingest scan` reported `unknown`.
 
 **Root cause.** Original `detect.py` knew only `vector` and `raster` kinds. LAZ extension fell through to `rasterio.open()` which refused it.
 
@@ -152,9 +152,9 @@ STAC Core 1.0 treats `links` as optional; `stac-fastapi-pgstac` does not.
 
 ### k3d `image import` needs the image to be a single-arch tag
 
-`k3d image import multi-arch:tag -c miso` occasionally fails with `content digest … not found` because the local Docker has only the OCI index manifest, not the per-platform image. Pull once explicitly:
+`k3d image import multi-arch:tag -c dashi` occasionally fails with `content digest … not found` because the local Docker has only the OCI index manifest, not the per-platform image. Pull once explicitly:
 
 ```bash
 docker pull --platform linux/arm64 repo/image:tag
-k3d image import repo/image:tag -c miso
+k3d image import repo/image:tag -c dashi
 ```

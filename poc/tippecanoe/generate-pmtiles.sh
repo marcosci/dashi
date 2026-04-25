@@ -12,7 +12,7 @@
 #   4. boto3 uploads PMTiles to s3://curated/tiles/<layer>.pmtiles.
 #
 # Required env:
-#   MISO_S3_ENDPOINT, MISO_S3_ACCESS_KEY, MISO_S3_SECRET_KEY
+#   DASHI_S3_ENDPOINT, DASHI_S3_ACCESS_KEY, DASHI_S3_SECRET_KEY
 #   LAYER_ID
 #   LAYER_SOURCE_PREFIX (s3://processed/<...>/vector)
 # Optional:
@@ -20,16 +20,16 @@
 
 set -euo pipefail
 
-: "${MISO_S3_ENDPOINT:?}"
-: "${MISO_S3_ACCESS_KEY:?}"
-: "${MISO_S3_SECRET_KEY:?}"
+: "${DASHI_S3_ENDPOINT:?}"
+: "${DASHI_S3_ACCESS_KEY:?}"
+: "${DASHI_S3_SECRET_KEY:?}"
 : "${LAYER_ID:?}"
 : "${LAYER_SOURCE_PREFIX:?}"
 
 MIN_ZOOM="${MIN_ZOOM:-4}"
 MAX_ZOOM="${MAX_ZOOM:-14}"
 
-WORK_DIR="$(mktemp -d -p /tmp miso-pmtiles.XXXXXX)"
+WORK_DIR="$(mktemp -d -p /tmp dashi-pmtiles.XXXXXX)"
 PARQ_DIR="${WORK_DIR}/parquet"
 mkdir -p "$PARQ_DIR"
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -43,7 +43,7 @@ import boto3
 from botocore.client import Config
 
 src = os.environ["LAYER_SOURCE_PREFIX"]
-endpoint = os.environ["MISO_S3_ENDPOINT"]
+endpoint = os.environ["DASHI_S3_ENDPOINT"]
 parq_dir = os.environ["PARQ_DIR"] if "PARQ_DIR" in os.environ else "/tmp/parq"
 work_dir = os.environ.get("WORK_DIR", "/tmp/work")
 PYEOF
@@ -55,7 +55,7 @@ import boto3
 from botocore.client import Config
 
 src = os.environ["LAYER_SOURCE_PREFIX"]
-endpoint = os.environ["MISO_S3_ENDPOINT"]
+endpoint = os.environ["DASHI_S3_ENDPOINT"]
 parq_dir = os.environ["PARQ_DIR"]
 
 assert src.startswith("s3://"), src
@@ -65,8 +65,8 @@ client = boto3.client(
     "s3",
     endpoint_url=endpoint,
     region_name="us-east-1",
-    aws_access_key_id=os.environ["MISO_S3_ACCESS_KEY"],
-    aws_secret_access_key=os.environ["MISO_S3_SECRET_KEY"],
+    aws_access_key_id=os.environ["DASHI_S3_ACCESS_KEY"],
+    aws_secret_access_key=os.environ["DASHI_S3_SECRET_KEY"],
     config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
 )
 
@@ -130,10 +130,10 @@ import os, boto3
 from botocore.client import Config
 c = boto3.client(
     "s3",
-    endpoint_url=os.environ["MISO_S3_ENDPOINT"],
+    endpoint_url=os.environ["DASHI_S3_ENDPOINT"],
     region_name="us-east-1",
-    aws_access_key_id=os.environ["MISO_S3_ACCESS_KEY"],
-    aws_secret_access_key=os.environ["MISO_S3_SECRET_KEY"],
+    aws_access_key_id=os.environ["DASHI_S3_ACCESS_KEY"],
+    aws_secret_access_key=os.environ["DASHI_S3_SECRET_KEY"],
     config=Config(signature_version="s3v4", s3={"addressing_style":"path"}),
 )
 c.upload_file(os.environ["PMT_PATH"], "curated", f"tiles/{os.environ['LAYER_ID']}.pmtiles")

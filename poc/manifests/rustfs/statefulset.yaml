@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: rustfs
-  namespace: miso-platform
+  namespace: dashi-platform
   labels:
     app.kubernetes.io/name: rustfs
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   serviceName: rustfs-headless
   replicas: 1

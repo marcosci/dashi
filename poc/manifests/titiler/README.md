@@ -23,9 +23,9 @@ Migration back to the upstream image is trivial when it publishes multi-arch: ch
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-serving` namespace |
+| `namespace.yaml` | `dashi-serving` namespace |
 | `secret.yaml` | `rustfs-client` template — real values injected by `scripts/serving-deploy.sh` from cluster state |
-| `deployment.yaml` | TiTiler Deployment, references `miso/titiler-endpoint:dev` |
+| `deployment.yaml` | TiTiler Deployment, references `dashi/titiler-endpoint:dev` |
 | `service.yaml` | ClusterIP `titiler:8080` |
 | `kustomization.yaml` | Apply with `kubectl apply -k .` |
 
@@ -39,7 +39,7 @@ make serving-deploy        # builds titiler-endpoint image + applies all serving
 Port-forward for local access:
 
 ```bash
-kubectl -n miso-serving port-forward svc/titiler 18090:8080
+kubectl -n dashi-serving port-forward svc/titiler 18090:8080
 curl "http://localhost:18090/cog/info?url=s3://processed/gelaende-umwelt/<id>/raster/<file>.tif"
 ```
 

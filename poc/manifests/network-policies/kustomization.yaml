@@ -9,5 +9,5 @@ resources:
   - allow-monitoring.yaml
 labels:
   - pairs:
-      app.kubernetes.io/part-of: miso
+      app.kubernetes.io/part-of: dashi
     includeSelectors: false

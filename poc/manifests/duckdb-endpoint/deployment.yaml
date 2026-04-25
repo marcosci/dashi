@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: duckdb-endpoint
-  namespace: miso-serving
+  namespace: dashi-serving
   labels:
     app.kubernetes.io/name: duckdb-endpoint
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   replicas: 1
   selector:
@@ -18,14 +18,14 @@ spec:
     spec:
       containers:
         - name: api
-          image: miso/duckdb-endpoint:dev
+          image: dashi/duckdb-endpoint:dev
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
           env:
             - name: RUSTFS_ENDPOINT
-              value: "http://rustfs.miso-platform.svc.cluster.local:9000"
+              value: "http://rustfs.dashi-platform.svc.cluster.local:9000"
             - name: RUSTFS_REGION
               value: "us-east-1"
             - name: RUSTFS_ACCESS_KEY

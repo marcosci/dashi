@@ -2,7 +2,7 @@
 
 Status snapshot of the Phase-1 Gate-1-equivalent acceptance criteria applied to the PoC scope (see [PHASE-0-ROADMAP §Gate-1-Äquivalent](PHASE-0-ROADMAP.md#gate-1-äquivalent--abnahmekriterien)).
 
-**Measurement date:** 2026-04-23 · **Cluster:** local k3d `miso` · **Data ingested:** Dresden OSM shapefiles (29 files), QGIS Military Grids GPKG (4 layers), GeoTIFF (sample.tif, EPSG:32631), LAZ (118 MB NZ LiDAR)
+**Measurement date:** 2026-04-23 · **Cluster:** local k3d `dashi` · **Data ingested:** Dresden OSM shapefiles (29 files), QGIS Military Grids GPKG (4 layers), GeoTIFF (sample.tif, EPSG:32631), LAZ (118 MB NZ LiDAR)
 
 | # | Kriterium | Messung | Zielwert | Stand | Belegt durch |
 |:-:|-----------|---------|----------|:-----:|--------------|
@@ -12,7 +12,7 @@ Status snapshot of the Phase-1 Gate-1-equivalent acceptance criteria applied to 
 | 4 | SQL-Abfrage auf Curated-/Processed-Zone | Einfache Abfrage in < 10 Sek. | Bestanden | ✅ | `ST_Intersects` über 367 219 Features, 10 490 Treffer, < 2 s |
 | 5 | COG-Serving funktionsfähig | TiTiler liefert PNG für Raster-Item | Bestanden | ✅ | `/cog/tiles/10/519/340.png` → 256×256 RGBA PNG |
 | 6 | Pipeline idempotent | Zwei aufeinanderfolgende Läufe, keine Duplikate | Bestanden | ✅ | dataset_id = `sha256(filename + content + layer)`, wiederholte Läufe liefern denselben STAC-Item-ID → `stac.post_item` 409 → PUT-Upsert. Zusätzlich Prefect-`cache_key_fn=task_input_hash`, der identische Tasks direkt aus dem Cache liefert. |
-| 8 | Prefect-Orchestrierung aktiv | Flow registriert + ausgeführt, Run zeigt `COMPLETED` im Prefect-API | Bestanden | ✅ | `poc/smoke/prefect.sh`: Flow `miso-ingest` mit `@task` Retry-Policy (2× mit 30s), `task_input_hash` Cache, Prefect 3 Server in `miso-data` Namespace |
+| 8 | Prefect-Orchestrierung aktiv | Flow registriert + ausgeführt, Run zeigt `COMPLETED` im Prefect-API | Bestanden | ✅ | `poc/smoke/prefect.sh`: Flow `dashi-ingest` mit `@task` Retry-Policy (2× mit 30s), `task_input_hash` Cache, Prefect 3 Server in `dashi-data` Namespace |
 | 7 | Betriebsdoku vorhanden | Setup + Teardown + Troubleshooting | Vollständig | ✅ | [docs/OPERATIONS.md](OPERATIONS.md), [docs/TROUBLESHOOTING.md](TROUBLESHOOTING.md), [poc/docs/k3s-setup.md](poc/docs/k3s-setup.md) |
 
 ## Unterstützende Metriken

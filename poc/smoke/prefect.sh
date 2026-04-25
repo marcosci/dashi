@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Smoke test — Prefect orchestration.
-# Boots local port-forwards, runs the miso-ingest flow against a tiny
+# Boots local port-forwards, runs the dashi-ingest flow against a tiny
 # synthetic input, and verifies the flow+tasks completed in the Prefect API.
 
 set -euo pipefail
 
-NS_PLATFORM="${NS_PLATFORM:-miso-platform}"
-NS_CATALOG="${NS_CATALOG:-miso-catalog}"
-NS_DATA="${NS_DATA:-miso-data}"
+NS_PLATFORM="${NS_PLATFORM:-dashi-platform}"
+NS_CATALOG="${NS_CATALOG:-dashi-catalog}"
+NS_DATA="${NS_DATA:-dashi-data}"
 S3_PORT="${S3_PORT:-19200}"
 STAC_PORT="${STAC_PORT:-19280}"
 PREFECT_PORT="${PREFECT_PORT:-19242}"
@@ -32,10 +32,10 @@ kubectl -n "$NS_DATA"     port-forward svc/prefect-server "${PREFECT_PORT}:4200"
 PFPIDS="$PFPIDS $!"
 sleep 4
 
-export MISO_S3_ACCESS_KEY=$(kubectl -n "$NS_PLATFORM" get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
-export MISO_S3_SECRET_KEY=$(kubectl -n "$NS_PLATFORM" get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
-export MISO_S3_ENDPOINT="http://localhost:${S3_PORT}"
-export MISO_STAC_URL="http://localhost:${STAC_PORT}"
+export DASHI_S3_ACCESS_KEY=$(kubectl -n "$NS_PLATFORM" get secret rustfs-root -o jsonpath='{.data.access-key}' | base64 -d)
+export DASHI_S3_SECRET_KEY=$(kubectl -n "$NS_PLATFORM" get secret rustfs-root -o jsonpath='{.data.secret-key}' | base64 -d)
+export DASHI_S3_ENDPOINT="http://localhost:${S3_PORT}"
+export DASHI_STAC_URL="http://localhost:${STAC_PORT}"
 export PREFECT_API_URL="http://localhost:${PREFECT_PORT}/api"
 
 ok()   { echo "✓ $1"; }
@@ -73,7 +73,7 @@ LAST_STATE=$(curl -sf -X POST "http://localhost:${PREFECT_PORT}/api/flow_runs/fi
 ok "latest flow run COMPLETED"
 
 # 5. Cleanup: delete the smoke-prefect collection
-curl -sf -X DELETE "${MISO_STAC_URL}/collections/smoke-prefect" >/dev/null 2>&1 || true
+curl -sf -X DELETE "${DASHI_STAC_URL}/collections/smoke-prefect" >/dev/null 2>&1 || true
 ok "cleanup"
 
 echo ""

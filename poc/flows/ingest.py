@@ -1,4 +1,4 @@
-"""Prefect flow wrapping miso-ingest.
+"""Prefect flow wrapping dashi-ingest.
 
 Design:
 
@@ -22,8 +22,8 @@ from pathlib import Path
 from prefect import flow, get_run_logger, task
 from prefect.tasks import task_input_hash
 
-from miso_ingest import detect, storage
-from miso_ingest.runner import IngestOutcome, ingest_one
+from dashi_ingest import detect, storage
+from dashi_ingest.runner import IngestOutcome, ingest_one
 
 
 @task(
@@ -58,7 +58,7 @@ def ingest_one_task(
 
     # Uploads are already gated by boto3 TransferConfig (8MB chunks, 2 threads).
     # Add a Prefect concurrency slot in Phase 2 once the deployment creates it
-    # via `prefect concurrency-limit create miso-ingest-uploads 4` during bootstrap.
+    # via `prefect concurrency-limit create dashi-ingest-uploads 4` during bootstrap.
     outcome: IngestOutcome = ingest_one(
         det,
         domain=domain,
@@ -82,13 +82,13 @@ def ingest_one_task(
     return outcome.__dict__
 
 
-@flow(name="miso-ingest")
+@flow(name="dashi-ingest")
 def ingest_flow(
     source_path: str,
     domain: str = "gelaende-umwelt",
     processed_bucket: str = "processed",
     stac_url: str | None = None,
-    collection_description: str = "Domain data processed via MISO ingestion pipeline",
+    collection_description: str = "Domain data processed via dashi ingestion pipeline",
     h3_resolution: int = 7,
 ) -> list[dict]:
     """Discover every primary file/layer under source_path and ingest.
@@ -98,7 +98,7 @@ def ingest_flow(
     """
     logger = get_run_logger()
 
-    stac_url = stac_url or os.environ.get("MISO_STAC_URL", "http://stac-fastapi.miso-catalog.svc.cluster.local:8080")
+    stac_url = stac_url or os.environ.get("DASHI_STAC_URL", "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080")
     src = Path(source_path)
 
     detections = detect.discover(src)

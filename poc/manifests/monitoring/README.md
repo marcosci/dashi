@@ -6,7 +6,7 @@ Minimal in-cluster observability stack for the dashi PoC. Intentionally operator
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-monitoring` namespace |
+| `namespace.yaml` | `dashi-monitoring` namespace |
 | `rbac.yaml` | Prometheus ServiceAccount + ClusterRole (node, pod, service, endpoint scrape) |
 | `kube-state-metrics.yaml` | kube-state-metrics Deployment — emits K8s object metrics as Prometheus timeseries |
 | `prometheus.yaml` | Prometheus Deployment + Service + ConfigMap (scrape config + alert rules) — retains 7 days in `emptyDir` |
@@ -37,7 +37,7 @@ metadata:
 | Alert | Condition | Severity |
 |-------|-----------|----------|
 | `PodCrashLoop` | > 3 restarts in 5 min on any pod, 10 min persisting | warning |
-| `DashiPodDown` | Pod in `Failed` / `Unknown` phase in a `miso-*` namespace for 5 min | critical |
+| `DashiPodDown` | Pod in `Failed` / `Unknown` phase in a `dashi-*` namespace for 5 min | critical |
 | `PVCFull` | PVC < 20 % free for 10 min | warning |
 | `DashiIngestFlowFailure` | Prefect flow-run entered `FAILED` in the last hour | warning |
 
@@ -53,7 +53,7 @@ make monitoring-up
 Port-forward Grafana:
 
 ```bash
-kubectl -n miso-monitoring port-forward svc/grafana 13000:3000 &
+kubectl -n dashi-monitoring port-forward svc/grafana 13000:3000 &
 # Anonymous Viewer on; admin login: see Secret `grafana-admin` for rotated password
 ```
 
@@ -69,4 +69,4 @@ Grafana comes pre-configured with a `Prometheus` data source and the `dashi · P
 - Exporters per data service:
   - `postgres_exporter` sidecars for `pgstac-db` + `prefect-db`
   - `rustfs_exporter` or Prometheus-formatted `/metrics` on the RustFS pod
-  - Custom `/metrics` endpoint on `miso-ingest`, `duckdb-endpoint`, `titiler-endpoint`
+  - Custom `/metrics` endpoint on `dashi-ingest`, `duckdb-endpoint`, `titiler-endpoint`

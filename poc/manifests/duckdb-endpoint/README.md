@@ -45,8 +45,8 @@ FROM read_parquet(['s3://processed/gelaende-umwelt/0e80204b11694337/vector/**/*.
 
 | File | Purpose |
 |------|---------|
-| `namespace.yaml` | `miso-serving` namespace |
-| `deployment.yaml` | runs `miso/duckdb-endpoint:dev`, reads `rustfs-client` secret |
+| `namespace.yaml` | `dashi-serving` namespace |
+| `deployment.yaml` | runs `dashi/duckdb-endpoint:dev`, reads `rustfs-client` secret |
 | `service.yaml` | ClusterIP `duckdb-endpoint:8080` |
 | `kustomization.yaml` | apply via `kubectl apply -k .` |
 
@@ -55,7 +55,7 @@ FROM read_parquet(['s3://processed/gelaende-umwelt/0e80204b11694337/vector/**/*.
 ```bash
 cd poc
 make serving-deploy         # builds image + applies
-kubectl -n miso-serving port-forward svc/duckdb-endpoint 18091:8080 &
+kubectl -n dashi-serving port-forward svc/duckdb-endpoint 18091:8080 &
 curl -X POST http://localhost:18091/query \
   -H 'Content-Type: application/json' \
   -d '{"sql":"SELECT 1 AS one"}'

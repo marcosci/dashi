@@ -2,10 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prefect-server
-  namespace: miso-data
+  namespace: dashi-data
   labels:
     app.kubernetes.io/name: prefect-server
-    app.kubernetes.io/part-of: miso
+    app.kubernetes.io/part-of: dashi
 spec:
   replicas: 1
   selector:

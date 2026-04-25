@@ -1,4 +1,8 @@
-# dashi
+<p align="center">
+  <img src="docs/assets/dashi-logo.svg" alt="dashi" width="180">
+</p>
+
+<h1 align="center">dashi</h1>
 
 > **The essential base for spatial data.**
 > A cloud-native spatial data lake — layered, infused, re-usable — consolidating reconnaissance (ISR), mission planning (C2), logistics, and terrain/environment geodata under a common zone-based architecture. Implementation workspace for the _CldGIS Geodatalake_ specification.
@@ -37,7 +41,7 @@ See [poc/docs/k3s-setup.md](poc/docs/k3s-setup.md) for prerequisites and trouble
 ## Repository Layout
 
 ```
-miso/
+dashi/
 ├── README.md                      # This file
 ├── CLAUDE.md                      # Agent working instructions
 ├── mkdocs.yml                     # MkDocs Material site config
