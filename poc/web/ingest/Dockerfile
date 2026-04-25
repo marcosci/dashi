@@ -1,7 +1,7 @@
 # Multi-stage: Vite build → tiny nginx static.
 # Build context: poc/web/ingest/
 
-FROM node:22-alpine AS builder
+FROM node:25-alpine AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci --no-audit --no-fund || npm install --no-audit --no-fund
