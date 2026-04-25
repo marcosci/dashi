@@ -83,6 +83,18 @@ Lightweight backlog. No promise to ship. Capture, sort later. Promotion path: id
 - **Sketch:** Single static HTML page using MapLibre + a hand-written style JSON pointing at `/tiles/{source}` Martin endpoints. Hosted as a sub-path on the docs site.
 - **Status:** idea
 
+### Point cloud visualisation
+
+- **Why:** ADR-004 mandates COPC for point clouds, and the PoC already ingests LAZ → COPC end-to-end, but there is no serving path. Martin only handles MVT and PMTiles — different data shape, won't be patched in.
+- **Sketch:**
+  - **PoC tier:** static MapLibre/deck.gl viewer page reads COPC directly from `s3://curated/pointclouds/*.copc.laz` via `loaders.gl` COPC loader + HTTP range requests. Zero new server component. Capped by client memory (~10⁷ points).
+  - **Production tier:** Prefect flow `copc → 3D Tiles tileset` using `py3dtiles`. Writes `tileset.json` + `.pnts` chunks to `s3://curated/3dtiles/<dataset>/`. Streamed by deck.gl `Tile3DLayer`, CesiumJS, or iTowns — same operational story as PMTiles.
+  - **Catalog:** STAC item gets `assets.viewer3d` pointing at the tileset.json; existing `assets.data` keeps the raw COPC.
+  - Skip Potree (own octree, redundant with COPC) and Entwine/Greyhound (deprecated).
+- **Status:** triaged
+- **Owner:** unassigned
+- **Refs:** ADR-004 (COPC), F-22 (vector tiles, sibling capability)
+
 ### PMTiles cache invalidation per source
 
 - **Why:** Currently the whole Martin pod restarts when any one PMTiles archive changes (initContainer mirror).
