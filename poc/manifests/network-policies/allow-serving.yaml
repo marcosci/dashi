@@ -11,7 +11,7 @@ spec:
     matchExpressions:
       - key: app.kubernetes.io/name
         operator: In
-        values: [titiler, duckdb-endpoint]
+        values: [titiler, duckdb-endpoint, martin, tipg]
   policyTypes: [Ingress]
   ingress:
     - {}   # all sources — PoC posture
