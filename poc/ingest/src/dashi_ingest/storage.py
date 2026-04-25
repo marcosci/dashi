@@ -26,7 +26,7 @@ class S3Config:
     secret_key: str
 
     @classmethod
-    def from_env(cls) -> "S3Config":
+    def from_env(cls) -> S3Config:
         return cls(
             endpoint=os.environ.get("DASHI_S3_ENDPOINT", "http://localhost:9000"),
             region=os.environ.get("DASHI_S3_REGION", "us-east-1"),

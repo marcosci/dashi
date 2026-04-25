@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (ruff + import check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dashi-ingest (no GIS deps required for lint)
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Ruff lint
+        run: ruff check poc/ingest/src
+
+      - name: Ruff format check
+        run: ruff format --check poc/ingest/src
+
+  shell:
+    name: Shell scripts (shellcheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          # SC1091: skip "source not followed" for repo-relative sources.
+          # SC2086: deliberate word-splitting in many of our scripts.
+          # SC2155: declare-and-assign in scripts is fine here.
+          find poc/scripts poc/smoke -type f -name '*.sh' -print0 \
+            | xargs -0 shellcheck -e SC1091,SC2086,SC2155 || true
+          # Hard fail only on the ingest helpers — bigger blast radius.
+          shellcheck -e SC1091,SC2086,SC2155 \
+            poc/scripts/k3s-up.sh \
+            poc/scripts/k3s-down.sh \
+            poc/scripts/ingest-sample.sh \
+            poc/smoke/pointcloud.sh \
+            poc/smoke/martin.sh
+
+  manifests:
+    name: K8s manifests (kubeconform)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \
+            | sudo tar -xz -C /usr/local/bin kubeconform
+
+      - name: Validate every YAML under poc/manifests/
+        # `--strict` rejects unknown fields. Skip CRDs we don't ship locally.
+        run: |
+          kubeconform \
+            -summary \
+            -ignore-missing-schemas \
+            -strict \
+            -kubernetes-version 1.31.0 \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            $(find poc/manifests -name '*.yaml' -o -name '*.yml')
+
+  docs:
+    name: Docs (mkdocs --strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install -r requirements-docs.txt
+      - run: mkdocs build --strict --site-dir site/
+
+  viewer:
+    name: Viewer bundle (esbuild)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: docs/viewer/package.json
+
+      - name: Install + bundle
+        run: |
+          cd docs/viewer
+          npm install --no-audit --no-fund
+          npm run build
+          ls -lh viewer.bundle.js
+
+      - name: Verify wasm assets present
+        run: |
+          test -s docs/viewer/laz-perf.wasm
+          test -s docs/viewer/laz_rs_wasm_bg.wasm

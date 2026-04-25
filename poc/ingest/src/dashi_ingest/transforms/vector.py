@@ -61,9 +61,7 @@ def transform(
 
     # Reproject only if needed (avoids numerical drift for already-4326 inputs)
     if gdf.crs is None:
-        raise ValueError(
-            f"{src}: no CRS declared — validator should have rejected this already"
-        )
+        raise ValueError(f"{src}: no CRS declared — validator should have rejected this already")
     if CRS.from_user_input(gdf.crs) != CRS.from_user_input(TARGET_CRS):
         gdf = gdf.to_crs(TARGET_CRS)
 
@@ -73,9 +71,7 @@ def transform(
         invalid_mask = ~gdf.geometry.is_valid
         if invalid_mask.any():
             repaired = int(invalid_mask.sum())
-            gdf.loc[invalid_mask, "geometry"] = gdf.loc[invalid_mask, "geometry"].apply(
-                make_valid
-            )
+            gdf.loc[invalid_mask, "geometry"] = gdf.loc[invalid_mask, "geometry"].apply(make_valid)
 
     # Assign H3 cells (centroid-based) + cross-cell flag
     gdf["h3_7"] = gdf.geometry.apply(lambda g: assign_cell(g, resolution=h3_resolution).h3_cell)

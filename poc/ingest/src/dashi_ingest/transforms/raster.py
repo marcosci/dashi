@@ -42,9 +42,7 @@ def transform(src: Path, out_dir: Path) -> RasterTransformResult:
     with rasterio.open(src) as source:
         source_crs = str(source.crs) if source.crs else None
         if source.crs is None:
-            raise ValueError(
-                f"{src}: no CRS declared — validator should have rejected this already"
-            )
+            raise ValueError(f"{src}: no CRS declared — validator should have rejected this already")
         reprojected = str(source.crs) != TARGET_CRS
 
         with tempfile.NamedTemporaryFile(suffix=".tif", delete=False) as tmp:

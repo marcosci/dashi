@@ -93,10 +93,7 @@ def classify(path: Path) -> list[Detection]:
         layers = _probe_vector_layers(path)
         if not layers:
             return [Detection(path, "unknown", None, "pyogrio refused", None)]
-        return [
-            Detection(path, "vector", drv, "ok", lyr or None)
-            for lyr, drv in layers
-        ]
+        return [Detection(path, "vector", drv, "ok", lyr or None) for lyr, drv in layers]
 
     if ext in RASTER_EXTS:
         driver, reason = _probe_raster(path)
@@ -107,8 +104,7 @@ def classify(path: Path) -> list[Detection]:
     layers = _probe_vector_layers(path)
     if layers:
         return [
-            Detection(path, "vector", drv, f"extension unknown; {'ok'}", lyr or None)
-            for lyr, drv in layers
+            Detection(path, "vector", drv, f"extension unknown; {'ok'}", lyr or None) for lyr, drv in layers
         ]
     driver, reason = _probe_raster(path)
     if driver:

@@ -121,9 +121,7 @@ def ingest_one(
         tmp_path = Path(tmp)
 
         if det.kind == "vector":
-            vresult = vector_transform.transform(
-                src, tmp_path, h3_resolution=h3_resolution, layer=det.layer
-            )
+            vresult = vector_transform.transform(src, tmp_path, h3_resolution=h3_resolution, layer=det.layer)
             if vresult.bbox is None:
                 return IngestOutcome(
                     input_path=str(src),

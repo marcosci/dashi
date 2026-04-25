@@ -19,7 +19,6 @@ from pathlib import Path
 import pyogrio
 import rasterio
 import shapely.geometry  # noqa: F401 (used via geopandas)
-import shapely.validation
 from pyproj import CRS
 
 
@@ -79,9 +78,7 @@ def validate_vector(
         n = info.get("features", 0)
         to_read = min(n, sample_geometries) if sample_geometries else n
         if to_read > 0:
-            geoms = pyogrio.read_dataframe(
-                path, max_features=to_read, read_geometry=True, **kwargs
-            )
+            geoms = pyogrio.read_dataframe(path, max_features=to_read, read_geometry=True, **kwargs)
             invalid = 0
             for g in geoms.geometry:
                 if g is None:
@@ -89,9 +86,7 @@ def validate_vector(
                 if not g.is_valid:
                     invalid += 1
             if invalid:
-                result.warn(
-                    f"{invalid}/{to_read} sampled geometries invalid — will be repaired in transform"
-                )
+                result.warn(f"{invalid}/{to_read} sampled geometries invalid — will be repaired in transform")
     except Exception as e:  # noqa: BLE001
         result.warn(f"geometry sample skipped: {e}")
 

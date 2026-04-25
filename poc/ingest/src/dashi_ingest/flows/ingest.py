@@ -98,7 +98,9 @@ def ingest_flow(
     """
     logger = get_run_logger()
 
-    stac_url = stac_url or os.environ.get("DASHI_STAC_URL", "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080")
+    stac_url = stac_url or os.environ.get(
+        "DASHI_STAC_URL", "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080"
+    )
     src = Path(source_path)
 
     detections = detect.discover(src)

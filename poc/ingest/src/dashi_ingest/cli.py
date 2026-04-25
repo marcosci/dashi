@@ -76,9 +76,7 @@ def ingest(
     console.print(f"[bold]Summary:[/] {summary}")
     # machine-readable result
     result_path = Path(".dashi-ingest-result.json")
-    result_path.write_text(
-        json.dumps([o.__dict__ for o in outcomes], indent=2, default=str)
-    )
+    result_path.write_text(json.dumps([o.__dict__ for o in outcomes], indent=2, default=str))
     console.print(f"[dim]wrote {result_path}[/]")
 
 
