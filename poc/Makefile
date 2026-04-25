@@ -1,7 +1,7 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
-        ogc-deploy 3dtiles-build 3dtiles-deploy ingest-sample smoke teardown \
-        docs-serve docs-build
+        ogc-deploy 3dtiles-build 3dtiles-deploy pointcloud-presign \
+        ingest-sample smoke teardown docs-serve docs-build
 
 help:
 	@echo "dashi PoC targets"
@@ -117,6 +117,9 @@ prefect-up:
 	@echo "✓ Prefect up. Port-forward with:"
 	@echo "  kubectl -n dashi-data port-forward svc/prefect-server 4200:4200"
 	@echo "  then visit http://localhost:4200/  (UI) and set PREFECT_API_URL=http://localhost:4200/api"
+
+pointcloud-presign:
+	@bash scripts/pointcloud-presign.sh
 
 3dtiles-build:
 	@docker build -t dashi/py3dtiles:dev py3dtiles
