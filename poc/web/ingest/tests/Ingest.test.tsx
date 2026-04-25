@@ -47,6 +47,6 @@ describe("Ingest happy path", () => {
     renderInRouter();
     expect(screen.getByRole("heading", {name: /ingest a dataset/i})).toBeInTheDocument();
     expect(await screen.findByRole("button", {name: /upload \+ scan/i})).toBeDisabled();
-    expect(screen.getByText(/drop a file here/i)).toBeInTheDocument();
+    expect(screen.getByText(/drop file\(s\) here/i)).toBeInTheDocument();
   });
 });

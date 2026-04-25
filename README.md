@@ -62,17 +62,35 @@ Full target list: `make help`. See [poc/docs/k3s-setup.md](poc/docs/k3s-setup.md
 ## Architecture
 
 ```
-                       ┌─────────────────────────────────────────────┐
-   GeoTIFF, Shapefile, │  Landing → Processed → Curated → Enrichment │
-   GPKG, KML, LAZ, …   │           (zone model, RustFS)              │
-            │          └────────────┬────────────────────────────────┘
-            ▼                       │
-        Prefect flow                ▼
-       (dashi-ingest)         pgstac (STAC catalog)
-            │                       │
+   ┌─ web ingest ─────────────────┐    ┌─ Iceberg ────────────────────┐
+   │ React+Vite SPA               │    │ tabulario/iceberg-rest       │
+   │ FastAPI shim ── presign/scan │    │ s3://curated/iceberg/        │
+   │            ── trigger/runs   │    │ promote_to_iceberg flow      │
+   │            ── catalog detail │    └──────────────┬───────────────┘
+   └────────────┬─────────────────┘                   │
+                │                                      │ DuckDB iceberg ext
+                ▼                                      ▼
+   GeoTIFF, Shapefile,    ┌──────────────────────────────────────────────┐
+   GPKG, KML, LAZ, NetCDF │  Landing → Processed → Curated → Enrichment  │
+   COPC, GeoParquet, …    │  (RustFS S3 — versioned, optional ObjectLock)│
+            │             └──────────────┬───────────────────────────────┘
+            ▼                            │
+       Prefect 3 flows                   ▼
+      (dashi-ingest /         pgstac (STAC catalog, Postgres)
+       dashi-retention /          + dashi:* properties:
+       dashi-iceberg /              kind / classification /
+       dashi-enrich)                prefect_flow_run_id+url /
+            │                       enriched_title+description+keywords
             └─────────┬─────────────┘
                       ▼
-        Serving:  TiTiler · DuckDB · Martin (OGC API – Tiles)
+   Serving      DuckDB SQL · TiTiler raster · Martin MVT · TiPG OGC-Features
+                maplibre-gl-lidar pointcloud · 3D Tiles tilesets · Iceberg reads
+                      │
+                      ▼
+   Observability      Prometheus · Grafana · Loki + promtail
+   Backups            pg_dump CronJobs (× 3 DBs) → s3://backups + optional offsite
+   Auth               Authelia OIDC issuer (scaffolded; oauth2-proxy template)
+   Optional LLM       Ollama in dashi-llm (classification-gated enrichment)
 ```
 
 Standardised formats: **COG** (raster), **GeoParquet** (vector), **COPC** (point cloud), **PMTiles** (tile bundles). Spatial partitioning via **H3**. Single processing engine via **DuckDB + GDAL/PDAL**.

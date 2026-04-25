@@ -37,6 +37,11 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: dashi-web
+        # iceberg-rest catalog reads/writes table data + metadata into
+        # s3://curated/iceberg/, plus promote Jobs in this namespace.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: dashi-iceberg
       ports:
         - protocol: TCP
           port: 9000

@@ -148,6 +148,10 @@ export const api = {
     kind?: string;
     limit?: number;
   } = {}) => request<CatalogResponse>(`/catalog/items${qs(filters)}`),
+  catalogItem: (collection: string, id: string) =>
+    request<Record<string, unknown>>(
+      `/catalog/items/${encodeURIComponent(collection)}/${encodeURIComponent(id)}`,
+    ),
   runs: (opts: {limit?: number; all_users?: boolean} = {}) =>
     request<RunsResponse>(`/runs${qs(opts)}`),
 };

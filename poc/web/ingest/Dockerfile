@@ -33,6 +33,7 @@ RUN mkdir -p /usr/share/nginx/html/viewer \
 # (envsubst over /etc/nginx/templates/*.template) at container start.
 ENV INGEST_API_UPSTREAM="http://ingest-api.dashi-web.svc.cluster.local:8088"
 ENV RUSTFS_UPSTREAM="http://rustfs.dashi-platform.svc.cluster.local:9000"
+ENV MARTIN_UPSTREAM="http://martin.dashi-serving.svc.cluster.local:3000"
 RUN mkdir -p /etc/nginx/templates && printf '%s\n' \
   'server {' \
   '  listen 8080;' \
@@ -49,6 +50,14 @@ RUN mkdir -p /etc/nginx/templates && printf '%s\n' \
   '    proxy_set_header Remote-User       $http_remote_user;' \
   '    proxy_set_header Remote-Groups     $http_remote_groups;' \
   '    proxy_read_timeout                 300s;' \
+  '  }' \
+  '  # /martin/* → Martin tile server. Path rewrite + Host preserved.' \
+  '  location /martin/ {' \
+  '    rewrite ^/martin/(.*)$ /$1 break;' \
+  '    proxy_pass ${MARTIN_UPSTREAM};' \
+  '    proxy_set_header Host              $http_host;' \
+  '    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;' \
+  '    proxy_set_header X-Forwarded-Proto $scheme;' \
   '  }' \
   '  # Bucket paths reverse-proxy to RustFS, preserving Host. No path' \
   '  # rewrite — boto3 SigV4 includes the path in the signature, so we' \

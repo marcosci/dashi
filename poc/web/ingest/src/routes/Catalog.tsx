@@ -1,7 +1,117 @@
 import {useState} from "react";
+import {useQuery} from "@tanstack/react-query";
 import {useCatalog} from "../hooks/useCatalog";
 import {useDomains} from "../hooks/useDomains";
 import {ClassificationBadge} from "../components/ClassificationBadge";
+import {api} from "../api/client";
+
+function FragmentRow({k, v}: {k: string; v: unknown}) {
+  return (
+    <>
+      <dt className="text-ink-soft truncate">{k.replace(/^dashi:/, "")}</dt>
+      <dd className="col-span-2 break-all">
+        {Array.isArray(v) ? v.join(", ") : v === null || v === undefined ? "—" : String(v)}
+      </dd>
+    </>
+  );
+}
+
+function ItemDetailBody({item}: {item: any}) {
+  const props = item.properties ?? {};
+  const assets = item.assets ?? {};
+  const dashiKeys = Object.keys(props).filter((k) => k.startsWith("dashi:")).sort();
+  const lineageKeys = dashiKeys.filter(
+    (k) => k.startsWith("dashi:prefect_") || k === "dashi:source_hash",
+  );
+  const otherKeys = dashiKeys.filter((k) => !lineageKeys.includes(k));
+  return (
+    <>
+      <section>
+        <h3 className="text-xs uppercase tracking-wider text-ink-soft mb-2">Identity</h3>
+        <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs font-mono">
+          <dt className="text-ink-soft">collection</dt><dd className="col-span-2">{item.collection}</dd>
+          <dt className="text-ink-soft">id</dt><dd className="col-span-2 break-all">{item.id}</dd>
+          <dt className="text-ink-soft">datetime</dt><dd className="col-span-2">{props.datetime ?? "—"}</dd>
+          {item.bbox && (
+            <>
+              <dt className="text-ink-soft">bbox</dt>
+              <dd className="col-span-2">{item.bbox.map((n: number) => n.toFixed(4)).join(", ")}</dd>
+            </>
+          )}
+        </dl>
+      </section>
+      <section>
+        <h3 className="text-xs uppercase tracking-wider text-ink-soft mb-2">dashi properties</h3>
+        <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs font-mono">
+          {otherKeys.map((k) => (
+            <FragmentRow key={k} k={k} v={props[k]} />
+          ))}
+        </dl>
+      </section>
+      {lineageKeys.length > 0 && (
+        <section>
+          <h3 className="text-xs uppercase tracking-wider text-ink-soft mb-2">Lineage</h3>
+          <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs font-mono">
+            {lineageKeys.map((k) => {
+              const v = props[k];
+              if (k === "dashi:prefect_flow_run_url" && typeof v === "string") {
+                return (
+                  <div key={k} className="col-span-3">
+                    <a href={v} target="_blank" rel="noreferrer" className="text-amber-deep hover:underline">
+                      open prefect run →
+                    </a>
+                  </div>
+                );
+              }
+              return <FragmentRow key={k} k={k} v={v} />;
+            })}
+          </dl>
+        </section>
+      )}
+      <section>
+        <h3 className="text-xs uppercase tracking-wider text-ink-soft mb-2">Assets</h3>
+        <ul className="space-y-2 text-xs font-mono">
+          {Object.entries(assets).map(([name, a]: any) => (
+            <li key={name} className="rounded border border-line bg-cream/40 px-3 py-2">
+              <div className="text-ink">{name}</div>
+              <div className="text-ink-soft mt-0.5 break-all">{a.href}</div>
+              <div className="text-ink-soft text-[11px] mt-0.5">
+                {a.type ?? a.media_type ?? ""} · {(a.roles ?? []).join(", ")}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
+  );
+}
+
+function ItemDetail({collection, id, onClose}: {collection: string; id: string; onClose: () => void}) {
+  const q = useQuery({
+    queryKey: ["catalog-item", collection, id],
+    queryFn: () => api.catalogItem(collection, id),
+    staleTime: 30_000,
+  });
+  return (
+    <aside className="fixed inset-y-0 right-0 w-full sm:w-[480px] bg-paper border-l border-line shadow-xl overflow-y-auto z-20">
+      <div className="px-5 py-4 border-b border-line flex items-center justify-between bg-cream/60">
+        <div className="font-mono text-sm text-ink truncate">{id}</div>
+        <button
+          onClick={onClose}
+          className="text-xs text-ink-soft hover:text-ink"
+          aria-label="close"
+        >
+          ✕ close
+        </button>
+      </div>
+      <div className="p-5 space-y-4 text-sm">
+        {q.isPending && <div className="text-ink-soft">loading…</div>}
+        {q.isError && <div className="text-seal">{String((q.error as Error)?.message)}</div>}
+        {q.data && <ItemDetailBody item={q.data as any} />}
+      </div>
+    </aside>
+  );
+}
 
 const KINDS = ["", "vector", "raster", "pointcloud"] as const;
 const CLASSES = ["", "pub", "int", "rst", "cnf"] as const;
@@ -10,6 +120,7 @@ export function Catalog() {
   const [collection, setCollection] = useState<string>("");
   const [kind, setKind] = useState<string>("");
   const [classification, setClassification] = useState<string>("");
+  const [open, setOpen] = useState<{collection: string; id: string} | null>(null);
 
   const dq = useDomains();
   const cq = useCatalog({collection, kind, classification, limit: 100});
@@ -107,7 +218,11 @@ export function Catalog() {
               </thead>
               <tbody className="font-mono">
                 {cq.data.items.map((it) => (
-                  <tr key={it.id} className="border-t border-line">
+                  <tr
+                    key={it.id}
+                    className="border-t border-line hover:bg-cream/40 cursor-pointer"
+                    onClick={() => setOpen({collection: it.collection, id: it.id})}
+                  >
                     <td className="px-4 py-2.5 text-ink">{it.id.slice(0, 16)}</td>
                     <td className="px-4 py-2.5 text-ink-soft">{it.collection}</td>
                     <td className="px-4 py-2.5 text-ink-soft">{it.kind ?? "—"}</td>
@@ -141,6 +256,13 @@ export function Catalog() {
             </table>
           )}
         </div>
+      )}
+      {open && (
+        <ItemDetail
+          collection={open.collection}
+          id={open.id}
+          onClose={() => setOpen(null)}
+        />
       )}
     </div>
   );

@@ -31,6 +31,22 @@ class CatalogResponse(BaseModel):
     next: str | None = None
 
 
+@router.get("/catalog/items/{collection}/{item_id}")
+async def catalog_item_detail(
+    collection: str,
+    item_id: str,
+    user: Principal = Depends(current_user),
+) -> dict:
+    """Return the raw STAC item — drives the Catalog drill-down side panel."""
+    async with stac_client() as client:
+        r = await client.get(f"/collections/{collection}/items/{item_id}")
+        if r.status_code == 404:
+            raise HTTPException(status_code=404, detail="item not found")
+        if r.status_code != 200:
+            raise HTTPException(status_code=502, detail=f"stac {r.status_code}")
+    return r.json()
+
+
 @router.get("/catalog/items", response_model=CatalogResponse)
 async def catalog_items(
     collection: str | None = None,

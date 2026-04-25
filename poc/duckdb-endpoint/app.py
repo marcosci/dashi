@@ -46,6 +46,13 @@ def _build_connection() -> duckdb.DuckDBPyConnection:
     conn = duckdb.connect(database=":memory:")
     conn.execute("INSTALL spatial; LOAD spatial;")
     conn.execute("INSTALL httpfs; LOAD httpfs;")
+    # iceberg extension for time-travel + ACID reads of curated Iceberg
+    # tables produced by the promote-to-iceberg Prefect flow (ADR-005).
+    # Reads only — DuckDB iceberg writes are still experimental.
+    try:
+        conn.execute("INSTALL iceberg; LOAD iceberg;")
+    except Exception as e:  # noqa: BLE001
+        log.warning("iceberg extension load failed: %s", e)
     conn.execute(f"SET s3_region='{RUSTFS_REGION}';")
     conn.execute(f"SET s3_endpoint='{RUSTFS_HOST}';")
     conn.execute(f"SET s3_use_ssl={'true' if RUSTFS_USE_SSL else 'false'};")
