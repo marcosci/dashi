@@ -1,6 +1,6 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
-        ingest-sample smoke teardown docs-serve docs-build
+        ogc-deploy ingest-sample smoke teardown docs-serve docs-build
 
 help:
 	@echo "dashi PoC targets"
@@ -76,6 +76,19 @@ network-policies-up:
 prefect-patch-pool:
 	@bash scripts/prefect-patch-pool.sh
 
+ogc-deploy:
+	@bash scripts/apply-with-secret.sh manifests/serving-db statefulset.yaml CHANGE_ME_SERVING_POSTGIS
+	kubectl -n miso-serving-db rollout status statefulset/serving-postgis --timeout=180s
+	kubectl apply -k manifests/martin
+	@echo ""
+	@echo "→ Generating PMTiles (one Job per layer; replace pmtiles-generate.sh's"
+	@echo "  layer list to add/remove sources)"
+	@bash scripts/pmtiles-generate.sh
+	kubectl -n miso-serving rollout restart deployment/martin
+	kubectl -n miso-serving rollout status deployment/martin --timeout=180s
+	@echo ""
+	@echo "✓ Martin live. Port-forward: kubectl -n miso-serving port-forward svc/martin 3000:3000"
+
 monitoring-up:
 	@bash scripts/apply-with-secret.sh manifests/monitoring grafana.yaml CHANGE_ME_GRAFANA_ADMIN
 	@echo ""
@@ -114,6 +127,7 @@ smoke:
 	@bash smoke/prefect.sh
 	@bash smoke/rbac.sh
 	@bash smoke/monitoring.sh
+	@bash smoke/martin.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

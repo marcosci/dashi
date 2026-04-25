@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: martin-config
+  namespace: miso-serving
+data:
+  config.yaml: |
+    # Martin v1.6 PMTiles backend uses object_store crate which can't be
+    # told a custom S3 endpoint via the public config schema. Workaround:
+    # initContainer mirrors PMTiles from RustFS into /tiles on a shared
+    # emptyDir, Martin serves them as local files. CronJob-driven
+    # refresh from generation jobs is the obvious next step.
+    pmtiles:
+      sources:
+        osm_roads:    /tiles/osm_roads.pmtiles
+        osm_buildings: /tiles/osm_buildings.pmtiles
+        osm_landuse:  /tiles/osm_landuse.pmtiles
+        osm_water:    /tiles/osm_water.pmtiles
+        osm_railways: /tiles/osm_railways.pmtiles
+        mgrs_grids:   /tiles/mgrs_grids.pmtiles

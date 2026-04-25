@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: serving-postgis
+  namespace: miso-serving-db
+type: Opaque
+stringData:
+  POSTGRES_USER: dashi_serving_owner
+  POSTGRES_PASSWORD: CHANGE_ME_SERVING_POSTGIS
+  POSTGRES_DB: serving
+  # Read-only role credentials the query-only consumers (TiPG) use
+  READONLY_USER: dashi_serving_ro
+  READONLY_PASSWORD: CHANGE_ME_SERVING_RO
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: serving-postgis-initdb
+  namespace: miso-serving-db
+data:
+  01-postgis.sh: |
+    #!/bin/sh
+    set -eu
+    psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" <<SQL
+      CREATE EXTENSION IF NOT EXISTS postgis;
+      CREATE SCHEMA IF NOT EXISTS serving;
+
+      DO \$\$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${READONLY_USER}') THEN
+          CREATE ROLE ${READONLY_USER} LOGIN PASSWORD '${READONLY_PASSWORD}';
+        END IF;
+      END
+      \$\$;
+      GRANT CONNECT ON DATABASE ${POSTGRES_DB} TO ${READONLY_USER};
+      GRANT USAGE ON SCHEMA serving TO ${READONLY_USER};
+      ALTER DEFAULT PRIVILEGES IN SCHEMA serving GRANT SELECT ON TABLES TO ${READONLY_USER};
+
+      -- Registry so consumers (and the promotion flow) agree on what's promoted.
+      CREATE TABLE IF NOT EXISTS serving.layer_registry (
+        layer_id       TEXT PRIMARY KEY,
+        source_item_id TEXT NOT NULL,
+        source_uri     TEXT NOT NULL,
+        feature_count  BIGINT NOT NULL,
+        promoted_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        serves_tiles   BOOLEAN NOT NULL DEFAULT TRUE,
+        serves_ogc     BOOLEAN NOT NULL DEFAULT TRUE
+      );
+      GRANT SELECT ON serving.layer_registry TO ${READONLY_USER};
+    SQL
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: serving-postgis
+  namespace: miso-serving-db
+  labels:
+    app.kubernetes.io/name: serving-postgis
+    app.kubernetes.io/part-of: miso
+spec:
+  serviceName: serving-postgis-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: serving-postgis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: serving-postgis
+    spec:
+      containers:
+        - name: postgis
+          image: postgis/postgis:16-3.4-alpine
+          ports:
+            - name: pg
+              containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: serving-postgis
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "dashi_serving_owner", "-d", "serving"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 24
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "dashi_serving_owner", "-d", "serving"]
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: initdb
+          configMap:
+            name: serving-postgis-initdb
+            defaultMode: 0755
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 3Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serving-postgis
+  namespace: miso-serving-db
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: serving-postgis
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: pg
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: serving-postgis-headless
+  namespace: miso-serving-db
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: serving-postgis
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: pg

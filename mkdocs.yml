@@ -130,6 +130,7 @@ nav:
           - Prefect Orchestrierung: poc/manifests/prefect/README.md
           - Observability (Prometheus + Grafana): poc/manifests/monitoring/README.md
           - NetworkPolicies: poc/manifests/network-policies/README.md
+          - Martin (vector tiles): poc/manifests/martin/README.md
       - Custom Images:
           - titiler-endpoint (arm64 Rebuild): poc/titiler-endpoint/README.md
           - duckdb-endpoint: poc/duckdb-endpoint/README.md

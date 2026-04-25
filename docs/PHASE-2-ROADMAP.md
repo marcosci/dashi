@@ -51,14 +51,20 @@ Militärische Akkreditierung (R-12, NF-11) bleibt **pausiert** bis ein Ziel-Host
 
 Live-Metriken (Stand 2026-04-23): 10 aktive Scrape-Targets, 17 Pods in `miso-*` Namespaces via `kube_pod_info` sichtbar, 4 Alert-Rules geladen.
 
-### Strang J — OGC-Dienste (F-21, F-22)
+### Strang J — OGC-Dienste (F-21, F-22) ✅ (Tiles + MVT) · ⏳ (Features)
 
-| Schritt | Output | ADR / Anforderung |
-|---------|--------|-------------------|
-| J1 | Entscheidung GeoServer vs. MapServer dokumentiert, [ADR-009](adrs.md) aktualisiert | ADR-009, F-21 |
-| J2 | OGC-Server-Deployment in `miso-serving` Namespace, WMS + WFS über stac-fastapi-katalogisierten Datensätze | F-21 |
-| J3 | Vektorkachel-Entscheidung Martin vs. pg_tileserv dokumentiert | ADR-009, F-22 |
-| J4 | Vektorkachel-Deployment, live auf allen Curated-Layern | F-22 |
+**Status:** Vektorkacheln + OGC API – Tiles abgeschlossen 2026-04-25. Smoke: [`poc/smoke/martin.sh`](https://github.com/marcosci/dashi/blob/main/poc/smoke/martin.sh) — 6/6 grün. OGC API – Features (TiPG / pygeoapi) bleibt offen.
+
+| Schritt | Output | Stand |
+|---------|--------|:-----:|
+| J1 | GeoServer / MapServer verworfen — Wechsel auf modernen OGC-API-Stack. Martin als Vektorkachel + OGC API – Tiles, TiPG geplant für OGC API – Features. ADR-009 aktualisiert | ✅ |
+| J2 | tippecanoe arm64 Image + Prefect-Job-basierte PMTiles-Generierung aus GeoParquet (`scripts/pmtiles-generate.sh`). 6 Layer × ~21 MB total | ✅ |
+| J3 | Martin v1.6 Deployment mit initContainer-Mirror der PMTiles aus `s3://curated/tiles/` in einen lokalen `emptyDir` (Workaround für Martin's fehlende RustFS-Endpoint-Konfiguration) | ✅ |
+| J4 | Martin live: Catalog mit 6 Sources, TileJSON 3.0.0 pro Layer, MVT-Tiles im Dresden-bbox bei z=5..10, 204 für out-of-bounds | ✅ |
+| J5 | OGC API – Features via TiPG + PostGIS-Promotion-Flow | ⏳ nächste Iteration |
+| J6 | Legacy-WMS-Shim (falls FüInfoSys es zwingt) | ⏳ Phase 3 |
+
+PostGIS für Serving (`miso-serving-db` Namespace, postgis:16-3.4-alpine, 3 Gi PVC, RO-Rolle `dashi_serving_ro`) ist deployed und wartet auf den Promotion-Flow + TiPG.
 
 ### Strang K — Domänen-Onboarding pro Produktionsdomäne
 

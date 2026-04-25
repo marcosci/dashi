@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: martin
+  namespace: miso-serving
+  labels:
+    app.kubernetes.io/name: martin
+    app.kubernetes.io/part-of: miso
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: martin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: martin
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/health"
+    spec:
+      initContainers:
+        # Mirror PMTiles from curated/ into a shared emptyDir so Martin
+        # reads them as local files. Workaround for Martin v1.6's PMTiles
+        # backend not exposing a custom-S3-endpoint knob.
+        - name: tile-fetch
+          image: minio/mc:latest
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              mc alias set rust "$MISO_S3_ENDPOINT" "$MISO_S3_ACCESS_KEY" "$MISO_S3_SECRET_KEY"
+              mc cp --recursive rust/curated/tiles/ /tiles/
+              ls -lh /tiles/
+          env:
+            - name: MISO_S3_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: dashi-rustfs-serving
+                  key: endpoint
+            - name: MISO_S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashi-rustfs-serving
+                  key: access-key
+            - name: MISO_S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashi-rustfs-serving
+                  key: secret-key
+          volumeMounts:
+            - name: tiles
+              mountPath: /tiles
+      containers:
+        - name: martin
+          image: ghcr.io/maplibre/martin:1.6.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--config=/etc/martin/config.yaml"
+            - "--listen-addresses=0.0.0.0:3000"
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: RUST_LOG
+              value: "info"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          volumeMounts:
+            - name: config
+              mountPath: /etc/martin
+            - name: tiles
+              mountPath: /tiles
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: martin-config
+        - name: tiles
+          emptyDir:
+            sizeLimit: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: martin
+  namespace: miso-serving
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: martin
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
