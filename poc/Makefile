@@ -1,6 +1,6 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
         monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
-        ogc-deploy 3dtiles-build 3dtiles-deploy pointcloud-presign \
+        ogc-deploy tipg-deploy 3dtiles-build 3dtiles-deploy pointcloud-presign \
         ingest-sample smoke teardown docs-serve docs-build
 
 help:
@@ -121,6 +121,11 @@ prefect-up:
 pointcloud-presign:
 	@bash scripts/pointcloud-presign.sh
 
+tipg-deploy:
+	@bash scripts/tipg-bootstrap.sh
+	@echo ""
+	@echo "✓ TiPG live in dashi-serving."
+
 3dtiles-build:
 	@docker build -t dashi/py3dtiles:dev py3dtiles
 	@k3d image import dashi/py3dtiles:dev -c $(CLUSTER_NAME)
@@ -144,6 +149,7 @@ smoke:
 	@bash smoke/monitoring.sh
 	@bash smoke/martin.sh
 	@bash smoke/pointcloud.sh
+	@bash smoke/tipg.sh
 
 teardown:
 	@echo "TODO: kubectl delete -k manifests/"

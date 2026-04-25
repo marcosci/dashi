@@ -14,7 +14,7 @@ Verschiedene Konsumenten benötigen verschiedene Zugriffsarten. Ein einzelner Se
 |----------------------|-------------------------------------------|:------:|
 | Analytisches SQL     | DuckDB (lokal) / Athena-kompatible Engine | ✅    |
 | OGC API — Tiles      | Martin (PMTiles)                          | ✅    |
-| OGC API — Features   | TiPG / pygeoapi                           | ⏳    |
+| OGC API — Features   | TiPG (DevelopmentSeed)                    | ✅    |
 | Legacy WMS / WFS     | (ggf. Shim für legacy GIS systems, sonst entfällt) | ⏳    |
 | Vektorkacheln (MVT)  | Martin                                    | ✅    |
 | Raster / COG-Tiles   | TiTiler                                   | ✅    |
