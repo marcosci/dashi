@@ -1,6 +1,6 @@
 # Build context: poc/ (so we can reach ingest/ alongside services/ingest-api/).
 # docker build -f poc/services/ingest-api/Dockerfile poc -t dashi/ingest-api:dev
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
