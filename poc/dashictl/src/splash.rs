@@ -1,38 +1,18 @@
-//! Splash banner. Shown once on `dashictl` (no args) and on top-level
-//! `--help` / `--version`. Suppressed when stderr is not a TTY so pipes,
-//! CI, and `2>/dev/null` stay clean.
+//! Splash banner. Renders the actual repo logo
+//! (`docs/assets/dashi-logo.svg` → pre-rasterized to PNG, embedded at
+//! compile time) when the host terminal supports an image protocol
+//! (iTerm2, Kitty, sixel). Falls back to ANSI half-blocks otherwise.
 //!
-//! The artwork is an ASCII translation of `docs/assets/dashi-logo.svg`:
-//! the outer bowl rim (dark ink), an inner ripple ring (amber), and the
-//! amber surface drop in the centre. owo-colors auto-disables under
-//! `NO_COLOR=1` and on non-TTY stderr.
+//! Suppressed when stderr is not a TTY so pipes / CI / `2>/dev/null`
+//! stay clean.
 
 use is_terminal::IsTerminal;
 use owo_colors::OwoColorize;
 
-/// Each tuple = (line, tone). Lines are exactly 25 chars wide so the
-/// whole banner aligns regardless of terminal background.
-const LOGO: &[(&str, Tone)] = &[
-    ("     _______________     ", Tone::Rim),
-    ("   ,'                 `.  ", Tone::Rim),
-    ("  /     _________     \\  ", Tone::Amber),
-    (" |    ,'         `.    | ", Tone::Amber),
-    (" |    |    ●●●    |    | ", Tone::AmberBold),
-    (" |    `.         .'    | ", Tone::Amber),
-    ("  \\     `-------'     /  ", Tone::Amber),
-    ("   `.                 .'  ", Tone::Rim),
-    ("    `---------------'    ", Tone::Rim),
-];
-
-#[derive(Clone, Copy)]
-enum Tone {
-    /// Outer rim — dim default-fg (matches SVG ink #1a1612).
-    Rim,
-    /// Inner ripple + amber surface ring (matches SVG #c8821f).
-    Amber,
-    /// Amber drop in the centre — bold for emphasis.
-    AmberBold,
-}
+/// Rasterized at build time from `docs/assets/dashi-logo.svg` via:
+///   rsvg-convert -w 320 -h 320 docs/assets/dashi-logo.svg \
+///     -o poc/dashictl/assets/dashi-logo.png
+const LOGO_PNG: &[u8] = include_bytes!("../assets/dashi-logo.png");
 
 const TAGLINE: &str = "spatial data lake · admin CLI";
 const REPO: &str = "github.com/marcosci/dashi";
@@ -42,20 +22,41 @@ pub fn maybe_print() {
     if !std::io::stderr().is_terminal() {
         return;
     }
-
     let version = env!("CARGO_PKG_VERSION");
 
     eprintln!();
-    for (line, tone) in LOGO {
-        match tone {
-            Tone::Rim => eprintln!("{}", line.dimmed()),
-            Tone::Amber => eprintln!("{}", line.bright_yellow()),
-            Tone::AmberBold => eprintln!("{}", line.bright_yellow().bold()),
-        }
+    if !render_image() {
+        // No image protocol available — viuer's half-block fallback also
+        // failed to write to stderr. Use a minimal text marker so the
+        // banner still shows.
+        eprintln!("  {}", "● dashi".bright_yellow().bold());
     }
     eprintln!();
-    eprintln!("        {}", "d a s h i".bright_yellow().bold());
     eprintln!("  {}", TAGLINE.dimmed());
     eprintln!("  v{}  ·  {}", version.bright_yellow(), REPO.dimmed());
     eprintln!();
+}
+
+/// Decode the embedded PNG and let viuer render it via the best
+/// protocol the terminal supports (Kitty / iTerm2 / sixel) or the
+/// half-block fallback. Returns false when the image can't render at
+/// all (e.g. the decode fails).
+fn render_image() -> bool {
+    let img = match image::load_from_memory(LOGO_PNG) {
+        Ok(i) => i,
+        Err(_) => return false,
+    };
+    // Compact size — fits next to the help text without dominating
+    // the screen. width is in terminal cells, height in half-cells
+    // (each glyph holds 2 vertical pixels in fallback mode).
+    let cfg = viuer::Config {
+        absolute_offset: false,
+        x: 4,
+        width: Some(20),
+        height: Some(10),
+        use_kitty: true,
+        use_iterm: true,
+        ..Default::default()
+    };
+    viuer::print(&img, &cfg).is_ok()
 }

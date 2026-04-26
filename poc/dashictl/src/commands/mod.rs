@@ -3,6 +3,7 @@ pub mod backfill;
 pub mod backup;
 pub mod domain;
 pub mod gc;
+pub mod ingest;
 pub mod item;
 pub mod runs;
 pub mod user;

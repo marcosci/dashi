@@ -8,13 +8,6 @@ use clap::{Parser, Subcommand};
     name = "dashictl",
     version,
     about = "Admin CLI for the dashi spatial data lake",
-    long_about = "Admin CLI for the dashi spatial data lake.\n\n\
-                  Three-layer ops model:\n  \
-                  · dashictl   — operator CLI (CRUD, GC, audit, backup, backfill)\n  \
-                  · Grafana    — read-only dashboards (throughput, errors, sizes)\n  \
-                  · Web UI     — researcher front door (ingest, browse, runs, viewer)\n\n\
-                  Admin tasks NEVER grow into the web UI. If a workflow needs a\n\
-                  button, build a `dashictl` subcommand instead.",
     propagate_version = true,
     subcommand_required = true,
     arg_required_else_help = true
@@ -73,6 +66,8 @@ pub enum Command {
     },
     /// Inspect Prefect flow runs.
     Runs(RunsArgs),
+    /// Upload + scan + trigger an ingest. Same pipeline the web UI uses.
+    Ingest(IngestArgs),
     /// Print resolved configuration (after context + env merge).
     Config,
 }
@@ -190,4 +185,27 @@ pub struct RunsArgs {
     /// Limit returned rows.
     #[arg(long, default_value_t = 50)]
     pub limit: u32,
+}
+
+#[derive(Parser, Debug)]
+pub struct IngestArgs {
+    /// Local file or already-staged `s3://landing/...` URI. When given a
+    /// local path the file is uploaded via /presign (single-PUT) or
+    /// /multipart/* (chunked) depending on size; an s3:// URI is
+    /// validated via /register and the upload step is skipped.
+    pub source: String,
+    /// Target domain (= STAC collection id). Must already exist.
+    #[arg(long)]
+    pub domain: String,
+    /// Classification tier. One of: pub, int, rst, cnf.
+    #[arg(long, default_value = "int", value_parser = ["pub", "int", "rst", "cnf"])]
+    pub classification: String,
+    /// ingest-api base URL. Defaults to `http://localhost:8088` (the
+    /// stable port-forward set up by `port-forward-all.sh`).
+    #[arg(long, default_value = "http://localhost:8088")]
+    pub api_url: String,
+    /// Skip the Prefect trigger — upload + scan only. Useful for
+    /// validating a file before committing to a flow run.
+    #[arg(long)]
+    pub dry_run: bool,
 }
