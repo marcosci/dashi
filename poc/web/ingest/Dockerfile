@@ -10,7 +10,7 @@ COPY public ./public
 COPY src ./src
 RUN npm run build
 
-FROM nginx:1.27-alpine
+FROM nginx:1.29-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 # Re-serve the standalone point cloud viewer at /viewer/* — same origin
 # as the SPA so the iframe works without CORS. Build context is
