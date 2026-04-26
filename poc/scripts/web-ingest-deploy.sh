@@ -12,8 +12,13 @@ docker build -t dashi/ingest-api:dev -f "$REPO_ROOT/services/ingest-api/Dockerfi
 echo "→ build dashi/ingest-web:dev"
 docker build -t dashi/ingest-web:dev "$REPO_ROOT/web/ingest"
 
-echo "→ k3d image import"
-k3d image import dashi/ingest-api:dev dashi/ingest-web:dev -c "$CLUSTER_NAME"
+CTX="$(kubectl config current-context 2>/dev/null || echo "")"
+if [[ "$CTX" == k3d-* ]]; then
+  echo "→ k3d image import"
+  k3d image import dashi/ingest-api:dev dashi/ingest-web:dev -c "$CLUSTER_NAME"
+else
+  echo "→ Skipping k3d import (context=$CTX shares docker daemon)"
+fi
 
 echo "→ apply ingest-api namespace + Deployment"
 kubectl apply -k "$REPO_ROOT/manifests/ingest-api"

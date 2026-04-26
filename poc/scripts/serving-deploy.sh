@@ -26,8 +26,13 @@ docker build -t "$DUCKDB_IMG" "$REPO_ROOT/duckdb-endpoint"
 echo "→ Building $TITILER_IMG"
 docker build -t "$TITILER_IMG" "$REPO_ROOT/titiler-endpoint"
 
-echo "→ Importing images into k3d cluster $CLUSTER_NAME"
-k3d image import "$DUCKDB_IMG" "$TITILER_IMG" -c "$CLUSTER_NAME"
+CTX="$(kubectl config current-context 2>/dev/null || echo "")"
+if [[ "$CTX" == k3d-* ]]; then
+  echo "→ Importing images into k3d cluster $CLUSTER_NAME"
+  k3d image import "$DUCKDB_IMG" "$TITILER_IMG" -c "$CLUSTER_NAME"
+else
+  echo "→ Skipping k3d import (context=$CTX shares docker daemon, images visible directly)"
+fi
 
 echo "→ Ensuring dashi-serving namespace"
 kubectl apply -f "$REPO_ROOT/manifests/titiler/namespace.yaml"
