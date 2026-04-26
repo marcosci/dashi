@@ -57,6 +57,7 @@ async fn run(cli: Cli) -> Result<()> {
         Command::Audit { cmd } => commands::audit::run(&cfg, cli.json, cmd).await,
         Command::Backup { cmd } => commands::backup::run(&cfg, cli.json, cmd).await,
         Command::Runs(args) => commands::runs::run(&cfg, cli.json, args).await,
+        Command::Ingest(args) => commands::ingest::run(args).await,
         Command::Config => print_config(&cfg, cli.json),
     }
 }
