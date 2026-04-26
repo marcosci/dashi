@@ -152,6 +152,42 @@ jobs:
           echo "Initial chunk gz size: $INITIAL bytes"
           test "$INITIAL" -le 204800 || { echo "initial chunk exceeds 200 KB gz budget"; exit 1; }
 
+  dashictl:
+    name: dashictl (cargo check + clippy + fmt)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust stable
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt
+          rustup default stable
+
+      - name: Cache cargo registry + target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            poc/dashictl/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('poc/dashictl/Cargo.toml') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: cargo fmt --check
+        run: |
+          cd poc/dashictl
+          cargo fmt --all -- --check
+
+      - name: cargo check
+        run: |
+          cd poc/dashictl
+          cargo check --all-targets --locked
+
+      - name: cargo clippy
+        run: |
+          cd poc/dashictl
+          cargo clippy --all-targets -- -D warnings
+
   ingest-api:
     name: Ingest API (FastAPI shim)
     runs-on: ubuntu-latest

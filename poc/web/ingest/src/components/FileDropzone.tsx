@@ -63,7 +63,10 @@ export function FileDropzone({files, onFiles, disabled, maxBytes}: Props) {
             Drop file(s) here or <span className="text-amber-deep underline underline-offset-2">browse</span>
           </div>
           <div className="text-xs text-ink-soft">
-            max {(maxBytes / (1024 * 1024)).toFixed(0)} MiB per file · GeoTIFF, Shapefile, GPKG, KML, LAZ, COPC, GeoParquet, …
+            max {maxBytes >= 1024 * 1024 * 1024
+              ? `${(maxBytes / (1024 * 1024 * 1024)).toFixed(0)} GiB`
+              : `${(maxBytes / (1024 * 1024)).toFixed(0)} MiB`}{" "}
+            per file · GeoTIFF, Shapefile, GPKG, KML, LAZ, COPC, GeoParquet, …
           </div>
         </div>
       )}

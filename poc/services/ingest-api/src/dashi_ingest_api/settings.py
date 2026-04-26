@@ -21,7 +21,12 @@ class Settings(BaseSettings):
     s3_secret_key: str = ""
     landing_bucket: str = "landing"
     presign_expiry_seconds: int = 900  # 15 minutes
-    upload_max_bytes: int = 1_073_741_824  # 1 GiB Phase-1 cap
+    # Cap is the absolute upload ceiling. Single-PUT path uses /presign for
+    # files below `multipart_threshold_bytes`; everything between threshold
+    # and cap goes through /multipart/* (chunked PUT + assemble).
+    upload_max_bytes: int = 53_687_091_200  # 50 GiB
+    multipart_threshold_bytes: int = 524_288_000  # 500 MiB
+    multipart_part_size_bytes: int = 16_777_216  # 16 MiB
 
     # Catalog (read-only)
     stac_url: str = "http://stac-fastapi.dashi-catalog.svc.cluster.local:8080"

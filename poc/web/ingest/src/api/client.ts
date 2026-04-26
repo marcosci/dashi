@@ -51,6 +51,60 @@ export interface PresignResponse {
   expires_in: number;
 }
 
+export interface MultipartStartRequest {
+  domain: string;
+  filename: string;
+  content_type: string;
+  content_length: number;
+}
+
+export interface MultipartStartResponse {
+  upload_id: string;
+  bucket: string;
+  key: string;
+  s3_uri: string;
+  part_size: number;
+  part_count: number;
+  urls: string[];
+  expires_in: number;
+}
+
+export interface MultipartPart {
+  part_number: number;
+  etag: string;
+}
+
+export interface MultipartCompleteRequest {
+  bucket: string;
+  key: string;
+  upload_id: string;
+  parts: MultipartPart[];
+}
+
+export interface MultipartCompleteResponse {
+  s3_uri: string;
+  etag: string | null;
+}
+
+export interface MultipartAbortRequest {
+  bucket: string;
+  key: string;
+  upload_id: string;
+}
+
+export interface RegisterRequest {
+  s3_uri: string;
+}
+
+export interface RegisterResponse {
+  s3_uri: string;
+  bucket: string;
+  key: string;
+  content_length: number;
+  content_type: string | null;
+  last_modified: string | null;
+}
+
 export interface ScanRow {
   path: string;
   kind: "vector" | "raster" | "pointcloud" | "unknown";
@@ -130,6 +184,26 @@ export const api = {
     content_length: number;
   }) =>
     request<PresignResponse>("/presign", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  multipartStart: (body: MultipartStartRequest) =>
+    request<MultipartStartResponse>("/multipart/start", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  multipartComplete: (body: MultipartCompleteRequest) =>
+    request<MultipartCompleteResponse>("/multipart/complete", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  multipartAbort: (body: MultipartAbortRequest) =>
+    request<{ok: boolean}>("/multipart/abort", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  register: (body: RegisterRequest) =>
+    request<RegisterResponse>("/register", {
       method: "POST",
       body: JSON.stringify(body),
     }),

@@ -39,7 +39,9 @@ RUN mkdir -p /etc/nginx/templates && printf '%s\n' \
   '  listen 8080;' \
   '  root /usr/share/nginx/html;' \
   '  index index.html;' \
-  '  client_max_body_size 1100m;' \
+  '  # Single-PUT path tops out at 500 MiB (multipart threshold); each' \
+  '  # multipart chunk is 16-64 MiB. 600m gives both paths headroom.' \
+  '  client_max_body_size 600m;' \
   '  location /api/ {' \
   '    rewrite ^/api/(.*)$ /$1 break;' \
   '    proxy_pass ${INGEST_API_UPSTREAM};' \

@@ -3,6 +3,7 @@ import {useMe} from "./hooks/useMe";
 
 const NAV: {to: string; label: string}[] = [
   {to: "/", label: "Ingest"},
+  {to: "/register", label: "Register"},
   {to: "/catalog", label: "Catalog"},
   {to: "/runs", label: "Runs"},
   {to: "/viewer", label: "Viewer"},
