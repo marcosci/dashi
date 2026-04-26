@@ -63,7 +63,19 @@ trap cleanup INT TERM
 
 start_one() {
   local name="$1" port="$2" ns="$3" target="$4"
-  if ! kubectl -n "$ns" get svc "${target%%:*}" >/dev/null 2>&1; then
+  # Precheck retried up to 5x with 1s gap. Lima SSH-forwarding flaps on
+  # macOS+colima — a single API hit can fail mid-bringup even when the
+  # cluster is healthy. Retry tolerates the flap; if all 5 attempts fail
+  # the service is genuinely missing.
+  local i ok=
+  for i in 1 2 3 4 5; do
+    if kubectl -n "$ns" get svc "${target%%:*}" >/dev/null 2>&1; then
+      ok=1
+      break
+    fi
+    sleep 1
+  done
+  if [ -z "$ok" ]; then
     printf "  · %-13s skip (svc/%s not in %s)\n" "$name" "${target%%:*}" "$ns"
     return
   fi

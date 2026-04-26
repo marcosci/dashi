@@ -6,6 +6,7 @@ import {BrowserRouter, Route, Routes, Navigate} from "react-router-dom";
 import "./styles/globals.css";
 import {App} from "./App";
 import {Ingest} from "./routes/Ingest";
+import {Register} from "./routes/Register";
 import {Catalog} from "./routes/Catalog";
 import {Runs} from "./routes/Runs";
 import {Viewer} from "./routes/Viewer";
@@ -26,6 +27,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route element={<App />}>
             <Route index element={<Ingest />} />
+            <Route path="register" element={<Register />} />
             <Route path="catalog" element={<Catalog />} />
             <Route path="runs" element={<Runs />} />
             <Route path="viewer" element={<Viewer />} />

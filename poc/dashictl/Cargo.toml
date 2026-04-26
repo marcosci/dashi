@@ -1,0 +1,34 @@
+[package]
+name = "dashictl"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.78"
+description = "Admin CLI for the dashi spatial data lake"
+license = "Apache-2.0"
+repository = "https://github.com/marcosci/dashi"
+readme = "README.md"
+
+[[bin]]
+name = "dashictl"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0"
+chrono = { version = "0.4", default-features = false, features = ["serde", "clock", "std"] }
+clap = { version = "4.5", features = ["derive", "wrap_help", "env"] }
+comfy-table = "7.1"
+is-terminal = "0.4"
+owo-colors = { version = "4.1", features = ["supports-colors"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+rusty-s3 = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+tokio = { version = "1.41", features = ["macros", "rt-multi-thread", "fs", "io-util", "signal"] }
+toml = "0.8"
+url = "2.5"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

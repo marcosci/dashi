@@ -6,8 +6,13 @@ import {DomainPicker} from "../components/DomainPicker";
 import {FileDropzone} from "../components/FileDropzone";
 import {ScanPreview} from "../components/ScanPreview";
 import {RunStatus} from "../components/RunStatus";
+import {multipartUpload, type MultipartProgress} from "../lib/multipart";
 
-const UPLOAD_MAX_BYTES = 1024 * 1024 * 1024; // 1 GiB; matches API default
+// Cap matches the API default (DASHI_API_UPLOAD_MAX_BYTES). Above the
+// multipart threshold we switch to chunked PUT; this is the absolute
+// ceiling that stops the user picking files we'd reject server-side.
+const UPLOAD_MAX_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
+const MULTIPART_THRESHOLD = 500 * 1024 * 1024; // 500 MiB
 
 interface PerFile {
   file: File;
@@ -15,9 +20,23 @@ interface PerFile {
   scan: ScanResponse;
 }
 
+interface UploadProgress {
+  uploadedBytes: number;
+  totalBytes: number;
+  uploadedParts?: number;
+  totalParts?: number;
+}
+
 type Stage =
   | {kind: "idle"}
-  | {kind: "uploading"; index: number; total: number; current: string}
+  | {
+      kind: "uploading";
+      index: number;
+      total: number;
+      current: string;
+      multipart: boolean;
+      progress: UploadProgress;
+    }
   | {kind: "scanning"; index: number; total: number; current: string}
   | {kind: "scanned"; entries: PerFile[]}
   | {kind: "triggering"; entries: PerFile[]}
@@ -29,6 +48,57 @@ function StatusLine({label}: {label: string}) {
     <div className="flex items-center gap-2 text-sm text-ink-soft">
       <span className="inline-block h-2 w-2 rounded-full bg-amber animate-pulse" />
       <span className="font-mono">{label}</span>
+    </div>
+  );
+}
+
+function fmtBytes(n: number): string {
+  if (n >= 1024 * 1024 * 1024) return `${(n / (1024 * 1024 * 1024)).toFixed(2)} GiB`;
+  if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MiB`;
+  if (n >= 1024) return `${(n / 1024).toFixed(0)} KiB`;
+  return `${n} B`;
+}
+
+function UploadProgressLine({
+  index,
+  total,
+  current,
+  multipart,
+  progress,
+}: {
+  index: number;
+  total: number;
+  current: string;
+  multipart: boolean;
+  progress: UploadProgress;
+}) {
+  const pct =
+    progress.totalBytes > 0
+      ? Math.min(100, Math.round((progress.uploadedBytes / progress.totalBytes) * 100))
+      : 0;
+  const partLabel =
+    multipart && progress.totalParts
+      ? ` · part ${progress.uploadedParts ?? 0}/${progress.totalParts}`
+      : "";
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm text-ink-soft">
+        <span className="inline-block h-2 w-2 rounded-full bg-amber animate-pulse" />
+        <span className="font-mono">
+          uploading {index + 1}/{total} · {current}
+          {multipart ? " · multipart" : ""}
+          {partLabel}
+        </span>
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-cream overflow-hidden">
+        <div
+          className="h-full bg-amber transition-[width] duration-200"
+          style={{width: `${pct}%`}}
+        />
+      </div>
+      <div className="text-xs font-mono text-ink-soft text-right">
+        {fmtBytes(progress.uploadedBytes)} / {fmtBytes(progress.totalBytes)} · {pct}%
+      </div>
     </div>
   );
 }
@@ -53,17 +123,50 @@ export function Ingest() {
       const entries: PerFile[] = [];
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
-        setStage({kind: "uploading", index: i, total: files.length, current: f.name});
-        const presign = await api.presign({
-          domain,
-          filename: f.name,
-          content_type: f.type || "application/octet-stream",
-          content_length: f.size,
+        const useMultipart = f.size >= MULTIPART_THRESHOLD;
+
+        setStage({
+          kind: "uploading",
+          index: i,
+          total: files.length,
+          current: f.name,
+          multipart: useMultipart,
+          progress: {uploadedBytes: 0, totalBytes: f.size},
         });
-        await presignedPut(presign.url, f);
+
+        let s3_uri: string;
+        if (useMultipart) {
+          const result = await multipartUpload(f, domain, {
+            onProgress: (p: MultipartProgress) =>
+              setStage({
+                kind: "uploading",
+                index: i,
+                total: files.length,
+                current: f.name,
+                multipart: true,
+                progress: {
+                  uploadedBytes: p.uploadedBytes,
+                  totalBytes: p.totalBytes,
+                  uploadedParts: p.uploadedParts,
+                  totalParts: p.totalParts,
+                },
+              }),
+          });
+          s3_uri = result.s3_uri;
+        } else {
+          const presign = await api.presign({
+            domain,
+            filename: f.name,
+            content_type: f.type || "application/octet-stream",
+            content_length: f.size,
+          });
+          await presignedPut(presign.url, f);
+          s3_uri = presign.s3_uri;
+        }
+
         setStage({kind: "scanning", index: i, total: files.length, current: f.name});
-        const scan = await api.scan(presign.s3_uri);
-        entries.push({file: f, s3_uri: presign.s3_uri, scan});
+        const scan = await api.scan(s3_uri);
+        entries.push({file: f, s3_uri, scan});
       }
       setStage({kind: "scanned", entries});
     },
@@ -170,8 +273,12 @@ export function Ingest() {
       )}
 
       {stage.kind === "uploading" && (
-        <StatusLine
-          label={`uploading ${stage.index + 1}/${stage.total} · ${stage.current}`}
+        <UploadProgressLine
+          index={stage.index}
+          total={stage.total}
+          current={stage.current}
+          multipart={stage.multipart}
+          progress={stage.progress}
         />
       )}
       {stage.kind === "scanning" && (
