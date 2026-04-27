@@ -1,6 +1,7 @@
 pub mod audit;
 pub mod backfill;
 pub mod backup;
+pub mod doctor;
 pub mod domain;
 pub mod gc;
 pub mod ingest;

@@ -4,6 +4,60 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-04-27
+
+Reproducible-bootstrap patch release. Same surface area as v0.1.0, but
+the four known fresh-cluster gaps + CI image baseline are closed.
+
+### Added
+- **`dashictl doctor`** — preflight check matrix (STAC, Prefect,
+  Loki, S3 buckets, ingest-api, deployment-registered). Exits
+  non-zero on any hard failure so it's CI-friendly. Use as the
+  success oracle for `make redeploy-all` or fresh-cluster bringup.
+- **`make prefect-bootstrap`** — combines `prefect-patch-pool` and
+  `prefect-register` behind one idempotent target. Auto-bootstraps
+  the local `dashi-ingest` venv, manages its own port-forward to
+  `svc/prefect-server`, and is now wired into `make prefect-up` so a
+  fresh cluster lands with `dashi-ingest/main` already registered.
+- **Synthetic sample data generator** at `poc/scripts/synthetic-data.sh`
+  — produces deterministic GeoJSON + GeoTIFF + GeoParquet fixtures
+  for E2E tests, demos, or new domain seeding. `--upload <domain>`
+  flag drives `dashictl ingest --dry-run` end-to-end.
+- **GitHub Actions image pipeline** (`.github/workflows/images.yml`):
+  builds all 7 dashi images (tippecanoe, dashi-ingest, ingest-api,
+  ingest-web, duckdb-endpoint, titiler-endpoint, py3dtiles) on every
+  PR (amd64). On `v*` tag push, also builds linux/arm64 and pushes
+  to GHCR as `ghcr.io/marcosci/dashi/<svc>:<tag>` + `:latest`.
+
+### Changed
+- `ingest-api` deployment now defaults `DASHI_API_S3_PUBLIC_ENDPOINT`
+  to `http://localhost:9000` so presigned PUT URLs work out-of-the-box
+  against the standard `port-forward-all.sh` setup. Production
+  deployments behind nginx should override to `""` so the per-request
+  Host header is used instead.
+- `pmtiles-generate.sh` now exits cleanly (status 0) when the source
+  prefix in `processed/` is empty — fresh clusters no longer fail with
+  `BackoffLimitExceeded` for layers whose source data hasn't landed
+  yet. Re-run `make ogc-deploy` once ingest produces partitions.
+- `redeploy-all.sh` extends the deploy chain to cover web-ingest,
+  iceberg, backup, tipg. LLM deploy is gated behind
+  `DASHI_ENABLE_LLM=1` (default off — Ollama pulls a 2 GiB model).
+- `serving-deploy.sh` and `web-ingest-deploy.sh` skip `k3d image
+  import` when the active kubectl context is not `k3d-*`. Vanilla
+  Kubernetes distros (OrbStack k8s, kind, real clusters) share the
+  host docker daemon, so locally-built images are visible without an
+  explicit import step.
+
+### Fixed
+- Splash logo in `dashictl` now renders as a procedural ANSI
+  half-block bowl + amber drop instead of an embedded raster, which
+  composited against a checker pattern in iTerm2-style transparent-
+  image rendering. Identical output across iTerm2, Ghostty,
+  Terminal.app, ssh, tmux. Saves ~5 MB of release-binary size.
+- Splash + `--help` output dropped the verbose long-about text
+  (three-layer ops model, "admin tasks NEVER" rule). That guidance
+  lives in README + CHANGELOG only; help stays terse.
+
 ### Added
 - Iceberg REST catalog (tabulario/iceberg-rest) deployed in `dashi-iceberg` namespace, backed by SQLite metadata + RustFS warehouse at `s3://curated/iceberg/`. Promote curated GeoParquet → Iceberg tables via the new `dashi_ingest.flows.iceberg` Prefect flow. ADR-005 closes from "decided" to "deployed".
 - LLM enrichment scaffolding: `dashi_ingest.enrich` (provider-agnostic OpenAI-compat client) + `dashi_ingest.flows.enrich` Prefect flow that writes `dashi:enriched_{title,description,keywords,model}` back to STAC. Optional Ollama Deployment in `dashi-llm` for fully-local inference. Enrichment is gated by classification (defaults to `pub,int` only).
@@ -47,5 +101,6 @@ First public release. The platform is feature-complete for a Phase-2 PoC: every 
 - Multi-file drop in the web UI (current flow already handles directories at the CLI level).
 - Iceberg catalog HA + Postgres backend (single-replica SQLite for PoC).
 
-[Unreleased]: https://github.com/marcosci/dashi/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/marcosci/dashi/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/marcosci/dashi/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/marcosci/dashi/releases/tag/v0.1.0

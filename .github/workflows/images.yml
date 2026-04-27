@@ -1,0 +1,101 @@
+name: Container images
+
+# F1 — build all images on every PR + main push so silent breakage is
+# caught at review time.
+# F2 — on tag push (v*), additionally push to GHCR with the tag and
+# `latest` so external adopters can `docker pull ghcr.io/marcosci/dashi/<svc>:vX.Y.Z`.
+#
+# Multi-arch (linux/amd64 + linux/arm64) — the maintainer's machine is
+# arm64; production targets are typically amd64. Using buildx with
+# QEMU emulation for the off-arch leg keeps this single workflow.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: images-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: tippecanoe
+            context: poc/tippecanoe
+            dockerfile: poc/tippecanoe/Dockerfile
+          - image: dashi-ingest
+            context: poc/ingest
+            dockerfile: poc/ingest/Dockerfile
+          - image: ingest-api
+            context: poc
+            dockerfile: poc/services/ingest-api/Dockerfile
+          - image: ingest-web
+            context: poc/web/ingest
+            dockerfile: poc/web/ingest/Dockerfile
+          - image: duckdb-endpoint
+            context: poc/duckdb-endpoint
+            dockerfile: poc/duckdb-endpoint/Dockerfile
+          - image: titiler-endpoint
+            context: poc/titiler-endpoint
+            dockerfile: poc/titiler-endpoint/Dockerfile
+          - image: py3dtiles
+            context: poc/py3dtiles
+            dockerfile: poc/py3dtiles/Dockerfile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: tags
+        env:
+          IMAGE: ${{ matrix.image }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          BASE="ghcr.io/${{ github.repository_owner }}/dashi/${IMAGE}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "tags=${BASE}:${REF_NAME},${BASE}:latest" >>"$GITHUB_OUTPUT"
+            echo "push=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "tags=${BASE}:pr-${{ github.event.pull_request.number || 'head' }}" >>"$GITHUB_OUTPUT"
+            echo "push=false" >>"$GITHUB_OUTPUT"
+          fi
+
+      - name: Build${{ startsWith(github.ref, 'refs/tags/v') && ' + push' || ' (PR)' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          # Multi-arch only on tag push (saves CI time on every PR).
+          # PR builds stay amd64-only as the regression signal.
+          platforms: ${{ startsWith(github.ref, 'refs/tags/v') && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          push: ${{ steps.tags.outputs.push == 'true' }}
+          tags: ${{ steps.tags.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}

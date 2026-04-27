@@ -68,6 +68,11 @@ pub enum Command {
     Runs(RunsArgs),
     /// Upload + scan + trigger an ingest. Same pipeline the web UI uses.
     Ingest(IngestArgs),
+    /// Preflight checks — verify the cluster + APIs are reachable and
+    /// the bootstrap is in a sane state. Exits non-zero on any failure
+    /// so it's CI-friendly. Use as the success oracle for fresh-cluster
+    /// bringups.
+    Doctor(DoctorArgs),
     /// Print resolved configuration (after context + env merge).
     Config,
 }
@@ -185,6 +190,14 @@ pub struct RunsArgs {
     /// Limit returned rows.
     #[arg(long, default_value_t = 50)]
     pub limit: u32,
+}
+
+#[derive(Parser, Debug)]
+pub struct DoctorArgs {
+    /// ingest-api base URL (only checked if reachable; failure is
+    /// non-fatal because the API is optional outside web ingest).
+    #[arg(long, default_value = "http://localhost:8088")]
+    pub api_url: String,
 }
 
 #[derive(Parser, Debug)]

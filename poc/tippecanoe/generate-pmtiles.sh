@@ -78,7 +78,15 @@ for page in paginator.paginate(Bucket=bucket, Prefix=prefix.rstrip("/") + "/"):
             keys.append(obj["Key"])
 print(f"  ▸ {len(keys)} parquet partitions under s3://{bucket}/{prefix}")
 if not keys:
-    sys.exit(f"no parquet found under s3://{bucket}/{prefix}")
+    # Fresh cluster / not-yet-ingested layer — exit successfully and
+    # let the caller (`pmtiles-generate.sh`) move on. Hard-failing
+    # here turns every Job into BackoffLimitExceeded which is loud and
+    # masks the simple "no source data yet" condition.
+    print(
+        f"  ⊘ no parquet under s3://{bucket}/{prefix} — skipping layer "
+        f"(re-run after ingest produces processed/ partitions)"
+    )
+    sys.exit(0)
 
 t0 = time.time()
 for i, k in enumerate(keys):
