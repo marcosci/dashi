@@ -39,8 +39,8 @@ cd "$POC_DIR"
   step "Prefect"
   make prefect-up
 
-  step "Prefect work pool patch"
-  make prefect-patch-pool || true
+  step "Prefect bootstrap (patch pool + register dashi-ingest deployment)"
+  make prefect-bootstrap || true
 
   step "Monitoring (Prometheus + Grafana + kube-state-metrics)"
   make monitoring-up
@@ -49,7 +49,28 @@ cd "$POC_DIR"
   make network-policies-up
 
   step "OGC (PostGIS + Martin + PMTiles regen)"
-  make ogc-deploy
+  make ogc-deploy || true
+
+  step "Web ingest (ingest-api + ingest-web)"
+  make web-ingest-deploy || true
+
+  step "Iceberg REST catalog"
+  make iceberg-deploy || true
+
+  step "Backup CronJobs"
+  make backup-deploy || true
+
+  step "TiPG (OGC API – Features)"
+  make tipg-deploy || true
+
+  # LLM enrichment is optional — pulls a 2 GiB model. Off unless
+  # explicitly opted in via DASHI_ENABLE_LLM=1.
+  if [[ "${DASHI_ENABLE_LLM:-0}" == "1" ]]; then
+    step "LLM enrichment (Ollama, optional)"
+    make llm-deploy || true
+  else
+    step "LLM enrichment skipped (DASHI_ENABLE_LLM=1 to opt in)"
+  fi
 
   step "Smoke tests"
   make smoke || { echo "SMOKE FAILED"; exit 1; }

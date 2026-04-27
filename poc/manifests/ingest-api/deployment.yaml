@@ -34,6 +34,15 @@ spec:
             - {name: DASHI_API_MOCK_GROUPS, value: "dashi,admins"}
             - {name: DASHI_API_S3_ENDPOINT,
                value: "http://rustfs.dashi-platform.svc.cluster.local:9000"}
+            # Browser-reachable endpoint baked into presigned PUT URLs.
+            # Default (`http://localhost:9000`) matches the stable
+            # port-forward set up by `port-forward-all.sh` for local dev
+            # against OrbStack / k3d. Production deployments behind an
+            # nginx ingress should override this to "" so the per-request
+            # Host header is used instead, keeping presigned URLs same-
+            # origin with the SPA. Override via kustomize patch or
+            # Helm values.
+            - {name: DASHI_API_S3_PUBLIC_ENDPOINT, value: "http://localhost:9000"}
             - {name: DASHI_API_S3_ACCESS_KEY,
                valueFrom: {secretKeyRef: {name: dashi-rustfs-pipeline, key: access-key}}}
             - {name: DASHI_API_S3_SECRET_KEY,

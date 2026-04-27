@@ -1,5 +1,5 @@
 .PHONY: help k3s-up k3s-down storage-deploy catalog-deploy serving-deploy prefect-up \
-        monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool \
+        monitoring-up rbac-bootstrap network-policies-up prefect-patch-pool prefect-bootstrap \
         ogc-deploy tipg-deploy 3dtiles-build 3dtiles-deploy pointcloud-presign \
         web-ingest-deploy backup-deploy auth-bootstrap \
         ingest-sample smoke teardown docs-serve docs-build
@@ -78,6 +78,14 @@ network-policies-up:
 prefect-patch-pool:
 	@bash scripts/prefect-patch-pool.sh
 
+# One-shot bootstrap: patch the work pool's base job template AND
+# register the dashi-ingest/main deployment in a single idempotent
+# step. Auto-creates the local Python venv on first run and manages
+# its own port-forward to svc/prefect-server, so it works equally
+# well from a fresh cluster bringup and from CI.
+prefect-bootstrap:
+	@bash scripts/prefect-bootstrap.sh
+
 ogc-deploy:
 	@bash scripts/apply-with-secret.sh manifests/serving-db statefulset.yaml CHANGE_ME_SERVING_POSTGIS
 	kubectl -n dashi-serving-db rollout status statefulset/serving-postgis --timeout=180s
@@ -114,6 +122,10 @@ prefect-up:
 	kubectl -n dashi-data rollout status deployment/prefect-server --timeout=240s
 	@echo "→ Waiting for Prefect worker"
 	kubectl -n dashi-data rollout status deployment/prefect-worker --timeout=180s
+	@echo ""
+	@echo "→ Bootstrapping dashi-ingest deployment + patching work pool"
+	@bash scripts/prefect-bootstrap.sh || \
+	  echo "  (prefect-bootstrap failed; rerun \`make prefect-bootstrap\` once worker has registered)"
 	@echo ""
 	@echo "✓ Prefect up. Port-forward with:"
 	@echo "  kubectl -n dashi-data port-forward svc/prefect-server 4200:4200"
