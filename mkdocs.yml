@@ -115,6 +115,7 @@ nav:
       - Launch post (template): LAUNCH-POST.md
   - Betrieb:
       - Operations Runbook: OPERATIONS.md
+      - dashictl Runbook: CLI-OPERATIONS.md
       - RBAC & Secret-Rotation: RBAC-RUNBOOK.md
       - Troubleshooting: TROUBLESHOOTING.md
       - Domain onboarding: onboarding/domain-template.md
@@ -136,6 +137,7 @@ nav:
       - ADR-009 Serving-Schicht: adr/ADR-009-serving-layer.md
       - ADR-010 Prefect: adr/ADR-010-pipeline-orchestration.md
       - ADR-011 k3s + GitHub: adr/ADR-011-infra-substrate.md
+      - ADR-012 OrbStack k8s lokal: adr/ADR-012-local-substrate-orbstack.md
   - PoC:
       - Überblick: poc/README.md
       - k3s Setup: poc/docs/k3s-setup.md

@@ -180,6 +180,21 @@ pub enum BackupCmd {
     /// Verify the most recent pg_dump can be inspected. Does NOT
     /// restore — only checks the archive header + size sanity.
     Verify,
+    /// Restore the most recent backup into an ephemeral PostgreSQL,
+    /// run a small set of sanity queries, and tear down. Proves the
+    /// dump is intact + readable end-to-end. Requires kubectl on PATH
+    /// + RBAC to create Jobs in the `dashi-backup` namespace.
+    RestoreTest {
+        /// Override which backup to restore. Defaults to the newest
+        /// `pgstac/*.dump` found in s3://backups/.
+        #[arg(long)]
+        key: Option<String>,
+        /// Skip the cleanup step on failure (leave the ephemeral
+        /// Postgres + Job in-cluster for post-mortem). Always cleans
+        /// up on success.
+        #[arg(long)]
+        leave_on_fail: bool,
+    },
 }
 
 #[derive(Parser, Debug)]
