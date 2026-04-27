@@ -4,6 +4,58 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-04-27
+
+Operator-complete + second-domain release. The `dashictl` mutation
+paths (`item delete --apply`, `gc --apply`, `backup restore-test`) are
+no longer dry-runs, the cluster is exercised end-to-end in CI, every
+pushed image carries an SBOM + vuln scan, and a second sample domain
+proves the multi-tenant story.
+
+### Added
+- **`dashictl item delete --apply`** — STAC item cascade delete.
+  Reads the item, prompts the operator to retype the item id,
+  cascades S3 assets → STAC record → (manual) Iceberg partition.
+  `DASHICTL_YES=1` skips the prompt for CI use. Audit line emitted to
+  stderr before the cascade so log shippers (Loki) capture the
+  intent even if the process is killed mid-cascade.
+- **`dashictl gc --apply`** — orphan-object garbage collection. Walks
+  every STAC collection's items, joins against an S3 ListObjectsV2
+  pagination of the target bucket, deletes objects that are not
+  referenced and older than `--min-age-hours` (default 1, override
+  `DASHICTL_GC_MIN_AGE_HOURS`). Always reports orphan count + total
+  MiB before applying; confirmation prompt requires retyping the
+  bucket name.
+- **`dashictl backup restore-test`** — proves the newest pgstac dump
+  is restorable end-to-end. Creates a Job in `dashi-backup` namespace
+  that spins an ephemeral PostgreSQL, `aws s3 cp`'s the latest dump,
+  runs `pg_restore`, runs sanity SELECTs (collection/item counts),
+  then tears down. `--key <key>` pins to a specific dump,
+  `--leave-on-fail` keeps the Job + Postgres in-cluster for
+  post-mortem.
+- **`.github/workflows/ci.yml` E2E job** now goes beyond RustFS
+  smoke: deploys pgstac + stac-fastapi against a kind cluster,
+  builds `dashictl` from source, runs `dashictl domain create/list`
+  and `dashictl doctor` against the live cluster.
+- **`.github/workflows/images.yml` SBOM + scan** — every `v*` tag
+  push now generates a Syft SPDX SBOM per image, runs Grype with
+  `severity-cutoff: high`, and uploads both as 90-day GH Actions
+  artefacts under `<image>-supplychain`.
+- **`poc/scripts/seed-sample-domains.sh`** — provisions the
+  `gelaende-umwelt` (ceiling=int) and `klima-historisch`
+  (ceiling=pub) demo domains via `dashictl domain create`. Proves
+  the multi-tenant boundary semantics with two real domains.
+- **`docs/CLI-OPERATIONS.md`** — day-2 runbook for every dashictl
+  subcommand. Wired into mkdocs nav.
+- **`adr/ADR-012-local-substrate-orbstack.md`** — captures the colima
+  → OrbStack vanilla k8s switch + the reasoning ahead of any future
+  reverse migration.
+
+### Changed
+- `dashictl` subcommands `item delete`, `gc`, `backup` no longer
+  carry the "stub" / "partial" markers in their help text — they
+  are real mutations with real audit trails.
+
 ## [0.1.1] — 2026-04-27
 
 Reproducible-bootstrap patch release. Same surface area as v0.1.0, but
@@ -101,6 +153,7 @@ First public release. The platform is feature-complete for a Phase-2 PoC: every 
 - Multi-file drop in the web UI (current flow already handles directories at the CLI level).
 - Iceberg catalog HA + Postgres backend (single-replica SQLite for PoC).
 
-[Unreleased]: https://github.com/marcosci/dashi/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/marcosci/dashi/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/marcosci/dashi/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/marcosci/dashi/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/marcosci/dashi/releases/tag/v0.1.0

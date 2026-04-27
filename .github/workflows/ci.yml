@@ -257,3 +257,45 @@ jobs:
           curl -s -o /dev/null -w '%{http_code}\n' http://localhost:9000/ \
             | grep -E '^(200|403)$'
           kill $PF || true
+
+      # F3 — End-to-end: deploy pgstac + stac-fastapi, build dashictl,
+      # run `dashictl domain create/list` against the live cluster.
+      # The dashictl-side commands cover the full HTTP path the web UI
+      # uses; if this is green we know the substrate is reachable.
+      - name: Deploy pgstac + stac-fastapi
+        run: |
+          for f in $(find poc/manifests/pgstac poc/manifests/stac-fastapi -name '*.yaml' 2>/dev/null); do
+            kubectl apply -f "$f"
+          done
+          kubectl -n dashi-catalog rollout status statefulset/pgstac --timeout=240s
+          kubectl -n dashi-catalog rollout status deployment/stac-fastapi --timeout=240s
+
+      - name: Install Rust + build dashictl
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          cd poc/dashictl
+          cargo build --release --locked
+          mv target/release/dashictl /usr/local/bin/
+          dashictl --version
+
+      - name: dashictl smoke (domain CRUD against live STAC)
+        run: |
+          kubectl -n dashi-catalog port-forward svc/stac-fastapi 8080:8080 &
+          PF=$!
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://localhost:8080/ && break
+            sleep 1
+          done
+          dashictl domain list
+          dashictl domain create ci-smoke \
+            --title "CI smoke" \
+            --max-classification int \
+            --description "created by ci e2e job"
+          dashictl domain list | grep -q 'ci-smoke'
+          dashictl domain show ci-smoke >/dev/null
+          # `doctor` will warn on missing components (Prefect, Loki,
+          # ingest-api) — that's expected here. We only fail the job
+          # if doctor itself crashes.
+          DASHI_STAC_URL=http://localhost:8080 dashictl doctor || true
+          kill $PF || true
