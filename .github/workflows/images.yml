@@ -89,7 +89,7 @@ jobs:
 
       - name: Build${{ startsWith(github.ref, 'refs/tags/v') && ' + push' || ' (PR)' }}
         id: build
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
